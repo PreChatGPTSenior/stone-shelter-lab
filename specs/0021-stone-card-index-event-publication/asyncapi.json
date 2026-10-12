@@ -1,0 +1,254 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Stone Shelter Card Index Events",
+    "version": "1.0.0",
+    "description": "Feature 0021 emits durable intentions; feature 0020 sends them and feature 0022 consumes them. Versions guard stale/redelivered work."
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "backendBroker": {
+      "host": "kafka:9092",
+      "protocol": "kafka"
+    }
+  },
+  "channels": {
+    "stoneIndexEvents": {
+      "address": "stone-card-index-events",
+      "servers": [
+        {
+          "$ref": "#/servers/backendBroker"
+        }
+      ],
+      "bindings": {
+        "kafka": {
+          "topic": "stone-card-index-events",
+          "partitions": 1,
+          "replicas": 1,
+          "topicConfiguration": {
+            "cleanup.policy": [
+              "delete"
+            ],
+            "retention.ms": 86400000
+          },
+          "bindingVersion": "0.5.0"
+        }
+      },
+      "messages": {
+        "update": {
+          "$ref": "#/components/messages/StoneCardIndexUpdated"
+        },
+        "deletion": {
+          "$ref": "#/components/messages/StoneCardIndexDeleted"
+        }
+      }
+    }
+  },
+  "operations": {
+    "publishIndexIntention": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/stoneIndexEvents"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/stoneIndexEvents/messages/update"
+        },
+        {
+          "$ref": "#/channels/stoneIndexEvents/messages/deletion"
+        }
+      ],
+      "description": "Publish committed intentions with the shared outbox dispatcher after their business transaction commits."
+    },
+    "processIndexIntention": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/stoneIndexEvents"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/stoneIndexEvents/messages/update"
+        },
+        {
+          "$ref": "#/channels/stoneIndexEvents/messages/deletion"
+        }
+      ],
+      "bindings": {
+        "kafka": {
+          "groupId": {
+            "type": "string",
+            "enum": [
+              "stone-card-indexer"
+            ]
+          },
+          "bindingVersion": "0.5.0"
+        }
+      },
+      "description": "New group reads earliest retained events. Manual ack after projection/version commit, stale skip, or acknowledged DLQ transfer. Three total event-specific attempts, then shared DLQ; dependency/admission waits do not consume attempts."
+    }
+  },
+  "components": {
+    "schemas": {
+      "StoneIndexUpdatePayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stoneId",
+          "name",
+          "stoneType",
+          "stoneSize",
+          "biography",
+          "sourceVersion"
+        ],
+        "properties": {
+          "stoneId": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "sourceVersion": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "pattern": "\\S"
+          },
+          "stoneType": {
+            "type": "string",
+            "enum": [
+              "BASALT",
+              "GRANITE",
+              "OBSIDIAN",
+              "PUMICE",
+              "LIMESTONE",
+              "SANDSTONE",
+              "SHALE",
+              "MARBLE",
+              "GNEISS",
+              "SLATE"
+            ]
+          },
+          "stoneSize": {
+            "type": "string",
+            "enum": [
+              "SMALL",
+              "MEDIUM",
+              "LARGE"
+            ]
+          },
+          "biography": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2048
+          }
+        }
+      },
+      "StoneIndexDeletePayload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stoneId",
+          "sourceVersion"
+        ],
+        "properties": {
+          "stoneId": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          },
+          "sourceVersion": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1
+          }
+        }
+      },
+      "StoneCardIndexUpdatedEvent": {
+        "allOf": [
+          {
+            "$ref": "../0020-outbox-kafka-publication/asyncapi.json#/components/schemas/EventEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "eventType": {
+                "const": "STONE_CARD_INDEX_UPDATED"
+              },
+              "schemaVersion": {
+                "const": 1
+              },
+              "payload": {
+                "$ref": "#/components/schemas/StoneIndexUpdatePayload"
+              }
+            }
+          }
+        ]
+      },
+      "StoneCardIndexDeletedEvent": {
+        "allOf": [
+          {
+            "$ref": "../0020-outbox-kafka-publication/asyncapi.json#/components/schemas/EventEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "eventType": {
+                "const": "STONE_CARD_INDEX_DELETED"
+              },
+              "schemaVersion": {
+                "const": 1
+              },
+              "payload": {
+                "$ref": "#/components/schemas/StoneIndexDeletePayload"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "messages": {
+      "StoneCardIndexUpdated": {
+        "name": "STONE_CARD_INDEX_UPDATED",
+        "payload": {
+          "$ref": "#/components/schemas/StoneCardIndexUpdatedEvent"
+        },
+        "bindings": {
+          "kafka": {
+            "key": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$",
+              "description": "Decimal string form of payload.stoneId, identical routing for update and deletion."
+            },
+            "bindingVersion": "0.5.0"
+          }
+        }
+      },
+      "StoneCardIndexDeleted": {
+        "name": "STONE_CARD_INDEX_DELETED",
+        "payload": {
+          "$ref": "#/components/schemas/StoneCardIndexDeletedEvent"
+        },
+        "bindings": {
+          "kafka": {
+            "key": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$",
+              "description": "Decimal string form of payload.stoneId, identical routing for update and deletion."
+            },
+            "bindingVersion": "0.5.0"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "url": "https://www.asyncapi.com/docs/reference/specification/v3.0.0"
+  },
+  "x-readiness": "Contract defined; application implementation and runtime verification pending."
+}

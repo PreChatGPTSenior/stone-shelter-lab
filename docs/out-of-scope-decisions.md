@@ -6,6 +6,19 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0021: Stone-Card Index Event Publication
+
+Accepted on 2026-10-12. Feature: [specification](../specs/0021-stone-card-index-event-publication/spec.md).
+Decision record: [ADR-0021](adr/0021-stone-card-index-event-publication.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0021-001 | Reindexing for photograph or admission-date changes | Publish update intentions for name, stoneType, stoneSize and biography; photograph and admission-date changes do not trigger indexing. |
+| OOS-0021-002 | Adoption-status-driven index changes and availability filtering | Adoption status does not change indexing behavior in this feature. Availability and adoption filtering belong to future search work. |
+| OOS-0021-003 | Embedding generation, event consumption and projection deletion | Feature 0022 processes indexing events, generates embeddings and deletes projections; feature 0021 only persists publication intentions. |
+| OOS-0021-004 | Explicit reindexing and automatic publication for existing cards | Initialize existing source versions without emitting events. Feature 0023 owns explicit reindexing of existing cards. |
+| OOS-0021-005 | Adding event or source-version fields to successful catalog HTTP responses | Preserve the existing successful response contracts; event identity and source versions are internal event data. |
+
 ## Feature 0020: Outbox Kafka Publication
 
 Accepted on 2026-10-12. Feature: [specification](../specs/0020-outbox-kafka-publication/spec.md).

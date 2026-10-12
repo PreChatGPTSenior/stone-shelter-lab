@@ -1,56 +1,101 @@
 # Feature 0021: Stone-Card Index Event Publication
 
-Status: Initial draft for discussion. Not ready for implementation.
+Status: Accepted requirements synchronized with ADR-0021; implementation and runtime readiness pending.
 
-## Goal and References
+## References
 
-Publish card-indexing intentions reliably when a stone is created, relevant fields change or a stone is deleted.
-
-- Shared requirements: [LLM Search Discovery](../0015-llm-search-discovery/spec.md).
-- Shared decisions: [ADR-0007](../../docs/adr/0007-llm-search-discovery.md).
-- Acceptance criteria: [acceptance.md](acceptance.md).
+- Feature decisions: [ADR-0021](../../docs/adr/0021-stone-card-index-event-publication.md).
+- Shared discovery: [0015](../0015-llm-search-discovery/spec.md).
+- Acceptance criteria: [acceptance.md](acceptance.md), exclusively.
 - Technical decisions: [plan.md](plan.md).
-- Task preparation: [tasks.md](tasks.md).
+- Exact execution boundaries: [tasks.md](tasks.md).
 
-## Initial Scope
+## Requirements
 
-- Define the indexing AsyncAPI contract before Kafka-related implementation.
-- Write the stone change and outbox event in one database transaction.
-- Return the existing HTTP operation after commit without waiting for publication or embeddings.
-- Include enough identity/version information for the consumer to handle delayed, duplicated or out-of-order work.
+### Events and Triggers
 
-## Delivery Boundary to Refine
+- Use one indexing-update event type for both card creation and relevant card
+  changes, and a separate index-deletion event type.
+- Relevant fields are name, stoneType, stoneSize and biography. Changes to
+  photographs or admission date do not request an embedding update.
+- Adoption status does not affect indexing in this feature. Availability and
+  adoption filtering belong to the future search feature.
+- If the indexed field values are unchanged, do not create an indexing event
+  and do not increment sourceVersion.
 
-- Event delivery uses feature 0020 rather than another dispatcher.
-- Consumer processing and projection deletion are owned by feature 0022; explicit reindexing by feature 0023.
+### Snapshots and Source Versions
 
-These boundaries organize discussion; they do not establish new accepted product
-exclusions. Record newly accepted out-of-scope decisions in the feature ADR and
-[central register](../../docs/out-of-scope-decisions.md) when confirmed.
+- Update-event payloads contain the complete agreed card snapshot: stoneId,
+  name, stoneType, stoneSize and biography, together with sourceVersion. Do
+  not substitute an identifier-only event that requires a catalog reload.
+- Use the accepted initial sourceVersion baseline: a monotonically increasing
+  numeric version per stone, advanced for changes that produce index events.
+  Assign the source version in the same transaction as the business change
+  and its event. This is distinct from the event-format schemaVersion.
+- New cards start at sourceVersion 1. Initialize existing cards to version 0
+  without automatically publishing events for them.
+- Deletion payloads contain only stoneId and the next sourceVersion; do not
+  include the deleted card snapshot.
+- Both event formats start with schemaVersion 1. Stale-source-version
+  handling belongs to the consumer in feature 0022.
 
-## Dependencies
+### Publication and HTTP Behavior
 
-- [0020-outbox-kafka-publication](../0020-outbox-kafka-publication/spec.md).
-- [0018-stone-card-embedding](../0018-stone-card-embedding/spec.md).
+- Write each business change and its outbox event in one database transaction.
+  The calling service supplies the UUID eventId under ADR-0019.
+- Return the existing successful HTTP response after commit without waiting
+  for Kafka acknowledgement, embedding generation or index processing.
+- An outbox-write failure rolls back the business change and returns HTTP 500
+  ProblemDetail rather than a successful response. Services remain independent
+  of HTTP error translation under the project constitution.
+- Preserve existing successful HTTP response bodies; do not expose event
+  identity or source-version fields through the catalog operations.
+- Use one Kafka topic, stone-card-index-events, for update and deletion events,
+  with one partition and replication factor 1. Provision it explicitly in
+  feature 0021. Topic retention is 24 hours.
+- Use the string representation of stoneId as the Kafka message key for both
+  event types.
 
-Existing capabilities must pass fresh readiness checks; their documentation or
-prior verification is not evidence of current runtime readiness.
+### Feature Boundaries
 
-## Open Decisions
+- Feature 0021 integrates event creation with card creation, relevant updates
+  and deletion, and defines the concrete indexing AsyncAPI contract before
+  Kafka implementation.
+- Feature 0020 publishes the events; do not create another dispatcher.
+- Feature 0022 generates embeddings, consumes index events, handles duplicate
+  or stale work and deletes index projections.
+- Feature 0023 owns explicit reindexing, including existing cards.
 
-- Exact relevant-change triggers, including adoption status and fields excluded from embedding text.
-- Snapshot versus identity payload, source versions and deletion representation.
-- Behaviour when the durable event write fails and verification of existing HTTP responses.
+## Kafka and HTTP Contract Requirements
 
-## Contract and Implementation Preparation
+[asyncapi.json](asyncapi.json) defines STONE_CARD_INDEX_UPDATED and
+STONE_CARD_INDEX_DELETED, both at schemaVersion 1, and imports the common envelope
+from feature 0020. Provision stone-card-index-events with one partition,
+replication factor 1 and 24-hour retention; key both event types by string stoneId.
 
-English-only delivery and existing pinned project versions remain the starting
-point. Before implementation, settle this feature's behaviour and contracts,
-fill acceptance.md and plan.md, and define exact writable files and focused test
-selectors in tasks.md. HTTP contracts are generated from controllers/shared DTOs;
-do not create handwritten OpenAPI. Define applicable AsyncAPI contracts before
-Kafka implementation. Use new Liquibase migrations for schema changes.
+Keep catalog routes and successful DTOs unchanged. Creation returns HTTP 201
+after the stone and outbox commit, without waiting for Kafka/model/indexing.
+Outbox failures roll back the business change and map to HTTP 500 ProblemDetail.
+Existing photo-transfer behavior remains governed by its own feature; add the
+outbox write to StoneCreationService's business transaction, not after commit.
 
-The first execution ticket must establish readiness for the entire requested
-batch. This draft authorizes no implementation, source provisioning, model
-calls/downloads, business imports, commits or pushes.
+## Accepted Exclusions
+
+OOS-0021-001, OOS-0021-002, OOS-0021-003, OOS-0021-004, OOS-0021-005 are recorded with their authoritative meaning in
+[ADR-0021](../../docs/adr/0021-stone-card-index-event-publication.md) and the
+[central register](../../docs/out-of-scope-decisions.md).
+No unanswered proposal is an accepted exclusion.
+
+## Dependencies and Delivery Gate
+
+- [0020](../0020-outbox-kafka-publication/spec.md).
+- [0018](../0018-stone-card-embedding/spec.md).
+
+Reuse existing pinned versions and capabilities. Prior task completion is not
+current runtime readiness. The first ticket in tasks.md checks the entire
+explicitly requested batch, with exact file allowlists and focused selectors.
+No implementation is authorized by documentation synchronization. Do not run
+application tests, inference, business imports, commits or pushes as part of
+this documentation work. New schema changes use new Liquibase changesets;
+generated OpenAPI remains the HTTP source of truth and AsyncAPI the Kafka
+source of truth. Feature 0025 is not part of this review or preparation.
