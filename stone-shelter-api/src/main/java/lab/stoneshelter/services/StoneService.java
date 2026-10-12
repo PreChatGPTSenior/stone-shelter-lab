@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Propagation;
 @Transactional
 public class StoneService {
     private final StoneEntityRepository repository;
+    private final StoneIndexEventService stoneIndexEventService;
     private final StonePhotoEntityRepository photoRepository;
     private final PhotoCleanupService cleanup;
     private final StoneCreationService creationService;
@@ -50,8 +51,9 @@ public class StoneService {
             StoneUpdateRequestToStoneEntityMapper updateRequestMapper,
             StoneEntityToStoneResponseMapper responseMapper,
             StoneEntityToStoneUpdateResponseMapper updateResponseMapper,
-            PageToStonesSearchResponseMapper searchResponseMapper) {
+            PageToStonesSearchResponseMapper searchResponseMapper, StoneIndexEventService stoneIndexEventService) {
         this.repository = repository;
+        this.stoneIndexEventService = stoneIndexEventService;
         this.photoRepository = photoRepository;
         this.cleanup = cleanup;
         this.creationService = creationService;
@@ -77,7 +79,10 @@ public class StoneService {
     }
 
     public StoneUpdateResponse update(long id, StoneUpdateRequest request) {
-        return updateResponseMapper.toDto(updateRequestMapper.toEntity(findById(id), request));
+        StoneEntity stoneEntity = repository.findByIdForUpdate(id).orElseThrow(() -> new StoneNotFoundException(id));
+        var previousSnapshot = stoneIndexEventService.snapshot(stoneEntity);
+        return updateResponseMapper.toDto(stoneIndexEventService.publishUpdateIfChanged(
+                updateRequestMapper.toEntity(stoneEntity, request), previousSnapshot));
     }
 
     public StoneDeleteResponse delete(long id) {
@@ -90,7 +95,7 @@ public class StoneService {
         photoRepository.flush();
         draftRepository.deleteAll(stonePhotoDraftEntities);
         draftRepository.flush();
-        repository.delete(stoneEntity);
+        repository.delete(stoneIndexEventService.publishDelete(stoneEntity));
         return new StoneDeleteResponse(id);
     }
 

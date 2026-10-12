@@ -1,6 +1,10 @@
 package lab.stoneshelter;
 
 import lab.stoneshelter.enums.StoneType;
+import lab.stoneshelter.services.OutboxDispatcherService;
+import lab.stoneshelter.services.OutboxKafkaTopicService;
+import lab.stoneshelter.services.StoneIndexKafkaTopicService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
 import java.time.Clock;
@@ -38,6 +42,10 @@ class StoneCatalogControllerTest extends IntegrationTest {
             new ParameterizedTypeReference<>() {};
     @Autowired private JdbcTemplate jdbc;
     private final List<Long> createdIds = new ArrayList<>();
+    private final List<Long> publicationIds = new ArrayList<>();
+    @MockitoBean private OutboxDispatcherService outboxDispatcherService;
+    @MockitoBean private OutboxKafkaTopicService outboxKafkaTopicService;
+    @MockitoBean private StoneIndexKafkaTopicService stoneIndexKafkaTopicService;
     @Autowired private RestTestClient client;
     @MockitoSpyBean private Clock clock;
 
@@ -49,6 +57,11 @@ class StoneCatalogControllerTest extends IntegrationTest {
     @AfterEach
     void cleanUpOwnStones() {
         reset(clock);
+        jdbc.execute("ALTER TABLE outbox_event DROP CONSTRAINT IF EXISTS catalog_test_reject_index");
+        for (long id : publicationIds) {
+            jdbc.update("DELETE FROM outbox_event WHERE (payload->>'stoneId')::bigint = ?", id);
+            jdbc.update("DELETE FROM stone_index_source_version WHERE stone_id = ?", id);
+        }
         org.junit.jupiter.api.Assertions.assertAll("Delete all Stones created by this test",
                 List.copyOf(createdIds).stream().map(id -> () -> jdbc.update("DELETE FROM stone WHERE id = ?", id)));
     }
@@ -494,11 +507,42 @@ class StoneCatalogControllerTest extends IntegrationTest {
         assertThat(id(create(validStone()))).isNotEqualTo(id);
     }
 
+    @Test
+    void outboxFailureReturns500AndRollsBackEachHttpMutation() {
+        long stoneId = id(create(validStone()));
+        long before = jdbc.queryForObject("SELECT count(*) FROM stone", Long.class);
+        jdbc.execute("ALTER TABLE outbox_event ADD CONSTRAINT catalog_test_reject_index CHECK (payload->>'name' <> 'Rejected')");
+        problem(HttpMethod.POST, STONES, changed("name", "Rejected"), 500);
+        problem(HttpMethod.PUT, STONES + "/" + stoneId, changed("name", "Rejected", true), 500);
+        jdbc.execute("ALTER TABLE outbox_event DROP CONSTRAINT catalog_test_reject_index");
+        jdbc.execute("ALTER TABLE outbox_event ADD CONSTRAINT catalog_test_reject_index CHECK (event_type <> 'STONE_CARD_INDEX_DELETED')");
+        problem(HttpMethod.DELETE, STONES + "/" + stoneId, null, 500);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM stone", Long.class)).isEqualTo(before);
+        assertThat(get(stoneId).get("name")).isEqualTo("Basalt Buddy");
+        assertThat(jdbc.queryForObject("SELECT source_version FROM stone_index_source_version WHERE stone_id = ?", Long.class, stoneId)).isEqualTo(1);
+    }
+
+    @Test
+    void generatedCatalogContractDoesNotExposeEventOrVersionFields() {
+        Map<String, Object> document = client.get().uri("/v3/api-docs").exchange().expectStatus().isOk()
+                .expectBody(JSON_OBJECT).returnResult().getResponseBody();
+        Map<?, ?> schemas = (Map<?, ?>) ((Map<?, ?>) document.get("components")).get("schemas");
+        for (String schema : List.of("StoneCreateResponse", "StoneUpdateResponse", "StoneResponse")) {
+            Map<?, ?> properties = (Map<?, ?>) ((Map<?, ?>) schemas.get(schema)).get("properties");
+            assertThat(properties.containsKey("eventId")).isFalse();
+            assertThat(properties.containsKey("sourceVersion")).isFalse();
+            assertThat(properties.containsKey("schemaVersion")).isFalse();
+            assertThat(properties.containsKey("id")).isTrue();
+        }
+    }
+
     private Map<String, Object> create(Map<String, Object> body) {
         var response = client.post().uri(STONES).body(body).exchange();
         Map<String, Object> stone = response.expectBody(JSON_OBJECT).returnResult().getResponseBody();
         trackCreatedStone(stone);
         response.expectStatus().isCreated();
+        assertThat(stone).doesNotContainKeys("eventId", "sourceVersion", "schemaVersion");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM outbox_event WHERE (payload->>'stoneId')::bigint = ?", Long.class, id(stone))).isEqualTo(1);
         assertThat(stone).isNotNull();
         assertThat(stone.remove("photos")).as("Legacy creation has an empty managed gallery").isEqualTo(List.of());
         response.expectHeader().doesNotExist("Location");
@@ -614,6 +658,7 @@ class StoneCatalogControllerTest extends IntegrationTest {
     private void trackCreatedStone(Map<?, ?> body) {
         if (body != null && body.get("id") instanceof Number id) {
             createdIds.add(id.longValue());
+            publicationIds.add(id.longValue());
         }
     }
 

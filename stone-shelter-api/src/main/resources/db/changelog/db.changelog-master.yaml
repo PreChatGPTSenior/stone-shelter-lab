@@ -26,3 +26,6 @@ databaseChangeLog:
   - include:
       file: 0020-add-outbox-delivery.xml
       relativeToChangelogFile: true
+  - include:
+      file: 0021-create-stone-index-source-version.xml
+      relativeToChangelogFile: true

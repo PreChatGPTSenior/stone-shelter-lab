@@ -1,6 +1,7 @@
 package lab.stoneshelter.handlers;
 
 import java.net.URI;
+import lab.stoneshelter.exceptions.OutboxWriteException;
 import lab.stoneshelter.exceptions.InvalidStoneDocumentIndexRequestException;
 import lab.stoneshelter.exceptions.StoneDocumentIndexConflictException;
 import lab.stoneshelter.exceptions.StoneDocumentDependencyUnavailableException;
@@ -38,6 +39,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler(OutboxWriteException.class)
+    public ProblemDetail outboxFailure(OutboxWriteException exception) {
+        return problemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "The catalog change could not be committed.");
+    }
+
     @ExceptionHandler(InvalidStoneDocumentIndexRequestException.class)
     public ProblemDetail documentInvalid(InvalidStoneDocumentIndexRequestException exception) {
         return problemDetail(HttpStatus.BAD_REQUEST, exception.getMessage());

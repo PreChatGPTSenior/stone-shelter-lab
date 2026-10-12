@@ -1,6 +1,6 @@
 # Feature 0021 Acceptance Criteria
 
-Status: Criteria defined from accepted ADR-0021; not executed.
+Status: All eight criteria verified on 2026-10-12.
 
 Read [spec.md](spec.md). These are planned acceptance outcomes, not verification
 evidence. Permitted selectors and file boundaries live in [tasks.md](tasks.md).
@@ -39,6 +39,14 @@ No embedding generation, new dispatcher or automatic existing-card reindex is ad
 
 ## Verification Evidence
 
-No application checks or fresh environment readiness have been performed for
-this feature in the documentation-synchronization task. Record actual evidence
-only when the explicitly selected execution ticket has run.
+See tasks.md for whole-batch readiness and named selector results. Tests use
+isolated PostgreSQL and mocked delivery/model dependencies.
+
+| Criteria | Evidence |
+| --- | --- |
+| AC-0021-001–004, 006 | StoneIndexPublicationTest: 5 passing cases, including full snapshots, unchanged/excluded fields, deletion history and atomic rollback. |
+| AC-0021-005, 007 | StoneIndexSourceVersionTest: 4 passing cases; existing version-0 seeding, concurrent allocations, rollback/deletion survival and canonical payload contract. Topic/key registration checked by publication selector. |
+| AC-0021-001, 006–008 | StoneCatalogControllerTest: 105 passing cases; HTTP 201/500, public responses and generated OpenAPI preserved. StoneIndexPublicationArchitectureTest: 3 passing cases; no synchronous embedding/Kafka work in catalog transactions. |
+
+All 117 focused checks pass. Existing pessimistic catalog locking was reused;
+no new dispatcher or automatic existing-card reindex was introduced.

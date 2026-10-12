@@ -32,10 +32,11 @@ public class StoneCreationService {
     private final StonePhotoDraftEntityToStonePhotoEntityMapper photoMapper;
     private final StoneEntityToStoneCreateResponseMapper responseMapper;
     private final Clock clock;
+    private final StoneIndexEventService stoneIndexEventService;
 
     public StoneCreationService(StoneEntityRepository repository, StonePhotoDraftEntityRepository draftRepository,
             StonePhotoEntityRepository photoRepository, StoneCreateRequestToStoneEntityMapper requestMapper,
-            StonePhotoDraftEntityToStonePhotoEntityMapper photoMapper, StoneEntityToStoneCreateResponseMapper responseMapper, Clock clock) {
+            StonePhotoDraftEntityToStonePhotoEntityMapper photoMapper, StoneEntityToStoneCreateResponseMapper responseMapper, Clock clock, StoneIndexEventService stoneIndexEventService) {
         this.repository = repository;
         this.draftRepository = draftRepository;
         this.photoRepository = photoRepository;
@@ -43,6 +44,7 @@ public class StoneCreationService {
         this.photoMapper = photoMapper;
         this.responseMapper = responseMapper;
         this.clock = clock;
+        this.stoneIndexEventService = stoneIndexEventService;
     }
 
     public long create(StoneCreateRequest request) {
@@ -65,7 +67,7 @@ public class StoneCreationService {
             stonePhotoDraftEntity.setStone(stoneEntity);
             stoneEntity.getPhotos().add(photoRepository.save(photoMapper.toEntity(stonePhotoDraftEntity)));
         }
-        return stoneEntity.getId();
+        return stoneIndexEventService.publishUpdate(stoneEntity).getId();
     }
 
     @Transactional(readOnly = true)
