@@ -3,6 +3,7 @@ package lab.stoneshelter.repositories;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import lab.stoneshelter.entities.StoneCardEmbeddingEntity;
 import lab.stoneshelter.entities.StoneCardSearchResultEntity;
@@ -29,6 +30,13 @@ public class StoneCardEmbeddingRepository {
                 RETURNING stone_id, text, embedding_profile, embedding::text AS vector_text
                 """, this::mapEntity, stoneCardEmbeddingEntity.getStoneId(), stoneCardEmbeddingEntity.getText(),
                 stoneCardEmbeddingEntity.getEmbeddingProfile(), vector(stoneCardEmbeddingEntity.getEmbedding()));
+    }
+
+    public List<Long> findOrphanIds() {
+        return jdbcTemplate.query("""
+                SELECT e.stone_id FROM stone_card_embedding e LEFT JOIN stone s ON s.id = e.stone_id
+                WHERE s.id IS NULL ORDER BY e.stone_id
+                """, (resultSet, row) -> resultSet.getLong(1));
     }
 
     public void deleteById(long stoneId) {

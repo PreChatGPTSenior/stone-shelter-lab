@@ -28,6 +28,12 @@ public interface StoneEntityRepository extends JpaRepository<StoneEntity, Long>,
     @Query("select s from StoneEntity s where s.id = :id")
     Optional<StoneEntity> findByIdForUpdate(@Param("id") long id);
 
+    @Query("select s.id from StoneEntity s order by s.id")
+    List<Long> findIds();
+
+    @Query("select s.id from StoneEntity s where s.id in :ids")
+    List<Long> findExistingIds(@Param("ids") List<Long> ids);
+
     default Page<StoneEntity> search(StoneSearchCriteria search) {
         Specification<StoneEntity> filter = (root, query, cb) -> {
             var predicates = new ArrayList<Predicate>();

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Comparator;
 import lab.stoneshelter.entities.StonePhotoDraftEntity;
+import lab.stoneshelter.repositories.StoneCardReindexControlRepository;
+import lab.stoneshelter.exceptions.StoneCardReindexConflictException;
 import lab.stoneshelter.exceptions.InvalidStonePhotoDraftException;
 import lab.stoneshelter.exceptions.StonePhotoDraftConflictException;
 import lab.stoneshelter.exceptions.StoneNotFoundException;
@@ -32,11 +34,12 @@ public class StoneCreationService {
     private final StonePhotoDraftEntityToStonePhotoEntityMapper photoMapper;
     private final StoneEntityToStoneCreateResponseMapper responseMapper;
     private final Clock clock;
+    private final StoneCardReindexControlRepository stoneCardReindexControlRepository;
     private final StoneIndexEventService stoneIndexEventService;
 
     public StoneCreationService(StoneEntityRepository repository, StonePhotoDraftEntityRepository draftRepository,
             StonePhotoEntityRepository photoRepository, StoneCreateRequestToStoneEntityMapper requestMapper,
-            StonePhotoDraftEntityToStonePhotoEntityMapper photoMapper, StoneEntityToStoneCreateResponseMapper responseMapper, Clock clock, StoneIndexEventService stoneIndexEventService) {
+            StonePhotoDraftEntityToStonePhotoEntityMapper photoMapper, StoneEntityToStoneCreateResponseMapper responseMapper, Clock clock, StoneIndexEventService stoneIndexEventService, StoneCardReindexControlRepository stoneCardReindexControlRepository) {
         this.repository = repository;
         this.draftRepository = draftRepository;
         this.photoRepository = photoRepository;
@@ -44,10 +47,14 @@ public class StoneCreationService {
         this.photoMapper = photoMapper;
         this.responseMapper = responseMapper;
         this.clock = clock;
+        this.stoneCardReindexControlRepository = stoneCardReindexControlRepository;
         this.stoneIndexEventService = stoneIndexEventService;
     }
 
     public long create(StoneCreateRequest request) {
+        if (stoneCardReindexControlRepository.isCreationBlockedForShare()) {
+            throw new StoneCardReindexConflictException("Stone creation is blocked while the full reindex job prepares its events.");
+        }
         List<UUID> photoUploadIds = request.getPhotoUploadIds() == null ? List.of() : request.getPhotoUploadIds();
         if (new HashSet<>(photoUploadIds).size() != photoUploadIds.size()) throw new InvalidStonePhotoDraftException();
         var stonePhotoDraftEntities = new HashMap<UUID, StonePhotoDraftEntity>();

@@ -32,3 +32,6 @@ databaseChangeLog:
   - include:
       file: 0022-create-stone-card-index-processing.xml
       relativeToChangelogFile: true
+  - include:
+      file: 0023-create-stone-card-reindex-jobs.xml
+      relativeToChangelogFile: true

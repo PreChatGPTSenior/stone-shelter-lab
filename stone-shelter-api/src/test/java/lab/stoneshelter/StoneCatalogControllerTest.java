@@ -4,6 +4,8 @@ import lab.stoneshelter.enums.StoneType;
 import lab.stoneshelter.services.OutboxDispatcherService;
 import lab.stoneshelter.services.OutboxKafkaTopicService;
 import lab.stoneshelter.services.StoneIndexKafkaTopicService;
+import lab.stoneshelter.services.StoneIndexConsumerService;
+import lab.stoneshelter.services.StoneCardReindexRunnerService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
@@ -46,6 +48,8 @@ class StoneCatalogControllerTest extends IntegrationTest {
     @MockitoBean private OutboxDispatcherService outboxDispatcherService;
     @MockitoBean private OutboxKafkaTopicService outboxKafkaTopicService;
     @MockitoBean private StoneIndexKafkaTopicService stoneIndexKafkaTopicService;
+    @MockitoBean private StoneIndexConsumerService stoneIndexConsumerService;
+    @MockitoBean private StoneCardReindexRunnerService stoneCardReindexRunnerService;
     @Autowired private RestTestClient client;
     @MockitoSpyBean private Clock clock;
 

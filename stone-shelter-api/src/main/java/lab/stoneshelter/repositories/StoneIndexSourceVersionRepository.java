@@ -16,11 +16,11 @@ public class StoneIndexSourceVersionRepository {
     public StoneIndexSourceVersionEntity increment(StoneIndexSourceVersionEntity stoneIndexSourceVersionEntity) {
         try {
             return jdbcTemplate.queryForObject("""
-                    INSERT INTO stone_index_source_version (stone_id, source_version) VALUES (?, 1)
-                    ON CONFLICT (stone_id) DO UPDATE SET source_version = stone_index_source_version.source_version + 1
+                    INSERT INTO stone_index_source_version (stone_id, source_version) VALUES (?, ? + 1)
+                    ON CONFLICT (stone_id) DO UPDATE SET source_version = GREATEST(stone_index_source_version.source_version, ?) + 1
                     RETURNING stone_id, source_version
                     """, (resultSet, row) -> new StoneIndexSourceVersionEntity(resultSet.getLong(1), resultSet.getLong(2)),
-                    stoneIndexSourceVersionEntity.stoneId());
+                    stoneIndexSourceVersionEntity.stoneId(), stoneIndexSourceVersionEntity.sourceVersion(), stoneIndexSourceVersionEntity.sourceVersion());
         } catch (DataAccessException exception) {
             throw new OutboxWriteException("Cannot allocate the stone index source version.", exception);
         }

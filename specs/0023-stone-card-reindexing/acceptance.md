@@ -1,6 +1,6 @@
 # Feature 0023 Acceptance Criteria
 
-Status: Criteria defined from accepted ADR-0023; not executed.
+Status: All nine criteria verified on 2026-10-12.
 
 Read [spec.md](spec.md). These are planned acceptance outcomes, not verification
 evidence. Permitted selectors and file boundaries live in [tasks.md](tasks.md).
@@ -43,6 +43,16 @@ Use only the current embedding profile; retain histories/errors indefinitely. No
 
 ## Verification Evidence
 
-No application checks or fresh environment readiness have been performed for
-this feature in the documentation-synchronization task. Record actual evidence
-only when the explicitly selected execution ticket has run.
+Batch readiness, fresh prerequisites and selector details are recorded in tasks.md.
+Isolated PostgreSQL and mocked background/model/broker components preserve live
+catalog data. No live full-catalog rebuild was performed.
+
+| Criteria | Evidence |
+| --- | --- |
+| AC-0023-001–003, 006 | StoneCardReindexPersistenceTest: 4 passing cases; unique active job, manifest/progress, durable gate and rollback. StoneCardReindexControllerTest: 14 passing cases; HTTP 201/400/404/409/503, generated JSON/YAML schemas and durable errors. |
+| AC-0023-003–008 | StoneCardReindexServiceTest: 6 passing cases; bounded independent transactions, forced versions, completed-item replay safety, creation/start race, gate/release, deletion skip, orphan version above counter/processed state, independent errors and storage pause. |
+| AC-0023-009 and architecture | StoneCardReindexArchitectureTest: 4 passing cases; no provider/Kafka call or new completion state. ENQUEUED describes durable intentions; current profile/vectors and indefinite history are preserved. |
+| Existing catalog contract | StoneCatalogControllerTest: 105 passing cases after the new gate wiring. |
+
+All 133 focused cases pass. The end-to-end completion follow-up remains deferred
+as explicitly agreed; current jobs do not assert that vectors are ready.
