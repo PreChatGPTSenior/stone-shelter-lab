@@ -1,6 +1,6 @@
 # Feature 0024 Technical Plan
 
-Status: Prepared from accepted ADR-0024; implementation and runtime qualification pending.
+Status: Implemented; focused acceptance verified. See tasks.md and acceptance.md for evidence.
 
 Read [spec.md](spec.md), [acceptance.md](acceptance.md) and [tasks.md](tasks.md).
 This document describes implementation choices, not acceptance criteria or
@@ -34,14 +34,18 @@ reference or unsupported wish produces clarification, not invented criteria.
 
 T0024-002 qualifies structured decisions, actual usage metadata and bounded prompt
 construction with the installed model before production integration. Prove that
-system instructions, schema, current request and output reservation fit 4096
-for the existing permitted input domain; trim only old complete pairs. Existing
-approximate embedding text estimates are not proof of exact chat token capacity.
+system instructions, examples, current request and output reservation fit 8192
+for the existing permitted input domain; trim only old complete pairs. The schema is passed as the format constraint, not duplicated in system prose.
+For explicit availability-only input without inherited narrowing, restrict schema
+action to CLARIFY, questions to at least two, and type/size/date arrays to empty.
+Use the installed qwen2/GPT2 byte-level profile and UTF-8 bytes plus conservative
+ChatML overhead as an upper bound; validate the runtime profile/template.
+Existing approximate embedding text estimates are not proof of chat capacity.
 If the selected integration cannot establish the bound or structured contract,
 block dependent implementation and report the concrete qualification failure;
 do not invent a new input limit, change models or bypass readiness.
 
-Set CHAT_MODEL_CONTEXT_TOKENS=4096, CHAT_MODEL_OUTPUT_TOKENS=512 and
+Set CHAT_MODEL_CONTEXT_TOKENS=8192, CHAT_MODEL_OUTPUT_TOKENS=512 and
 CHAT_MODEL_CALL_TIMEOUT=PT50S; retain the 120s turn deadline. A repair is a second
 independent invocation/reservation with at most two calls per turn. Charge usage
 for failed/invalid outputs too. No broad tuning/quality campaign is part of this
@@ -58,7 +62,7 @@ Markdown import waits only within its existing overall deadline.
 
 Create model_token_budget_day and model_token_reservation through
 0024-create-model-token-budget.xml. Reserve atomically under the original UTC-day
-row lock with MODEL_DAILY_TOKEN_BUDGET=100000. Each chat call reserves 4096;
+row lock with MODEL_DAILY_TOKEN_BUDGET=100000. Each chat call reserves 8192;
 each embedding call reserves its validated profile maximum input (currently
 32768 in the existing document/card profile). Chat actual usage includes input
 and output; embeddings charge reported input usage, not vector dimensions.
@@ -113,7 +117,7 @@ configuration outside the selected ticket's explicit scope.
 
 Check actual authenticated PostgreSQL connectivity/server version (18.6) and,
 when vectors are used, pgvector 0.8.6; actual Kafka broker metadata (4.2.2) for
-Kafka work; Ollama version (0.40.2), selected model inventory/digests/profile for
+Kafka work; Previously user-approved Ollama version (0.40.3), selected model inventory/digests/profile for
 model work; Redis, MinIO and application endpoints wherever the selected context
 requires them. Use backend-reachable addresses from approved configuration,
 not a substitute host address. Report backend/frontend states and task impact

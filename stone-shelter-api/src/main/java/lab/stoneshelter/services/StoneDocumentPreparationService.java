@@ -6,6 +6,8 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
+import lab.stoneshelter.enums.ModelAdmissionMode;
+import lab.stoneshelter.exceptions.ModelAdmissionDeferredException;
 import lab.stoneshelter.criteria.StoneDocumentEmbeddingCriteria;
 import lab.stoneshelter.criteria.StoneMarkdownDocumentCriteria;
 import lab.stoneshelter.entities.StoneDocumentEmbeddingEntity;
@@ -47,7 +49,10 @@ public class StoneDocumentPreparationService {
                 throw new StoneDocumentDependencyUnavailableException("The document import deadline has expired.");
             }
             StoneDocumentEmbeddingEntity stoneDocumentEmbeddingEntity;
-            try { stoneDocumentEmbeddingEntity = embeddingService.embed(new StoneDocumentEmbeddingCriteria(stoneDocumentFragmentEntity.getText(), false, deadline)); }
+            try { stoneDocumentEmbeddingEntity = embeddingService.embed(new StoneDocumentEmbeddingCriteria(stoneDocumentFragmentEntity.getText(), false, deadline, ModelAdmissionMode.IMPORT)); }
+            catch (ModelAdmissionDeferredException exception) {
+                throw new StoneDocumentDependencyUnavailableException("The document import admission deadline has expired.", exception);
+            }
             catch (IllegalArgumentException exception) {
                 throw new StoneDocumentSourceUnindexableException("A passage exceeds model input capacity.");
             }

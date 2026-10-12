@@ -1,6 +1,7 @@
 package lab.stoneshelter.services;
 
 import java.time.Clock;
+import lab.stoneshelter.enums.ModelAdmissionMode;
 import lab.stoneshelter.criteria.StoneDocumentEmbeddingCriteria;
 import lab.stoneshelter.entities.StoneCardEmbeddingEntity;
 import lab.stoneshelter.entities.StoneDocumentEmbeddingEntity;
@@ -42,7 +43,7 @@ public class StoneCardEmbeddingService {
     public StoneCardSaveResponse save(StoneCardSaveRequest stoneCardSaveRequest) {
         try {
             return stoneCardEmbeddingEntityToStoneCardSaveResponseMapper.toDto(
-                    stoneCardEmbeddingTransactionService.save(prepare(stoneCardSaveRequest)));
+                    stoneCardEmbeddingTransactionService.save(prepare(stoneCardSaveRequest, ModelAdmissionMode.IMPORT)));
         } catch (DataAccessException exception) {
             throw new StoneDocumentDependencyUnavailableException("The stone-card index could not be saved.", exception);
         }
@@ -50,11 +51,15 @@ public class StoneCardEmbeddingService {
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public StoneCardEmbeddingEntity prepare(StoneCardSaveRequest stoneCardSaveRequest) {
+        return prepare(stoneCardSaveRequest, ModelAdmissionMode.BACKGROUND);
+    }
+
+    private StoneCardEmbeddingEntity prepare(StoneCardSaveRequest stoneCardSaveRequest, ModelAdmissionMode mode) {
         validate(stoneCardSaveRequest);
         StoneCardEmbeddingEntity stoneCardEmbeddingEntity = stoneCardSaveRequestToStoneCardEmbeddingEntityMapper.toEntity(stoneCardSaveRequest);
         StoneDocumentEmbeddingEntity stoneDocumentEmbeddingEntity = stoneDocumentEmbeddingService.embed(
                 new StoneDocumentEmbeddingCriteria(stoneCardEmbeddingEntity.getText(), false,
-                        clock.instant().plus(stoneDocumentIndexSettings.embeddingTimeout())));
+                        clock.instant().plus(stoneDocumentIndexSettings.embeddingTimeout()), mode));
         stoneCardEmbeddingEntity.setEmbeddingProfile(stoneDocumentEmbeddingEntity.profile());
         stoneCardEmbeddingEntity.setEmbedding(stoneDocumentEmbeddingEntity.vector());
         return stoneCardEmbeddingEntity;

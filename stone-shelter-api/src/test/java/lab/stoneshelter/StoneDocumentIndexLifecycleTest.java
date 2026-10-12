@@ -27,6 +27,11 @@ import lab.stoneshelter.services.StoneEncyclopediaIndexService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import lab.stoneshelter.services.StoneCardReindexRunnerService;
+import lab.stoneshelter.services.StoneIndexConsumerService;
+import lab.stoneshelter.services.StoneIndexKafkaTopicService;
+import lab.stoneshelter.services.OutboxKafkaTopicService;
+import lab.stoneshelter.services.OutboxDispatcherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -49,6 +54,11 @@ import static org.mockito.Mockito.reset;
 
 @SpringBootTest
 class StoneDocumentIndexLifecycleTest extends IntegrationTest {
+    @MockitoBean private OutboxDispatcherService isolatedOutboxDispatcherService;
+    @MockitoBean private OutboxKafkaTopicService isolatedOutboxKafkaTopicService;
+    @MockitoBean private StoneIndexKafkaTopicService isolatedStoneIndexKafkaTopicService;
+    @MockitoBean private StoneIndexConsumerService isolatedStoneIndexConsumerService;
+    @MockitoBean private StoneCardReindexRunnerService isolatedStoneCardReindexRunnerService;
     @Autowired private StoneEncyclopediaIndexService service;
     @Autowired private StoneDocumentIndexTransactionService transactions;
     @Autowired private JdbcTemplate jdbc;

@@ -14,6 +14,7 @@ import lab.stoneshelter.services.StoneDocumentEmbeddingService;
 import lab.stoneshelter.services.StoneDocumentIndexSettings;
 import lab.stoneshelter.services.StoneIndexProcessingService;
 import lab.stoneshelter.services.StoneIndexConsumerService;
+import lab.stoneshelter.services.ModelInvocationAdmissionService;
 import lab.stoneshelter.mappers.entities.StoneCardSaveRequestToStoneCardEmbeddingEntityMapper;
 import lab.stoneshelter.mappers.dtos.StoneCardEmbeddingEntityToStoneCardSaveResponseMapper;
 import org.springframework.mock.env.MockEnvironment;
@@ -26,6 +27,8 @@ import lab.stoneshelter.services.StoneIndexAttemptTransactionService;
 import lab.stoneshelter.repositories.OutboxKafkaRepository;
 import lab.stoneshelter.entities.OutboxDeadLetterEntity;
 import lab.stoneshelter.exceptions.OutboxWriteException;
+import lab.stoneshelter.exceptions.ModelAdmissionDeferredException;
+import lab.stoneshelter.enums.ModelAdmissionMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 import javax.sql.DataSource;
@@ -99,6 +102,7 @@ class StoneIndexRetryTest {
         context.register(StoneIndexAttemptTransactionService.class);
         context.registerBean(Clock.class, () -> CLOCK);
         context.registerBean(StoneDocumentEmbeddingService.class, () -> embeddingService);
+        context.registerBean(ModelInvocationAdmissionService.class, () -> mock(ModelInvocationAdmissionService.class));
         context.registerBean(StoneDocumentIndexSettings.class, () -> new StoneDocumentIndexSettings(new MockEnvironment()));
         context.register(StoneCardEmbeddingService.class, StoneCardEmbeddingTransactionService.class,
                 StoneCardSaveRequestToStoneCardEmbeddingEntityMapper.class, StoneCardEmbeddingEntityToStoneCardSaveResponseMapper.class,
@@ -232,6 +236,20 @@ class StoneIndexRetryTest {
         assertThat(processingService.processRecord("stone-card-index-events", 0, 402, valid, "40").completed()).isFalse();
         assertThat(attemptRepository.findById("stone-card-index-events", 0, 402)).isEmpty();
         assertThat(stateRepository.findById(40)).isEmpty();
+    }
+
+    @Test
+    void healthyAdmissionWaitDoesNotChargeAttemptsAcknowledgeOrEnterDlq() {
+        when(embeddingService.embed(any())).thenAnswer(call -> {
+            lab.stoneshelter.criteria.StoneDocumentEmbeddingCriteria criteria = call.getArgument(0);
+            assertThat(criteria.admissionMode()).isEqualTo(ModelAdmissionMode.BACKGROUND);
+            throw new ModelAdmissionDeferredException(START.plusSeconds(2));
+        });
+        var record = new ConsumerRecord<>("stone-card-index-events", 0, 500, "50", event(50, 1, false));
+        Acknowledgment acknowledgment = mock(Acknowledgment.class); consumer().receive(record, acknowledgment);
+        verify(acknowledgment).nack(java.time.Duration.ofSeconds(2)); verify(acknowledgment, never()).acknowledge();
+        assertThat(attemptRepository.findById(record.topic(), 0, 500)).isEmpty();
+        verify(kafkaRepository, never()).publishDeadLetter(any(), anyString(), anyString());
     }
 
     private StoneIndexConsumerService consumer() {

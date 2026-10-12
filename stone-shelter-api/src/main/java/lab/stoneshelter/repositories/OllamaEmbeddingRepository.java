@@ -2,6 +2,7 @@ package lab.stoneshelter.repositories;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.LongConsumer;
 import java.util.concurrent.TimeUnit;
 import lab.stoneshelter.entities.StoneDocumentEmbeddingEntity;
 import lab.stoneshelter.entities.StoneDocumentEmbeddingInputEntity;
@@ -20,7 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class OllamaEmbeddingRepository {
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
 
-    public StoneDocumentEmbeddingEntity embed(StoneDocumentEmbeddingInputEntity stoneDocumentEmbeddingInputEntity) {
+    public StoneDocumentEmbeddingEntity embed(StoneDocumentEmbeddingInputEntity stoneDocumentEmbeddingInputEntity, LongConsumer usage) {
         if (Thread.currentThread().isInterrupted()) {
             throw new StoneDocumentDependencyUnavailableException("The document embedding request was interrupted.");
         }
@@ -53,6 +54,13 @@ public class OllamaEmbeddingRepository {
                 }
                 if (!profile.equals(findProfile(okHttpClient, stoneDocumentEmbeddingInputEntity, deadlineNanos))) {
                     throw new StoneDocumentDependencyUnavailableException("The embedding model changed during the request.");
+                }
+                JsonNode inputTokens = jsonNode.path("prompt_eval_count");
+                if (StoneDocumentEmbeddingInputEntity.MODEL.equals(jsonNode.path("model").asString())
+                        && inputTokens.isIntegralNumber() && inputTokens.canConvertToInt() && inputTokens.asInt() > 0 && inputTokens.asInt() <= 32768) {
+                    usage.accept(inputTokens.asInt());
+                } else {
+                    throw new StoneDocumentDependencyUnavailableException("The embedding provider returned incompatible token accounting.");
                 }
                 return embedding(jsonNode, profile);
             }

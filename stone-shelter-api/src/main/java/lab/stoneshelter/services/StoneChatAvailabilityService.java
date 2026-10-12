@@ -1,6 +1,11 @@
 package lab.stoneshelter.services;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import lab.stoneshelter.exceptions.ModelCapacityExceededException;
+import lab.stoneshelter.exceptions.ModelTokenBudgetExceededException;
+import lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,13 +27,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class StoneChatAvailabilityService {
     private record Controls(StoneChatActiveTurnRepository leases, StoneChatContextSelector context) {}
     private record Components(StoneChatSessionRepository sessions, StoneChatConversationRepository history,
                               StoneChatRateLimiterRepository limiter, Controls controls) {}
     private record Status(long generation, boolean ready) {}
     private record Tracking(AtomicReference<Status> status, AtomicBoolean probing) {}
+    private record Models(StoneExactSearchProvider provider, ModelInvocationAdmissionService admission) {}
+    private Models models;
+    @Autowired public void configureModels(StoneExactSearchProvider provider, ModelInvocationAdmissionService admission) {
+        models = new Models(provider, admission); admission.setFailureListener(this::invalidate);
+    }
     private final Components components;
     private final StoneChatRedisRepository redis;
     private final StoneChatConversationSerializationService serialization;
@@ -47,7 +57,8 @@ public class StoneChatAvailabilityService {
     public <T> T execute(Supplier<T> work) {
         try { return work.get(); }
         catch (StoneChatRateLimitedException | StoneChatConversationBusyException | StoneChatConversationNotFoundException
-                | StoneChatOriginRejectedException | StoneChatTurnConflictException exception) { throw exception; }
+                | StoneChatOriginRejectedException | StoneChatTurnConflictException | ModelCapacityExceededException
+                | ModelTokenBudgetExceededException | InvalidStoneExactSearchOutputException exception) { throw exception; }
         catch (RuntimeException exception) { invalidate(exception); throw new StoneChatUnavailableException(exception); }
     }
     @EventListener(ApplicationReadyEvent.class)
@@ -61,6 +72,8 @@ public class StoneChatAvailabilityService {
         Status previous = tracking.status().get(); String prefix = "chat:probe:" + UUID.randomUUID() + ":";
         try {
             execute(() -> {
+                if (models == null) throw new StoneChatUnavailableException();
+                models.admission().probe(); models.provider().probe();
                 redis.probe(prefix); components.sessions().probe(prefix); components.history().probe(prefix);
                 components.limiter().probe(prefix); components.controls().leases().probe(prefix); serialization.probe();
                 if (components.controls().context().select(List.of()) == null)

@@ -2,8 +2,12 @@ package lab.stoneshelter.entities;
 
 import java.util.List;
 import java.util.UUID;
+import lab.stoneshelter.criteria.StoneExactSearchCriteria;
 
 public class StoneChatTurnEntity {
+    private StoneExactSearchCriteria exactSearchCriteria;
+    public StoneExactSearchCriteria getExactSearchCriteria() { return exactSearchCriteria; }
+    public void setExactSearchCriteria(StoneExactSearchCriteria value) { exactSearchCriteria = value; }
     private UUID turnId;
     private String message;
     private StoneChatContextEntity context;

@@ -11,6 +11,16 @@ import lab.stoneshelter.repositories.StoneChatRedisRepository;
 import lab.stoneshelter.repositories.StoneChatSessionRepository;
 import lab.stoneshelter.services.StoneChatAvailabilityService;
 import lab.stoneshelter.services.StoneChatContextSelector;
+import lab.stoneshelter.services.StoneExactSearchProvider;
+import lab.stoneshelter.services.ModelInvocationAdmissionService;
+import lab.stoneshelter.exceptions.ModelCapacityExceededException;
+import lab.stoneshelter.exceptions.ModelTokenBudgetExceededException;
+import lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException;
+import java.time.Instant;
+import java.time.Clock;
+import lab.stoneshelter.services.ModelInvocationSettings;
+import lab.stoneshelter.services.ModelTokenBudgetTransactionService;
+import org.springframework.mock.env.MockEnvironment;
 import lab.stoneshelter.services.StoneChatConversationSerializationService;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -68,14 +78,45 @@ class StoneChatAvailabilityServiceTest {
             }
             StoneChatAvailabilityService service = new StoneChatAvailabilityService(sessions, history, limiter, leases,
                     redis, serialization, new StoneChatContextSelector());
+            service.configureModels(mock(StoneExactSearchProvider.class), mock(ModelInvocationAdmissionService.class));
             service.initialize();
             assertThatThrownBy(() -> service.ensureReady(false)).isInstanceOf(StoneChatUnavailableException.class);
             assertThatThrownBy(service::recover).isInstanceOf(StoneChatUnavailableException.class);
         }
     }
+    @Test
+    void healthyModelRejectionsDoNotCloseHistoryAndReplayButActualProviderAndLedgerFailuresDo() {
+        StoneChatAvailabilityService service = service(mock(StoneChatRateLimiterRepository.class));
+        StoneExactSearchProvider provider = mock(StoneExactSearchProvider.class);
+        ModelInvocationAdmissionService admission = mock(ModelInvocationAdmissionService.class);
+        service.configureModels(provider, admission); service.recover();
+        for (RuntimeException failure : java.util.List.of(new ModelCapacityExceededException(),
+                new ModelTokenBudgetExceededException(Instant.now().plusSeconds(100)), new InvalidStoneExactSearchOutputException())) {
+            assertThatThrownBy(() -> service.execute(() -> { throw failure; })).isSameAs(failure); service.assertReady();
+        }
+        doThrow(new IllegalStateException("Ollama unavailable")).when(provider).probe();
+        assertThatThrownBy(service::recover).isInstanceOf(StoneChatUnavailableException.class);
+        assertThatThrownBy(service::assertReady).isInstanceOf(StoneChatUnavailableException.class);
+        org.mockito.Mockito.doNothing().when(provider).probe(); service.recover(); service.assertReady();
+        doThrow(new IllegalStateException("Ledger unavailable")).when(admission).probe();
+        assertThatThrownBy(service::recover).isInstanceOf(StoneChatUnavailableException.class);
+        assertThatThrownBy(service::assertReady).isInstanceOf(StoneChatUnavailableException.class);
+    }
+
+    @Test void backgroundModelFailureClosesSharedChatUntilVerifiedManualRecovery() {
+        var admission = new ModelInvocationAdmissionService(mock(ModelTokenBudgetTransactionService.class), new ModelInvocationSettings(new MockEnvironment()), Clock.systemUTC());
+        var service = service(mock(StoneChatRateLimiterRepository.class));
+        service.configureModels(mock(StoneExactSearchProvider.class), admission); service.recover(); service.assertReady();
+        admission.failure(new IllegalStateException("background model dependency failed"));
+        assertThatThrownBy(service::assertReady).isInstanceOf(StoneChatUnavailableException.class);
+        service.ensureReady(true); service.assertReady();
+    }
+
     private static StoneChatAvailabilityService service(StoneChatRateLimiterRepository limiter) {
-        return new StoneChatAvailabilityService(mock(StoneChatSessionRepository.class), mock(StoneChatConversationRepository.class),
+        StoneChatAvailabilityService service = new StoneChatAvailabilityService(mock(StoneChatSessionRepository.class), mock(StoneChatConversationRepository.class),
                 limiter, mock(StoneChatActiveTurnRepository.class), mock(StoneChatRedisRepository.class),
                 mock(StoneChatConversationSerializationService.class), new StoneChatContextSelector());
+        service.configureModels(mock(StoneExactSearchProvider.class), mock(ModelInvocationAdmissionService.class));
+        return service;
     }
 }

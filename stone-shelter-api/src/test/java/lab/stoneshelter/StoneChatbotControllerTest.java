@@ -9,6 +9,13 @@ import java.util.stream.Stream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import lab.stoneshelter.services.StoneExactSearchService;
+import lab.stoneshelter.exceptions.ModelCapacityExceededException;
+import lab.stoneshelter.exceptions.ModelTokenBudgetExceededException;
+import lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException;
 import lab.stoneshelter.controllers.StoneChatbotController;
 import lab.stoneshelter.controllers.StoneChatHistoryController;
 import lab.stoneshelter.controllers.StoneChatBindingInterceptor;
@@ -69,11 +76,17 @@ class StoneChatbotControllerTest {
             when(admission.bind(nullable(String.class), any())).thenReturn("test-session");
             when(admission.retentionSeconds()).thenReturn(86400L); return admission;
         }
+        @Bean StoneExactSearchService exactSearch() { return mock(StoneExactSearchService.class); }
+        @Bean Clock clock() { return Clock.systemUTC(); }
+        @Bean StoneChatSettings chatSettings() { return new StoneChatSettings(new MockEnvironment()); }
         @Bean StoneChatbotService chatbot() {
             StoneChatbotService service = mock(StoneChatbotService.class);
             when(service.sendMessage(any(), anyString(), any())).thenAnswer(invocation -> {
                 StoneChatMessageRequest request = invocation.getArgument(0);
                 switch (request.message()) {
+                    case "capacity" -> throw new ModelCapacityExceededException();
+                    case "budget" -> throw new ModelTokenBudgetExceededException(LocalDate.now(ZoneOffset.UTC).plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC));
+                    case "invalid-model" -> throw new InvalidStoneExactSearchOutputException();
                     case "unavailable" -> throw new StoneChatUnavailableException();
                     case "busy" -> throw new StoneChatConversationBusyException();
                     case "rate" -> throw new StoneChatRateLimitedException(6);
@@ -114,13 +127,24 @@ class StoneChatbotControllerTest {
         restClient.post().uri("/api/v1/chat/messages").header("Origin", "http://localhost:5173").body(validRequest("conflict"))
                 .exchange().expectStatus().isEqualTo(409).expectBody().jsonPath("$.code").isEqualTo("CHAT_TURN_CONFLICT");
     }
+    @Test void modelErrorsUseAgreedStatusAndRetryHintsWithoutSuccessCookie() {
+        restClient.post().uri("/api/v1/chat/messages").header("Origin", "http://localhost:5173").body(validRequest("capacity"))
+                .exchange().expectStatus().isEqualTo(503).expectHeader().valueEquals("Retry-After", "1")
+                .expectHeader().doesNotExist("Set-Cookie").expectBody().jsonPath("$.code").isEqualTo("CHAT_CAPACITY_EXCEEDED");
+        restClient.post().uri("/api/v1/chat/messages").header("Origin", "http://localhost:5173").body(validRequest("budget"))
+                .exchange().expectStatus().isEqualTo(429).expectHeader().value("Retry-After", value -> assertThat(Long.parseLong(value)).isBetween(1L, 86400L))
+                .expectHeader().doesNotExist("Set-Cookie").expectBody().jsonPath("$.code").isEqualTo("CHAT_TOKEN_BUDGET_EXCEEDED");
+        restClient.post().uri("/api/v1/chat/messages").header("Origin", "http://localhost:5173").body(validRequest("invalid-model"))
+                .exchange().expectStatus().isEqualTo(502).expectHeader().doesNotExist("Set-Cookie")
+                .expectBody().jsonPath("$.code").isEqualTo("CHAT_INVALID_MODEL_OUTPUT");
+    }
     @Test void generatesMatchingJsonAndYamlIncludingHistoryAndTurnIdentity() throws Exception {
         JsonNode json = Json31.mapper().readTree(restClient.get().uri("/v3/api-docs").exchange().expectStatus().isOk()
                 .expectBody(String.class).returnResult().getResponseBody());
         JsonNode operation = json.at("/paths/~1api~1v1~1chat~1messages/post");
-        assertThat(operation.path("description").asText()).contains("Redis", "No AI");
+        assertThat(operation.path("description").asText()).contains("Redis", "AVAILABLE", "catalog");
         assertThat(operation.path("responses").propertyStream().map(Map.Entry::getKey).toList())
-                .containsExactlyInAnyOrder("200", "400", "403", "404", "409", "429", "503");
+                .containsExactlyInAnyOrder("200", "400", "403", "404", "409", "429", "502", "503");
         assertThat(json.at("/components/schemas/StoneChatMessageRequest/required"))
                 .contains(Json31.mapper().valueToTree("turnId"));
         assertThat(json.at("/components/schemas/StoneChatMessageRequest/properties/turnId/format").asText()).isEqualTo("uuid");

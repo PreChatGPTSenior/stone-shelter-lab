@@ -52,6 +52,13 @@ public class StoneChatConversationRepository {
                         || turn.getText() == null || turn.getStones() == null || turn.getStones().stream()
                         .anyMatch(stone -> stone == null || stone.id() <= 0 || stone.name() == null))
                     throw new IllegalArgumentException("Invalid completed turn");
+                if (turn.getExactSearchCriteria() != null) {
+                    var criteria = turn.getExactSearchCriteria();
+                    if (criteria.getStoneId() != null && criteria.getStoneId() <= 0 || criteria.getAdmissionDateRanges().stream()
+                            .anyMatch(range -> range == null || range.startInclusive() == null || range.endExclusive() == null
+                                    || !range.startInclusive().isBefore(range.endExclusive())))
+                        throw new IllegalArgumentException("Invalid stored exact-search metadata");
+                }
             }
             return conversation;
         } catch (RuntimeException exception) { throw redis.unavailable(exception); }

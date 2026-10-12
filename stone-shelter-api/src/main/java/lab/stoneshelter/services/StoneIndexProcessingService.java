@@ -8,6 +8,7 @@ import lab.stoneshelter.entities.OutboxDeadLetterEntity;
 import lab.stoneshelter.repositories.StoneCardIndexAttemptRepository;
 import lab.stoneshelter.repositories.OutboxKafkaRepository;
 import lab.stoneshelter.exceptions.StoneDocumentDependencyUnavailableException;
+import lab.stoneshelter.exceptions.ModelAdmissionDeferredException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -69,6 +70,8 @@ public class StoneIndexProcessingService {
                 return outcome;
             } catch (OutboxValidationException exception) {
                 return transferDeadLetter(attemptTransactions.getObject().recordFailure(stoneCardIndexAttemptEntity, reason(exception), true));
+            } catch (ModelAdmissionDeferredException exception) {
+                return new Outcome(false, exception.getRetryAt());
             } catch (StoneDocumentDependencyUnavailableException | DataAccessException exception) {
                 return waiting();
             } catch (RuntimeException exception) {

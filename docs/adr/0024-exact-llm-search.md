@@ -2,7 +2,7 @@
 
 Date: 2026-10-12
 
-Status: Accepted; feature documents synchronized. Runtime readiness is not checked.
+Status: Accepted and implemented; focused verification recorded in feature tasks/acceptance.
 
 Feature number: 0024. The ADR number and filename prefix match the feature
 specification directory number.
@@ -88,9 +88,9 @@ and [ADR-0008](0008-chat-memory-and-request-protection.md).
   call to 50 seconds, leaving time for catalog work and completed-turn storage.
 - When model context does not fit, remove old whole history pairs while
   preserving the current request and system instructions. Keep full stored/UI
-  history independently. Initially use 4096 tokens for the total model context
+  history independently. Initially use 8192 tokens for the total model context
   and at most 512 output tokens, reserving room for output within that context.
-  This accepted initial setting supersedes the earlier 8192/512 proposal.
+  The user-authorized qualification remediation supersedes the initial 4096/512 choice.
 - Mandatory readiness and basic functional verification remain in this
   feature. Dedicated context/output tuning is separate work, and broad
   query-quality evaluation belongs to feature 0027.
@@ -107,7 +107,7 @@ and [ADR-0008](0008-chat-memory-and-request-protection.md).
   and settle against actual reported usage; retain reservations for unknown
   usage until reconciled rather than blindly refunding them.
 - Reserve the full configured upper bound separately for every model call:
-  initially 4096 input/output tokens for each chat call, and the selected
+  initially 8192 input/output tokens for each chat call, and the selected
   embedding profile's maximum input for each embedding call. Release the
   difference only after reliable actual-usage settlement.
 - Unknown usage after a timeout or restart remains reserved against the UTC
@@ -156,7 +156,7 @@ Matching entries are maintained in the
 | OOS-0024-002 | Additional model invocation for result wording | Render exact-search result text with backend templates. After feature 0030, check whether model-generated wording was covered elsewhere; if not, discuss it separately. |
 | OOS-0024-003 | Semantic matching of unsupported properties and intended uses | Do not drop unsupported wishes or infer exact properties; semantic matching belongs to feature 0025. |
 | OOS-0024-004 | Care and geological explanations | This stage provides exact catalog search; substantive care/geological answers belong to feature 0026. |
-| OOS-0024-005 | Dedicated evaluation of context and output-token sizing | Start with a 4096-token total context and a 512-token output cap; defer detailed parameter evaluation and tuning. Mandatory readiness and basic functional verification remain in feature 0024, with broad query-quality evaluation in feature 0027. |
+| OOS-0024-005 | Dedicated evaluation of context and output-token sizing | Start with an 8192-token total context and a 512-token output cap; defer detailed parameter evaluation and tuning. Mandatory readiness and basic functional verification remain in feature 0024, with broad query-quality evaluation in feature 0027. |
 | OOS-0024-006 | General name and ID search-filter additions | Limit new exact-search filters to type, size, availability and admission date. Stored-result and page-context references remain supported. |
 | OOS-0024-007 | External-provider implementation in the initial delivery | Prepare a provider interface while running only local Ollama initially; no external provider connection or automatic fallback is selected here. |
 | OOS-0024-008 | Queuing customer chat requests for model admission | Customer chat requests receive an immediate busy/capacity or token-budget rejection. Background indexing waits without consuming event-specific processing attempts or entering DLQ. Markdown imports wait within their existing overall deadline and fail without partial publication if it expires. |
@@ -177,8 +177,8 @@ do not infer it from that feature's title.
 
 The remaining clarification answers are accepted. The feature specification,
 acceptance criteria, technical plan and task boundaries record the structured
-DTOs, date rules and resource accounting. Runtime qualification and environment
-readiness remain unchecked; no numeric setting establishes current readiness.
+DTOs, date rules and resource accounting. Fresh environment readiness and basic qualification are recorded in tasks.md;
+full implementation is pending and numeric settings alone do not establish readiness.
 
 ## Preparation Boundary
 
@@ -190,3 +190,52 @@ OpenAPI remains the HTTP source of truth; do not maintain handwritten OpenAPI.
 Acceptance criteria belong exclusively in acceptance.md. This ADR authorizes
 no model calls/downloads, environment changes, code, application tests, commits
 or pushes.
+
+## Authorized Qualification Remediation
+
+The user approved a separate bounded correction scope after the initial
+qualification failed. Retain qwen2.5:3b/Spring AI 2.0.1, the existing 2000-UTF-16
+HTTP input, 512 output tokens, 50-second call and 120-second turn limits.
+Use an 8192-token context and reserve 8192 per chat call. The complete permitted
+input domain has a conservative bound of 7639 input tokens plus 512 output
+with the qualified compact prompt, including ChatML overhead and a 200-byte
+corrective-instruction allowance (8151 total). The former 4096
+setting does not establish this bound. The choice preserves the public input
+contract without truncating the current request; it is a necessary qualification
+correction, not a broad tuning campaign. OOS-0024-005 remains deferred tuning
+with the new initial setting and matches the central register.
+
+The installed profile reports GPT2 byte-level tokenization with qwen2
+pretokenization. UTF-8 byte count is used as a conservative upper bound, not an
+average characters/token estimate; BPE merges cannot increase the byte-token
+count. Maximum valid input contributes at most 6000 bytes for 2000 UTF-16 units.
+The bound includes all system/example/current message content and a conservative
+32 tokens per ChatML message plus 32 for the assistant header. Confirm the
+installed profile/template before relying on this bound. The qualified template
+SHA-256 is eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175. Background history is
+trimmed as whole pairs within the remaining capacity.
+Primary tokenizer reference: [Qwen2 tokenizer](https://huggingface.co/docs/transformers/v4.45.1/en/model_doc/qwen2).
+
+Keep the JSON schema in the API format parameter, with compact instructions and
+a real user/assistant clarification example. Explicit availability-only requests
+without inherited narrowing use a restricted schema: CLARIFY, at least two
+questions and empty type/size/date arrays. This enforces the existing backend
+policy at the structured boundary and prevents repair from inventing criteria
+to enable SEARCH. Generic decisions still receive strict backend validation.
+No SQL or catalog query is authorized by malformed or ungrounded criteria.
+
+The maximum Unicode diagnostic timed out at both 32768 and 8192. This is not
+proof of a token-count overflow or a promise that every permitted request
+finishes inference within 50 seconds. Qualification separates complete-input
+capacity proof from execution deadlines; actual timeout keeps unknown usage
+reserved and does not append a completed turn. Numeric bounds and a working
+basic fixture do not establish a general query-quality evaluation.
+
+## Delivery Verification
+
+The feature implementation and focused acceptance review are complete. Evidence
+and exact selectors are recorded in the feature's tasks.md and acceptance.md;
+acceptance criteria are not duplicated here. The provider, PostgreSQL ledger,
+exact query, embedding retrofit, chat integration and generated HTTP contract
+retain the accepted scope. Verification uses isolated data and the installed
+qualified model. Local deployment and broad quality evaluation are not claimed.

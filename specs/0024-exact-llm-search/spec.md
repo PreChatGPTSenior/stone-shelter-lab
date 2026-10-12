@@ -1,6 +1,6 @@
 # Feature 0024: Exact LLM Search
 
-Status: Accepted requirements synchronized with ADR-0024; implementation and runtime readiness pending.
+Status: Implemented; focused acceptance verified. See tasks.md and acceptance.md for evidence.
 
 ## References
 
@@ -82,9 +82,9 @@ Status: Accepted requirements synchronized with ADR-0024; implementation and run
   call to 50 seconds, leaving time for catalog work and completed-turn storage.
 - When model context does not fit, remove old whole history pairs while
   preserving the current request and system instructions. Keep full stored/UI
-  history independently. Initially use 4096 tokens for the total model context
+  history independently. Initially use 8192 tokens for the total model context
   and at most 512 output tokens, reserving room for output within that context.
-  This accepted initial setting supersedes the earlier 8192/512 proposal.
+  The user-authorized qualification remediation supersedes the initial 4096/512 choice.
 - Mandatory readiness and basic functional verification remain in this
   feature. Dedicated context/output tuning is separate work, and broad
   query-quality evaluation belongs to feature 0027.
@@ -101,7 +101,7 @@ Status: Accepted requirements synchronized with ADR-0024; implementation and run
   and settle against actual reported usage; retain reservations for unknown
   usage until reconciled rather than blindly refunding them.
 - Reserve the full configured upper bound separately for every model call:
-  initially 4096 input/output tokens for each chat call, and the selected
+  initially 8192 input/output tokens for each chat call, and the selected
   embedding profile's maximum input for each embedding call. Release the
   difference only after reliable actual-usage settlement.
 - Unknown usage after a timeout or restart remains reserved against the UTC
@@ -154,6 +154,12 @@ executes no catalog query; filterless availability requests ask at least two
 specific questions. UNSUPPORTED executes no catalog query and explains supported
 conditions. Contract-invalid output may receive one repair call; genuinely
 ambiguous user input is clarification, not an output-validation failure.
+Explicit availability-only requests without inherited narrowing use a schema
+restricted to CLARIFY, at least two questions and empty type/size/date arrays;
+backend validation continues to prohibit unfiltered queries for all decisions.
+Use UTF-8 byte bounds for the qualified qwen2 byte-level tokenizer, including
+ChatML overhead, to preserve the full permitted current request and output.
+The user-authorized bounded remediation and its reasoning are recorded in ADR-0024.
 Backend code resolves relative dates against an injected UTC clock and validates
 ranges. Follow-ups retain effective criteria unless resetSearch selects a new
 search. Requested availability is ANDed with mandatory AVAILABLE visibility.

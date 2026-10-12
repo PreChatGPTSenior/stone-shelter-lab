@@ -14,6 +14,11 @@ import lab.stoneshelter.services.StoneDocumentEmbeddingService;
 import lab.stoneshelter.shared.StoneCardSaveRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import lab.stoneshelter.services.StoneCardReindexRunnerService;
+import lab.stoneshelter.services.StoneIndexConsumerService;
+import lab.stoneshelter.services.StoneIndexKafkaTopicService;
+import lab.stoneshelter.services.OutboxKafkaTopicService;
+import lab.stoneshelter.services.OutboxDispatcherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -35,6 +40,11 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class StoneCardEmbeddingServiceTest extends IntegrationTest {
+    @MockitoBean private OutboxDispatcherService isolatedOutboxDispatcherService;
+    @MockitoBean private OutboxKafkaTopicService isolatedOutboxKafkaTopicService;
+    @MockitoBean private StoneIndexKafkaTopicService isolatedStoneIndexKafkaTopicService;
+    @MockitoBean private StoneIndexConsumerService isolatedStoneIndexConsumerService;
+    @MockitoBean private StoneCardReindexRunnerService isolatedStoneCardReindexRunnerService;
     @Autowired private StoneCardEmbeddingService service;
     @Autowired private JdbcTemplate jdbcTemplate;
     @Autowired private PlatformTransactionManager transactionManager;

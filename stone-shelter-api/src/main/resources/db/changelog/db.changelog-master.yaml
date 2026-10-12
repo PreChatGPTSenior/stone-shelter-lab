@@ -35,3 +35,6 @@ databaseChangeLog:
   - include:
       file: 0023-create-stone-card-reindex-jobs.xml
       relativeToChangelogFile: true
+  - include:
+      file: 0024-create-model-token-budget.xml
+      relativeToChangelogFile: true

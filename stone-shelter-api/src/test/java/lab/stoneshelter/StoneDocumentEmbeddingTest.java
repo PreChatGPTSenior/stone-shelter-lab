@@ -17,6 +17,14 @@ import lab.stoneshelter.mappers.entities.StoneDocumentEmbeddingCriteriaToStoneDo
 import lab.stoneshelter.repositories.OllamaEmbeddingRepository;
 import lab.stoneshelter.services.StoneDocumentEmbeddingService;
 import lab.stoneshelter.services.StoneDocumentIndexSettings;
+import lab.stoneshelter.services.ModelInvocationAdmissionService;
+import lab.stoneshelter.services.ModelInvocationSettings;
+import lab.stoneshelter.services.ModelTokenBudgetTransactionService;
+import lab.stoneshelter.entities.ModelTokenReservationEntity;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -227,6 +235,13 @@ class StoneDocumentEmbeddingTest {
     }
 
     private StoneDocumentEmbeddingService service(MockEnvironment mockEnvironment) {
-        return new StoneDocumentEmbeddingService(new OllamaEmbeddingRepository(), mapper(mockEnvironment));
+        StoneDocumentEmbeddingService service = new StoneDocumentEmbeddingService(new OllamaEmbeddingRepository(), mapper(mockEnvironment));
+        ModelTokenBudgetTransactionService ledger = mock(ModelTokenBudgetTransactionService.class);
+        when(ledger.reserve(any(), any(), anyLong(), anyLong())).thenAnswer(call ->
+                new ModelTokenReservationEntity(call.getArgument(0), call.getArgument(1), call.getArgument(2), null));
+        when(ledger.settle(any(), anyLong())).thenAnswer(call ->
+                new ModelTokenReservationEntity(call.getArgument(0), java.time.LocalDate.of(2026, 10, 12), 32768, call.getArgument(1)));
+        service.configureAdmission(new ModelInvocationAdmissionService(ledger, new ModelInvocationSettings(new MockEnvironment()), CLOCK), CLOCK);
+        return service;
     }
 }

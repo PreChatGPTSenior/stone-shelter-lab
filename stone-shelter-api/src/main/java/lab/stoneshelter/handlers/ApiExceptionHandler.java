@@ -1,6 +1,12 @@
 package lab.stoneshelter.handlers;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+import lab.stoneshelter.exceptions.ModelCapacityExceededException;
+import lab.stoneshelter.exceptions.ModelTokenBudgetExceededException;
+import lab.stoneshelter.exceptions.ModelAdmissionDeferredException;
+import lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException;
 import lab.stoneshelter.exceptions.StoneCardReindexConflictException;
 import lab.stoneshelter.exceptions.InvalidStoneCardReindexRequestException;
 import lab.stoneshelter.exceptions.StoneCardReindexNotFoundException;
@@ -144,6 +150,26 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataAccessException.class)
     public ProblemDetail handlePersistenceFailure(DataAccessException exception) {
         return problemDetail(HttpStatus.INTERNAL_SERVER_ERROR, "The operation could not be saved. Try again later.");
+    }
+
+    @ExceptionHandler(ModelCapacityExceededException.class)
+    public ProblemDetail modelCapacity(ModelCapacityExceededException exception, HttpServletResponse response) {
+        response.setHeader(HttpHeaders.RETRY_AFTER, "1");
+        return chatProblem(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_CAPACITY_EXCEEDED", exception.getMessage());
+    }
+    @ExceptionHandler(ModelTokenBudgetExceededException.class)
+    public ProblemDetail modelBudget(ModelTokenBudgetExceededException exception, HttpServletResponse response) {
+        long milliseconds = Duration.between(Instant.now(), exception.getRetryAt()).toMillis();
+        response.setHeader(HttpHeaders.RETRY_AFTER, Long.toString(Math.max(1, (milliseconds + 999) / 1000)));
+        return chatProblem(HttpStatus.TOO_MANY_REQUESTS, "CHAT_TOKEN_BUDGET_EXCEEDED", exception.getMessage());
+    }
+    @ExceptionHandler(InvalidStoneExactSearchOutputException.class)
+    public ProblemDetail invalidModelOutput(InvalidStoneExactSearchOutputException exception) {
+        return chatProblem(HttpStatus.BAD_GATEWAY, "CHAT_INVALID_MODEL_OUTPUT", exception.getMessage());
+    }
+    @ExceptionHandler(ModelAdmissionDeferredException.class)
+    public ProblemDetail indexAdmissionDeferred(ModelAdmissionDeferredException exception) {
+        return problemDetail(HttpStatus.SERVICE_UNAVAILABLE, "Indexing admission is temporarily unavailable.");
     }
 
     @ExceptionHandler(StoneChatUnavailableException.class)
