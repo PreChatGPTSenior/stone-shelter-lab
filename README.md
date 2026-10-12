@@ -10,6 +10,35 @@ And, occasionally, to enjoy the results with popcorn. 🍿
 
 ---
 
+### 📦 Deliverables
+
+At the end of every Phase, I'll record a video reviewing the final implementation and walking through:
+
+- What went wrong and why.
+- Which mistakes were made by the agent.
+- Which mistakes were mine.
+- What actually worked well.
+- Where the agent genuinely did a good job.
+- Where my engineering decisions helped or made things worse.
+- What I learned from the experiment.
+
+And yes, the original code will be preserved. Future archaeologists deserve access to the evidence.
+
+---
+## 🧪 The Experiment at a Glance
+
+|                        | Phase 1 🍿              | Phase 2 🔧              | Phase 3 🤖               |
+|------------------------|-------------------------|-------------------------|--------------------------|
+| **Approach**           | Vibe Coding             | Controlled Refactoring  | Multi-Agent Development  |
+| **Starting Point**     | Initial implementation  | Phase 1 codebase        | Specifications only      |
+| **Architecture Rules** | Suggestions and prayers | Enforced where possible | Enforced from day one    |
+| **Quality Gates**      | None                    | Automated               | Automated                |
+| **Code Review**        | Human observation       | AI-assisted review      | Independent AI reviewers |
+| **Human Role**         | Observer with popcorn   | Engineering supervisor  | Experiment designer      |
+| **Main Question**      | What could go wrong?    | Can we fix it?          | Can we prevent it?       |
+
+
+---
 ## 🎢 Phase 1: Vibe Coding, Unsupervised
 
 **Status:** 🟢 In Progress
@@ -22,17 +51,12 @@ And, occasionally, to enjoy the results with popcorn. 🍿
 
 Just an AI agent, a codebase, a set of expectations, and an increasingly impressive collection of technical debt.
 
+
 ### 🔬 Questions to Investigate
 
 **What happens when someone with only vibe-coding experience lets AI build an entire application?**
 
-There is, admittedly, one minor flaw in the experimental design: I actually know how to code.
-
-Unfortunately, I cannot unlearn software engineering for the sake of science.
-
-But I'm doing my best to breathe, resist the urge to intervene, and limit my involvement to collaboratively writing specifications with the agent.
-
-The architecture may suffer. The scientific curiosity must prevail.
+There is, admittedly, one minor flaw in the experimental design: I actually know how to code and cannot unlearn software engineering.
 
 ### 👩‍💻 My Responsibilities
 
@@ -42,21 +66,7 @@ The architecture may suffer. The scientific curiosity must prevail.
 - Occasionally add rules to the project's *constitution* to discover **how creatively the agent will ignore them**.
 - Resist the overwhelming temptation to fix everything myself.
 
-### 📦 Deliverables
-
-At the end of Phase 1, I'll record a video reviewing the final implementation and walking through:
-
-- What went wrong and why.
-- Which mistakes were made by the agent.
-- Which mistakes were mine.
-- What actually worked well.
-- Where the agent genuinely did a good job.
-- Where my engineering decisions helped or made things worse.
-- What I learned from the experiment.
-
 **The goal is not to prove that AI writes bad code. It's to observe what actually happens when engineering supervision is deliberately reduced.**
-
-And yes, the original code will be preserved. Future archaeologists deserve access to the evidence.
 
 ---
 
@@ -79,30 +89,16 @@ This time, the constitution will have actual enforcement mechanisms.
 - Additional automated quality gates where appropriate.
 - AI-assisted code review and controlled refactoring workflows.
 
-**The focus is refactoring, not rewriting the application from scratch.**
-
-After stabilization, a small number of deliberately selected feature changes may be introduced to observe how well the improved codebase accommodates evolution.
-
-For example, introducing a new domain attribute that was intentionally left out of the initial implementation.
-
-Because maintaining existing software is where architectural decisions become particularly entertaining.
+**The focus is refactoring, not rewriting the application from scratch.** After stabilization, a small number of deliberately selected feature changes may be introduced to observe how well the improved codebase accommodates evolution.
 
 ### 🔬 Questions to Investigate
 
 - Can AI agents reliably refactor their own code?
-- How many architectural problems can automated quality gates detect?
+- How many architectural problems can be automated quality gates detect?
 - Does explicit enforcement improve compliance with project rules?
 - Does the resulting architecture become easier to extend?
 - How much human supervision is still required?
 - Can we turn *"Please follow the architecture"* into *"The build fails if you don't"*?
-
-### 📦 Deliverables
-
-A refactored application, quality reports, an architectural assessment, and a tagged Phase 2 snapshot.
-
-**Same codebase. Same requirements. Fewer opportunities for creative architectural interpretation.**
-
-At least, that's the hypothesis.
 
 ---
 
@@ -112,7 +108,6 @@ At least, that's the hypothesis.
 
 **The experiment:** What happens when AI agents start from the same specifications, but with engineering constraints, automated checks, and independent code review built into the process from day one?
 
-A completely new repository will be created.
 
 ### 📁 Starting Materials
 
@@ -124,17 +119,11 @@ It will contain only:
 
 **No backend code. No frontend code. No implementation copied from previous phases.**
 
-No inherited technical debt.
-
-No mysterious legacy decisions.
-
-Just specifications, rules, and several AI agents with strong opinions about software engineering.
-
-What could possibly go wrong?
 
 ### 🧠 Multi-Agent Development
 
 Development will be organized around specialized AI roles, orchestrated through a multi-agent workflow with MCP integrations where appropriate.
+Each multi-agent team will start in a separate repository, with different combinations of models and capability levels, to compare how team composition affects code quality and development outcomes.
 
 Potential roles include:
 
@@ -143,57 +132,89 @@ Potential roles include:
 - **Reviewer:** Independent code and architecture review.
 - **Quality Gates:** Automated verification and rule enforcement.
 
-The objective is to evaluate whether multi-agent collaboration, explicit contracts, and continuous verification can prevent the problems observed during the initial vibe-coding phase.
-
-Or whether three agents can simply agree that everything looks good.
 
 ### 🔬 Questions to Investigate
 
 - Does a multi-agent workflow produce better code than a single coding agent?
-- Are architectural rules followed more consistently when independent reviewers are involved?
-- Can automated checks prevent technical debt rather than merely detect it afterward?
-- How does the result compare with refactoring an unconstrained AI-generated codebase?
-- What is the cost of additional engineering control in iterations, time, and tokens?
-- **Can multiple AI agents collectively demonstrate better engineering judgment, or will they simply form a committee to approve each other's mistakes?**
-
-### 📦 Deliverables
-
-A fresh implementation, quality reports, and a comparative assessment of all three phases.
+- How do different combinations of AI models and capability levels affect code quality,
 
 ---
+## 🪨 A Pet Project. Not a Toy Engineering Experiment.
 
-## 🧪 The Experiment at a Glance
+**Yes, this is a pet project about a shelter for stones.**
 
-| | Phase 1 🍿 | Phase 2 🔧 | Phase 3 🤖 |
-|---|---|---|---|
-| **Approach** | Vibe Coding | Controlled Refactoring | Multi-Agent Development |
-| **Starting Point** | Initial implementation | Phase 1 codebase | Specifications only |
-| **Architecture Rules** | Suggestions and prayers | Enforced where possible | Enforced from day one |
-| **Quality Gates** | None | Automated | Automated |
-| **Code Review** | Human observation | AI-assisted review | Independent AI reviewers |
-| **Human Role** | Observer with popcorn | Engineering supervisor | Experiment designer |
-| **Main Question** | What could go wrong? | Can we fix it? | Can we prevent it? |
+Stones have profiles. Stones can be adopted. Stones deserve love, apparently.
 
-Each phase will be preserved using Git branches and tags.
+But while the business domain is intentionally absurd, the engineering challenges are not.
 
-Phase 3 will use a completely separate repository to avoid carrying over implementation code from previous phases.
+Stone Shelter Lab is designed as a full-stack application with a deliberately ambitious technology stack, covering persistence, transactional consistency, distributed messaging, object storage, resilience, AI integration, and automated testing.
 
----
+The idea is simple:
 
-## 🎯 Final Thought
+**Keep the business domain ridiculous enough to be entertaining, but the technical challenges realistic enough to expose actual engineering problems.**
 
-**AI can generate code. Engineering is still responsible for making that code trustworthy.**
+### 🛠️ Technology Stack
 
-Working code is not automatically good code.
+**Backend**
+- Java 23, Spring Boot 4, Spring MVC
+- Spring Data JPA, Hibernate
+- REST APIs, OpenAPI / Swagger, Jakarta Bean Validation
+- Maven
 
-Passing tests is not automatically good architecture.
+**Data & Storage**
+- PostgreSQL 18 with pgvector
+- Liquibase database migrations
+- Redis
+- MinIO object storage
 
-And putting *"Follow clean architecture principles"* in a Markdown file does not magically make an AI agent follow them.
+**Messaging & Distributed Systems**
+- Apache Kafka 4.x
+- Transactional Outbox Pattern 
+- Asynchronous event processing and recovery
+- Idempotency, retries, and failure handling
 
-This experiment is about discovering which parts of software engineering can be delegated, which can be automated, and which still require an experienced engineer.
+**AI & Search**
+- Spring AI
+- Ollama for local LLM integration
+- Vector embeddings and semantic search
+- Conversational search and context management 
 
-It is an exploratory engineering case study, not a controlled scientific benchmark.
+**Resilience & Rate Limiting**
+- Resilience4j
+- Bucket4j
+- Timeout, concurrency, and failure-handling policies
 
-**Pre-ChatGPT Senior™. Post-ChatGPT Agent Wrangler.**
+**Frontend**
+- React 19
+- TypeScript 6
+- Vite
+- ESLint
 
-*Powered by specifications, architectural skepticism, and popcorn.* 🍿
+**Testing & Infrastructure**
+- JUnit / Spring Boot Test
+- Testcontainers
+- ArchUnit
+- Vitest and React Testing Library
+- Docker and Docker Compose
+
+*The stack includes both implemented infrastructure and capabilities planned in the specifications. Dependency declarations are not proof of completed functionality.*
+
+### 🎯 Why So Much Engineering for a Stone Shelter?
+
+Because another simple CRUD application would tell us relatively little about the limits of AI-assisted software engineering.
+
+The experiment needs opportunities for agents to encounter real architectural decisions:
+
+- Transaction boundaries and data consistency.
+- Distributed workflows, retries, and partial failures.
+- Event publishing and idempotency.
+- Persistence and object storage lifecycle management.
+- API contracts and validation.
+- AI integration and search infrastructure.
+- Architectural boundaries and maintainability.
+- Automated testing and enforcement of engineering standards.
+
+These are exactly the areas where generating working code and designing reliable software can become two very different activities.
+
+**The stones may be fictional. The technical debt is unfortunately very real.** 🍿
+
