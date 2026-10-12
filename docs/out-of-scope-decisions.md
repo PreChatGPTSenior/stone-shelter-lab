@@ -6,6 +6,18 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0019: Outbox Event Persistence
+
+Accepted on 2026-10-12. Feature: [specification](../specs/0019-outbox-event-persistence/spec.md).
+Decision record: [ADR-0019](adr/0019-outbox-event-persistence.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0019-001 | Support for empty event payloads | Reject null, empty objects, arrays and scalar payloads. Only nonempty JSON objects are accepted. |
+| OOS-0019-002 | Automatic event expiry and cleanup | Retain events indefinitely, including pending and successfully dispatched events. This feature does not delete them through a retention policy or cleanup job. |
+| OOS-0019-003 | Configurable and event-specific payload-size limits | Enforce a fixed maximum of 256 KiB (262144 bytes) of compact JSON payload encoded in UTF-8, excluding the event envelope. Custom limit configuration and different limits per event type are excluded. |
+| OOS-0019-004 | Comparing payload content on repeated event IDs | Validate every invocation first. For an existing eventId with valid input, compare only eventType and schemaVersion. Matching values produce a successful no-op regardless of the supplied payload; a mismatch raises an error. Preserve the original payload, timestamps and delivery state. The caller must ensure that one UUID always identifies one immutable event. |
+
 ## Feature 0018: Stone-Card Embeddings
 
 Accepted on 2026-10-12. Feature: [specification](../specs/0018-stone-card-embedding/spec.md).
