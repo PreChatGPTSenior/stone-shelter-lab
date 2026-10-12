@@ -1,242 +1,199 @@
-# Stone Shelter Lab
+# 🪨 Stone Shelter Lab
+## Postmortem Driven Development 🍿
+### An Experiment in AI-Assisted Software Engineering
 
-Pet project for practising spec-driven development, AI-first workflow and a
-layered Spring Boot + React stack. Not production software.
+**The goal is not simply to make an application work.**
 
-Phase 1
-Single coding agent + human review
+The goal is to find out **how much engineering supervision AI-generated code actually needs, and whether better rules, automated quality gates, and multi-agent workflows produce better software.**
 
-Phase 2
-Multi-agent development + UI QA
+And, occasionally, to enjoy the results with popcorn. 🍿
 
-Phase 3
-Agentic product features with Spring AI
+---
 
-## Run API
+## 🎢 Phase 1: Vibe Coding, Unsupervised
 
-On first launch, copy the local environment template from the repository root:
+**Status:** 🟢 In Progress
 
-```sh
-cp .env.example .env
-```
+**The experiment:** Let an AI coding agent implement the application with minimal human intervention.
 
-## Usefull command
-docker compose up --build
-docker compose up -d --build
-docker compose down
-docker compose ps
+**No enforced quality gates. No systematic automated architecture checks. No human refactoring.**
 
-Compose loads `.env` automatically. The template contains development-only
-database and MinIO credentials; edit `.env` if needed. Existing `.env` files
-need the new MinIO settings from `.env.example`. Keep this file out of Git.
+**NOTHING. JUST VIBE CODING. 🍿**
 
-## Local AI Infrastructure
+Just an AI agent, a codebase, a set of expectations, and an increasingly impressive collection of technical debt.
 
-The backend, PostgreSQL 18.6 with pgvector 0.8.6, MinIO, Redis and a single
-Kafka 4.2.2 KRaft broker run in Compose. Ollama runs on the host and is managed
-by the user. Existing chatbot responses remain fixed; infrastructure does not
-implement LLM search, RAG, conversation memory, analytics or streaming.
+### 🔬 Questions to Investigate
 
-Preserve an existing `.env`; manually add the non-secret settings documented
-in `.env.example` when updating an older setup. To use the published local
-examples explicitly without loading a private env file, add
-`--env-file .env.example` to each Compose command.
+**What happens when someone with only vibe-coding experience lets AI build an entire application?**
 
-```sh
-docker compose up -d --build --wait --wait-timeout 180
-docker compose ps
-docker compose stop
-docker compose start
-```
+There is, admittedly, one minor flaw in the experimental design: I actually know how to code.
 
-Start only the infrastructure when the backend is not needed:
+Unfortunately, I cannot unlearn software engineering for the sake of science.
 
-```sh
-docker compose up -d --wait postgres minio redis kafka
-```
+But I'm doing my best to breathe, resist the urge to intervene, and limit my involvement to collaboratively writing specifications with the agent.
 
-PostgreSQL and MinIO keep their existing named volumes; Kafka also has a
-persistent volume. Normal `stop`, `start` and rebuild commands preserve them.
-Do not use `down -v` for routine setup or frontend mode switching. Redis is an
-ephemeral local cache with AOF/RDB disabled; its data can disappear on restart.
-`CHAT_MEMORY_TTL=PT24H` is a future application setting, not implemented memory.
+The architecture may suffer. The scientific curiosity must prevail.
 
-The backend connects to Redis at `redis:6379`, Kafka at `kafka:9092`, and the
-host Ollama server at `http://host.docker.internal:11434`. Kafka's external
-listener is `localhost:29092`, overridable by `KAFKA_EXTERNAL_PORT`; controller
-traffic and Redis remain internal. Broker logs retain 24 hours by default,
-controlled by `KAFKA_LOG_RETENTION_HOURS`. No application topics are created.
+### 👩‍💻 My Responsibilities
 
-```sh
-docker compose exec redis redis-cli ping
-docker compose exec kafka /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server kafka:9092
-curl --fail http://localhost:8080/actuator/health
-```
+- Collaborate with AI agents on requirements and specifications.
+- Observe the implementation without manually correcting the code.
+- Record architectural violations, questionable decisions, unnecessary complexity, and recurring patterns in my **secret day-by-day engineering disaster log**.
+- Occasionally add rules to the project's *constitution* to discover **how creatively the agent will ignore them**.
+- Resist the overwhelming temptation to fix everything myself.
 
-Feature scope and evidence live in
-[0014-llm-search-infrastructure](specs/0014-llm-search-infrastructure/spec.md).
+### 📦 Deliverables
 
-## Frontend Startup Modes
+At the end of Phase 1, I'll record a video reviewing the final implementation and walking through:
 
-For the complete Docker stack, including the frontend:
+- What went wrong and why.
+- Which mistakes were made by the agent.
+- Which mistakes were mine.
+- What actually worked well.
+- Where the agent genuinely did a good job.
+- Where my engineering decisions helped or made things worse.
+- What I learned from the experiment.
 
-```sh
-docker compose --profile frontend up -d --build --wait --wait-timeout 180
-```
+**The goal is not to prove that AI writes bad code. It's to observe what actually happens when engineering supervision is deliberately reduced.**
 
-Open http://localhost:5173/stone-shelter/catalog. `FRONTEND_PORT` changes the
-published port. The frontend profile uses pinned Node/npm and the existing
-Vite API-mode server, proxying `/api` and `/images` to the Docker backend.
-SPA page URLs support direct navigation/reload. This is local development
-infrastructure, not a production static-web deployment.
+And yes, the original code will be preserved. Future archaeologists deserve access to the evidence.
 
-For fast host UI edits, stop only the frontend container if it is running:
+---
 
-```sh
-docker compose --profile frontend stop stone-shelter-ui
-docker compose up -d --build --wait --wait-timeout 180
-cd stone-shelter-ui
-npm ci
-# First launch only; preserve an existing .env.local.
-cp .env.example .env.local
-npm run dev:api
-```
+## 🔧 Phase 2: Quality Gates & Controlled Refactoring
 
-Use Node 24.21.0 and npm 11.19.0. Host Vite proxies to `http://localhost:8080`
-through `API_PROXY_TARGET`; keep `VITE_API_BASE_URL` empty. Source edits receive
-Vite hot updates without rebuilding Docker or restarting the backend. To choose
-a different host port, use `npm run dev:api -- --port 5174 --strictPort`.
+**Status:** ⚪ Planned
 
-To switch back, stop the host Vite process and enable the Compose frontend
-profile again. Switching frontend modes does not stop infrastructure or remove
-its volumes. Existing `npm run dev` and explicit `npm run dev:mock` remain
-available; API errors do not switch to mocks.
+**The experiment:** Can engineering constraints and automated verification turn the Phase 1 codebase into something maintainable?
 
-## User-Managed Host Ollama
+The Phase 1 implementation will be preserved in a dedicated branch and tagged before refactoring begins.
 
-Ollama CLI 0.40.2 is installed on the host. The backend uses
-`SPRING_AI_OLLAMA_BASE_URL=http://host.docker.internal:11434`, not container
-localhost. If the server is not running, start it yourself in a host terminal
-with a Docker-accessible listen address:
+This time, the constitution will have actual enforcement mechanisms.
 
-```sh
-OLLAMA_HOST=0.0.0.0:11434 ollama serve
-```
+### 🛠️ Introducing Engineering Discipline
 
-If using the macOS Ollama app instead, configure its host environment and restart
-it yourself following the [official host configuration instructions](https://docs.ollama.com/faq).
-Use one running server, not both app and terminal instances on the same port.
-The browser calls the backend; it does not need direct Ollama access or new CORS
-settings. Docker Desktop resolves [host.docker.internal](https://docs.docker.com/desktop/features/networking/networking-how-tos/).
+- A more comprehensive project constitution and explicit coding rules.
+- **Checkstyle** and automated code formatting.
+- **PMD** for static analysis and **CPD** for duplication detection.
+- **ArchUnit** for enforceable architectural boundaries.
+- Additional automated quality gates where appropriate.
+- AI-assisted code review and controlled refactoring workflows.
 
-In another host terminal, download only the selected model when ready:
+**The focus is refactoring, not rewriting the application from scratch.**
 
-```sh
-ollama --version
-ollama pull qwen2.5:3b
-ollama list
-curl --fail http://localhost:11434/api/version
-```
+After stabilization, a small number of deliberately selected feature changes may be introduced to observe how well the improved codebase accommodates evolution.
 
-The published model is about 1.9 GB, Q4_K_M; allow additional disk space for the
-host runtime. The repository never installs Ollama or pulls models at startup.
-Host models survive container rebuilds. To remove only this model deliberately:
+For example, introducing a new domain attribute that was intentionally left out of the initial implementation.
 
-```sh
-ollama rm qwen2.5:3b
-```
+Because maintaining existing software is where architectural decisions become particularly entertaining.
 
-Check version and model inventory from the backend container without generating
-answers or downloading anything:
+### 🔬 Questions to Investigate
 
-```sh
-docker compose exec stone-shelter-api curl --fail --max-time 5 http://host.docker.internal:11434/api/version
-docker compose exec stone-shelter-api curl --fail --max-time 5 http://host.docker.internal:11434/api/tags
-```
+- Can AI agents reliably refactor their own code?
+- How many architectural problems can automated quality gates detect?
+- Does explicit enforcement improve compliance with project rules?
+- Does the resulting architecture become easier to extend?
+- How much human supervision is still required?
+- Can we turn *"Please follow the architecture"* into *"The build fails if you don't"*?
 
-If host Ollama is unavailable, these checks remain pending; the Docker stack and
-existing API still start. Spring AI auto-pulling and embeddings are disabled.
-No model capability or business-logic test belongs to infrastructure setup.
+### 📦 Deliverables
 
-## Stone Photo Storage
+A refactored application, quality reports, an architectural assessment, and a tagged Phase 2 snapshot.
 
-Compose builds a pinned MinIO release from official binaries with checksum
-verification. PostgreSQL stores gallery metadata and MinIO stores image bytes
-in persistent volumes. The bucket is private. `MINIO_BROWSER_ENDPOINT` must
-be reachable by the browser; the local default is `http://localhost:9000`.
-The MinIO console is at `http://localhost:9001`.
+**Same codebase. Same requirements. Fewer opportunities for creative architectural interpretation.**
 
-Use the generated contract at `/v3/api-docs` or `/v3/api-docs.yaml` for current
-HTTP requirements. For an existing stone, upload a supported image with:
+At least, that's the hypothesis.
 
-```sh
-curl --fail-with-body -F 'file=@stone.png;type=image/png' \
-  http://localhost:8080/api/v1/stones/1/photos
-```
+---
 
-Read `/api/v1/stones/1` for ordered gallery metadata and temporary image URLs.
-The first successfully added photo supplies the catalog cover. The React UI uses the real API by default and supports optional photo uploads
-when creating a stone. It also offers an explicit standalone mock mode. Run both
-modes using the [UI instructions](stone-shelter-ui/README.md).
+## 🤖 Phase 3: Multi-Agent Development From Scratch
 
-Photo deletion is deferred to a scheduler inside the backend. By default it runs
-at 03:00 UTC daily, checks MinIO write readiness, and processes paced batches.
-Deletion requests remove database metadata and queue owned files; failed uploads
-retain durable cleanup intent. Storage failures stop a run and preserve work for
-the next day. Configure cron/timezone and processing limits using the
-PHOTO_CLEANUP_* settings in `.env.example`. The current deployment uses one
-backend scheduler instance.
+**Status:** ⚪ Planned
 
-Feature decisions and verification are in
-[0006-stone-details](specs/0006-stone-details/spec.md).
+**The experiment:** What happens when AI agents start from the same specifications, but with engineering constraints, automated checks, and independent code review built into the process from day one?
 
-## Stone Reservations
+A completely new repository will be created.
 
-POST `/api/v1/stones/{id}/reservations` with JSON fields `applicantName` and
-`contactDetails` to reserve an available stone. Both fields accept arbitrary
-nonblank text. Creation returns 201 with the reservation id, stoneId, RESERVED
-adoptionStatus and createdAt. The reservation and status change commit together;
-duplicates or unavailable stones return 409 ProblemDetail. Deleting the stone
-removes its dependent reservation. Generated OpenAPI remains the HTTP contract.
+### 📁 Starting Materials
 
-The React details page submits adoption applications through the real API and
-refreshes details and the AVAILABLE-only catalog. Explicit mock mode and ordinary
-UI tests retain the same flow without a backend. Reservation decisions are in
-[0007-adopt-stone](specs/0007-adopt-stone/spec.md); integrated launch instructions
-and verification are in [0011-ui-api-integration](specs/0011-ui-api-integration/spec.md).
+It will contain only:
 
-## Stone Chatbot Demo
+- The application specifications prepared during the experiment.
+- The architectural constitution and coding standards.
+- The defined engineering constraints and acceptance criteria.
 
-`POST /api/v1/chat/messages` accepts `conversationId` (UUID), `message` and
-optional `context.stoneId`. The controller returns fixed `text` and ordered
-`stones` references; no AI or server history is connected. The UI preserves its
-conversation across client-side page changes and resets it on reload.
-See [feature 0012](specs/0012-stone-chatbot/spec.md).
+**No backend code. No frontend code. No implementation copied from previous phases.**
 
-From `stone-shelter-api`, run only its backend checks with the pinned JDK:
+No inherited technical debt.
 
-```sh
-./mvnw -Dtest=StoneChatbotControllerTest,StoneChatbotArchitectureTest verify
-```
+No mysterious legacy decisions.
 
-To include the actual UI adapter/Vite proxy smoke, first install the UI's pinned
-dependencies and run `npm run build` there, then use:
+Just specifications, rules, and several AI agents with strong opinions about software engineering.
 
-```sh
-./mvnw -Dtest=StoneChatbotControllerTest,StoneChatbotArchitectureTest,StoneChatbotTransportTest -Dchatbot.transport=true verify
-```
+What could possibly go wrong?
 
-The transport test starts temporary local servers without a database or catalog
-mutations. It is opt-in so ordinary backend verification does not require Node
-or installed frontend dependencies.
+### 🧠 Multi-Agent Development
 
-## Verify
-    curl localhost:8080/actuator/health
-    http://localhost:8080/actuator/health
+Development will be organized around specialized AI roles, orchestrated through a multi-agent workflow with MCP integrations where appropriate.
 
-## Layout
-    specs/NNN-*/                      one directory per feature
-    docs/adr/                         decisions and rationale
-    docs/glossary.md                  domain vocabulary
-    stone-shelter-api/                Spring Boot backend
-    stone-shelter-ui/                 React frontend
+Potential roles include:
+
+- **Business Analyst:** Requirements, specifications, and acceptance criteria.
+- **Developer:** Implementation and tests.
+- **Reviewer:** Independent code and architecture review.
+- **Quality Gates:** Automated verification and rule enforcement.
+
+The objective is to evaluate whether multi-agent collaboration, explicit contracts, and continuous verification can prevent the problems observed during the initial vibe-coding phase.
+
+Or whether three agents can simply agree that everything looks good.
+
+### 🔬 Questions to Investigate
+
+- Does a multi-agent workflow produce better code than a single coding agent?
+- Are architectural rules followed more consistently when independent reviewers are involved?
+- Can automated checks prevent technical debt rather than merely detect it afterward?
+- How does the result compare with refactoring an unconstrained AI-generated codebase?
+- What is the cost of additional engineering control in iterations, time, and tokens?
+- **Can multiple AI agents collectively demonstrate better engineering judgment, or will they simply form a committee to approve each other's mistakes?**
+
+### 📦 Deliverables
+
+A fresh implementation, quality reports, and a comparative assessment of all three phases.
+
+---
+
+## 🧪 The Experiment at a Glance
+
+| | Phase 1 🍿 | Phase 2 🔧 | Phase 3 🤖 |
+|---|---|---|---|
+| **Approach** | Vibe Coding | Controlled Refactoring | Multi-Agent Development |
+| **Starting Point** | Initial implementation | Phase 1 codebase | Specifications only |
+| **Architecture Rules** | Suggestions and prayers | Enforced where possible | Enforced from day one |
+| **Quality Gates** | None | Automated | Automated |
+| **Code Review** | Human observation | AI-assisted review | Independent AI reviewers |
+| **Human Role** | Observer with popcorn | Engineering supervisor | Experiment designer |
+| **Main Question** | What could go wrong? | Can we fix it? | Can we prevent it? |
+
+Each phase will be preserved using Git branches and tags.
+
+Phase 3 will use a completely separate repository to avoid carrying over implementation code from previous phases.
+
+---
+
+## 🎯 Final Thought
+
+**AI can generate code. Engineering is still responsible for making that code trustworthy.**
+
+Working code is not automatically good code.
+
+Passing tests is not automatically good architecture.
+
+And putting *"Follow clean architecture principles"* in a Markdown file does not magically make an AI agent follow them.
+
+This experiment is about discovering which parts of software engineering can be delegated, which can be automated, and which still require an experienced engineer.
+
+It is an exploratory engineering case study, not a controlled scientific benchmark.
+
+**Pre-ChatGPT Senior™. Post-ChatGPT Agent Wrangler.**
+
+*Powered by specifications, architectural skepticism, and popcorn.* 🍿
