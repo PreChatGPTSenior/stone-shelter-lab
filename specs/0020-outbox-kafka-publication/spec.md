@@ -1,54 +1,126 @@
 # Feature 0020: Outbox Kafka Publication
 
-Status: Initial draft for discussion. Not ready for implementation.
+Status: Accepted requirements synchronized with ADR-0020; implementation and runtime readiness pending.
 
-## Goal and References
+## References
 
-Deliver committed outbox events to Kafka in the background, preserving work during outages and supporting recovery.
-
-- Shared requirements: [LLM Search Discovery](../0015-llm-search-discovery/spec.md).
-- Shared decisions: [ADR-0007](../../docs/adr/0007-llm-search-discovery.md).
-- Acceptance criteria: [acceptance.md](acceptance.md).
+- Feature decisions: [ADR-0020](../../docs/adr/0020-outbox-kafka-publication.md).
+- Shared discovery: [0015](../0015-llm-search-discovery/spec.md).
+- Acceptance criteria: [acceptance.md](acceptance.md), exclusively.
 - Technical decisions: [plan.md](plan.md).
-- Task preparation: [tasks.md](tasks.md).
+- Exact execution boundaries: [tasks.md](tasks.md).
 
-## Initial Scope
+## Requirements
 
-- Reuse the outbox persistence capability; do not publish uncommitted business changes.
-- Define dispatcher ownership, delivery acknowledgement and restart recovery.
-- Retain pending events across Kafka outages and retry delivery; duplicate publication must be accounted for by event contracts and consumers.
+### Dispatcher and Polling
 
-## Delivery Boundary to Refine
+- Run the dispatcher inside the existing backend and start it automatically
+  with the backend.
+- Poll every 2 seconds and select up to 20 events per pass. Configure both
+  values through environment variables.
+- Publish committed outbox events. Do not keep a PostgreSQL transaction open
+  while waiting for Kafka publication.
+- A problematic event must not block publication of other events.
+- Support one running backend instance and one dispatcher. Concurrent
+  publication from multiple backend instances is outside this feature.
 
-- Stone indexing events and their business triggers are owned by feature 0021.
-- Embedding consumption is owned by feature 0022; analytics processing by feature 0028.
+### Acknowledgement and Duplicate Delivery
 
-These boundaries organize discussion; they do not establish new accepted product
-exclusions. Record newly accepted out-of-scope decisions in the feature ADR and
-[central register](../../docs/out-of-scope-decisions.md) when confirmed.
+- Mark normal publication successful only after receiving Kafka's
+  acknowledgement. Use acks=all and enable producer idempotence.
+- Duplicate deliveries are permitted and must be handled correctly by
+  consumers using the stable event identity. This feature does not implement
+  the indexing or analytics consumers.
 
-## Dependencies
+### Bounded Attempts and Dead Letters
 
-- [0019-outbox-event-persistence](../0019-outbox-event-persistence/spec.md).
+- Permit three total attempts to publish an event normally: the initial
+  attempt, a retry after 2 seconds and a further retry after 4 seconds.
+- Event-specific failures, including missing routes, follow this bounded
+  policy. Exhaustion transitions the event to dead-letter publication rather
+  than silently discarding it.
+- Kafka unavailability does not consume this three-attempt budget. Retain
+  the event in PENDING and resume normal publication when Kafka recovers.
+- Detailed analysis and special handling of a Kafka deployment that never
+  becomes available are outside scope; the basic durable waiting policy
+  remains in scope.
+- Use one shared Kafka topic named outbox-dead-letter.
+- Dead-letter messages contain the complete original event, the failure
+  reason, the normal-publication attempt count and the original topic when
+  known. Do not omit the event when no route was available.
+- If dead-letter publication fails, keep the event in PostgreSQL and retry
+  the dead-letter transfer until Kafka acknowledges it, including after a
+  backend restart. Do not resume normal publication for that event.
+- Mark dead-letter transfer complete only after Kafka acknowledgement.
+- Do not consume, repair or replay dead-letter events in this feature.
 
-Existing capabilities must pass fresh readiness checks; their documentation or
-prior verification is not evidence of current runtime readiness.
+### Delivery State and Fields
 
-## Open Decisions
+- Use PENDING and PUBLISHED for normal publication, plus
+  DEAD_LETTER_PENDING for an event awaiting transfer and DEAD_LETTERED after
+  acknowledged dead-letter publication.
+- Persist attemptCount, nextAttemptAt, lastError, publishedAt and
+  deadLetteredAt.
+- attemptCount counts normal-publication attempts charged to the bounded
+  policy; Kafka-unavailability failures do not exhaust that budget.
+- Set publishedAt only on successful normal publication, and deadLetteredAt
+  only on successful dead-letter transfer. Do not mark dead-letter events as
+  successfully published to their original destination.
 
-- Polling/batch limits, concurrent dispatch ownership and retry policy.
-- Publication acknowledgement, duplicate-delivery guarantees and completed-row retention.
-- Shared transport envelope and ownership of domain AsyncAPI contracts.
+### Message Envelope, Routing and Key
 
-## Contract and Implementation Preparation
+- Publish a JSON envelope containing eventId, eventType, schemaVersion,
+  occurredAt and payload. Do not include internal outbox delivery fields in
+  the normal message.
+- Configure eventType-to-topic routing; the dispatcher does not modify the
+  business payload. Domain features define concrete event types and topics.
+- Default the Kafka message key to eventId, with an event-type-specific key
+  rule supported for future contracts, such as stone identity in feature 0021.
+- Define the shared envelope and delivery rules in AsyncAPI for this feature.
+  Concrete indexing and analytics contracts remain future feature work.
 
-English-only delivery and existing pinned project versions remain the starting
-point. Before implementation, settle this feature's behaviour and contracts,
-fill acceptance.md and plan.md, and define exact writable files and focused test
-selectors in tasks.md. HTTP contracts are generated from controllers/shared DTOs;
-do not create handwritten OpenAPI. Define applicable AsyncAPI contracts before
-Kafka implementation. Use new Liquibase migrations for schema changes.
+### Topic Provisioning, Retention and Observation
 
-The first execution ticket must establish readiness for the entire requested
-batch. This draft authorizes no implementation, source provisioning, model
-calls/downloads, business imports, commits or pushes.
+- Explicitly provision outbox-dead-letter in feature 0020. Provision normal
+  indexing and analytics topics in their respective domain features.
+- The dead-letter Kafka topic retains messages for 24 hours by default; make
+  that duration configurable through environment settings.
+- Retain the original PostgreSQL outbox records indefinitely under ADR-0019.
+  Kafka topic expiry does not authorize outbox cleanup.
+- Provide logs and the agreed delivery/diagnostic fields in PostgreSQL.
+  Additional HTTP operations, management UI and dedicated metrics are outside
+  the current feature scope.
+- Detailed analysis of the diagnostic fields and expanded observability are
+  deferred; this does not remove the agreed fields or their basic semantics.
+
+## Kafka Contract
+
+[asyncapi.json](asyncapi.json) is the source of truth for the reusable envelope
+and shared dead-letter format. Normal domain topic contracts belong to their
+features. Configure routes through environment settings; use eventId as the
+default key or a configured payload-field rule. Do not transform payloads.
+
+Dead-letter metadata distinguishes PUBLISHER and CONSUMER failures. Preserve
+malformed consumer records losslessly as base64 in originalEvent when a JSON
+representation cannot preserve the record. There is no DLQ receive operation.
+This feature adds no HTTP API.
+
+## Accepted Exclusions
+
+OOS-0020-001, OOS-0020-002, OOS-0020-003, OOS-0020-004 are recorded with their authoritative meaning in
+[ADR-0020](../../docs/adr/0020-outbox-kafka-publication.md) and the
+[central register](../../docs/out-of-scope-decisions.md).
+No unanswered proposal is an accepted exclusion.
+
+## Dependencies and Delivery Gate
+
+- [0019](../0019-outbox-event-persistence/spec.md).
+
+Reuse existing pinned versions and capabilities. Prior task completion is not
+current runtime readiness. The first ticket in tasks.md checks the entire
+explicitly requested batch, with exact file allowlists and focused selectors.
+No implementation is authorized by documentation synchronization. Do not run
+application tests, inference, business imports, commits or pushes as part of
+this documentation work. New schema changes use new Liquibase changesets;
+generated OpenAPI remains the HTTP source of truth and AsyncAPI the Kafka
+source of truth. Feature 0025 is not part of this review or preparation.

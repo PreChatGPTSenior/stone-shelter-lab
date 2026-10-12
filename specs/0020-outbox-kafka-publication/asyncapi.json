@@ -1,0 +1,205 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Stone Shelter Outbox Transport",
+    "version": "1.0.0",
+    "description": "Shared envelope and reliable dead-letter transfer. Delivery is at least once; no DLQ receive operation is implemented."
+  },
+  "defaultContentType": "application/json",
+  "servers": {
+    "backendBroker": {
+      "host": "kafka:9092",
+      "protocol": "kafka",
+      "description": "Approved container-network default; runtime broker address comes from existing environment configuration."
+    }
+  },
+  "channels": {
+    "domainEvents": {
+      "address": "{topic}",
+      "parameters": {
+        "topic": {
+          "description": "Topic selected by the configured eventType route; concrete domain contracts define supported values."
+        }
+      },
+      "servers": [
+        {
+          "$ref": "#/servers/backendBroker"
+        }
+      ],
+      "messages": {
+        "outboxEvent": {
+          "$ref": "#/components/messages/OutboxEvent"
+        }
+      }
+    },
+    "deadLetters": {
+      "address": "outbox-dead-letter",
+      "servers": [
+        {
+          "$ref": "#/servers/backendBroker"
+        }
+      ],
+      "description": "Explicitly provisioned shared DLQ. Default retention is 24 hours, configurable through environment settings; no cleanup of PostgreSQL source rows.",
+      "bindings": {
+        "kafka": {
+          "topic": "outbox-dead-letter",
+          "replicas": 1,
+          "topicConfiguration": {
+            "cleanup.policy": [
+              "delete"
+            ],
+            "retention.ms": 86400000
+          },
+          "bindingVersion": "0.5.0"
+        }
+      },
+      "messages": {
+        "deadLetter": {
+          "$ref": "#/components/messages/OutboxDeadLetter"
+        }
+      }
+    }
+  },
+  "operations": {
+    "publishDomainEvent": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/domainEvents"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/domainEvents/messages/outboxEvent"
+        }
+      ],
+      "description": "Send only committed events outside a database transaction; record success only after Kafka acks=all. Producer idempotence enabled; duplicates remain possible."
+    },
+    "publishDeadLetter": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/deadLetters"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/deadLetters/messages/deadLetter"
+        }
+      ],
+      "description": "Persist DLQ intent before transfer; retry until acknowledged, including after restart. No normal-publication resumption."
+    }
+  },
+  "components": {
+    "schemas": {
+      "EventEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eventId",
+          "eventType",
+          "schemaVersion",
+          "occurredAt",
+          "payload"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventType": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "schemaVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC instant set by the outbox on first persistence."
+          },
+          "payload": {
+            "type": "object",
+            "minProperties": 1,
+            "description": "At most 262144 bytes of compact UTF-8 JSON, excluding envelope bytes; validated before persistence.",
+            "x-max-compact-utf8-bytes": 262144
+          }
+        }
+      },
+      "DeadLetterEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "originalEvent",
+          "failureStage",
+          "failureReason",
+          "attemptCount",
+          "originalTopic"
+        ],
+        "properties": {
+          "originalEvent": {
+            "description": "Complete original event without rewriting. For malformed consumer bytes, preserve losslessly as an object with encoding=base64 and value containing the original bytes."
+          },
+          "failureStage": {
+            "type": "string",
+            "enum": [
+              "PUBLISHER",
+              "CONSUMER"
+            ]
+          },
+          "failureReason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "attemptCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Charged attempts in the failing stage. Direct invalid-contract transfer may have zero."
+          },
+          "originalTopic": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null only when the publisher could not determine a route."
+          }
+        }
+      }
+    },
+    "messages": {
+      "OutboxEvent": {
+        "name": "OutboxEvent",
+        "payload": {
+          "$ref": "#/components/schemas/EventEnvelope"
+        },
+        "bindings": {
+          "kafka": {
+            "key": {
+              "type": "string",
+              "description": "eventId by default; a configured payload-field rule may override the normal-message key."
+            },
+            "bindingVersion": "0.5.0"
+          }
+        }
+      },
+      "OutboxDeadLetter": {
+        "name": "OutboxDeadLetter",
+        "payload": {
+          "$ref": "#/components/schemas/DeadLetterEnvelope"
+        },
+        "bindings": {
+          "kafka": {
+            "key": {
+              "type": "string",
+              "description": "Known eventId; otherwise source topic/partition/offset for an invalid consumer record."
+            },
+            "bindingVersion": "0.5.0"
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "url": "https://www.asyncapi.com/docs/reference/specification/v3.0.0"
+  },
+  "x-readiness": "Contract defined; application implementation and runtime verification pending."
+}

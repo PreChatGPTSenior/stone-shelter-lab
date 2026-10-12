@@ -6,6 +6,18 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0020: Outbox Kafka Publication
+
+Accepted on 2026-10-12. Feature: [specification](../specs/0020-outbox-kafka-publication/spec.md).
+Decision record: [ADR-0020](adr/0020-outbox-kafka-publication.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0020-001 | Processing and replaying dead-letter events | Transfer exhausted events reliably to outbox-dead-letter, then do not consume, repair or replay them in this feature. |
+| OOS-0020-002 | Concurrent dispatchers across multiple backend instances | Support one running backend instance and one dispatcher; do not implement distributed publication ownership in this feature. |
+| OOS-0020-003 | Detailed analysis of Kafka never becoming available | Keep pending events durable without consuming the event-specific attempt limit during broker unavailability. Special escalation, terminal-outage policies and a detailed permanent-outage analysis are deferred. |
+| OOS-0020-004 | Detailed diagnostic-field analysis and expanded observability | Keep the agreed logs and database fields with their basic semantics. Defer full analysis of those fields, dedicated metrics, new HTTP management operations and a management UI. |
+
 ## Feature 0019: Outbox Event Persistence
 
 Accepted on 2026-10-12. Feature: [specification](../specs/0019-outbox-event-persistence/spec.md).
