@@ -25,7 +25,7 @@ class OpenApiDocumentationTest extends IntegrationTest {
         assertThat(jsonNode.path("openapi").asText()).startsWith("3.");
         JsonNode pathsJsonNode = jsonNode.path("paths");
         assertThat(pathsJsonNode.propertyStream().map(entry -> entry.getKey()).toList())
-                .containsExactlyInAnyOrder("/api/v1/stones", "/api/v1/stones/{id}", "/api/v1/stones/search", "/api/v1/stones/{id}/photos", "/api/v1/stones/{id}/reservations", "/api/v1/stone-photo-drafts", "/api/v1/stone-photo-drafts/{id}", "/api/v1/chat/messages");
+                .containsExactlyInAnyOrder("/api/v1/stones", "/api/v1/stones/{id}", "/api/v1/stones/search", "/api/v1/stones/{id}/photos", "/api/v1/stones/{id}/reservations", "/api/v1/stone-photo-drafts", "/api/v1/stone-photo-drafts/{id}", "/api/v1/chat/messages", "/api/v1/chat/conversations/{conversationId}/messages", "/api/stone-encyclopedia/index");
         assertThat(pathsJsonNode.path("/api/v1/stones").propertyStream().map(entry -> entry.getKey()).toList())
                 .containsExactly("post");
         assertThat(pathsJsonNode.path("/api/v1/stones/{id}").propertyStream().map(entry -> entry.getKey()).toList())
@@ -93,6 +93,32 @@ class OpenApiDocumentationTest extends IntegrationTest {
         assertThat(schemasJsonNode.at("/StonesSearchRequest/properties/size/maximum").asInt()).isEqualTo(24);
         assertThat(schemasJsonNode.at("/SearchSort/properties/field/pattern").asText()).isEqualTo("name|stoneSize|admissionDate");
         assertThat(schemasJsonNode.at("/SearchSort/properties/direction/pattern").asText()).isEqualTo("asc|desc");
+    }
+
+    @Test
+    void documentsBodylessEncyclopediaOperationsAndHiddenOutcome() throws Exception {
+        JsonNode root = openApiJson();
+        JsonNode path = root.at("/paths/~1api~1stone-encyclopedia~1index");
+        assertThat(path.propertyStream().map(entry -> entry.getKey()).toList()).containsExactlyInAnyOrder("post", "delete");
+        for (String method : List.of("post", "delete")) {
+            JsonNode operation = path.path(method);
+            assertThat(operation.has("requestBody")).isFalse();
+            assertThat(operation.path("parameters")).anySatisfy(parameter -> {
+                assertThat(parameter.path("name").asText()).isEqualTo("Idempotency-Key");
+                assertThat(parameter.path("required").asBoolean()).isTrue();
+                assertThat(parameter.at("/schema/format").asText()).isEqualTo("uuid");
+            });
+            for (String code : method.equals("post") ? List.of("400", "404", "409", "422", "503") : List.of("400", "409", "503")) {
+                assertThat(operation.at("/responses/" + code + "/content/application~1problem+json/schema/$ref").asText())
+                        .isEqualTo("#/components/schemas/ProblemDetail");
+            }
+        }
+        assertThat(path.path("post").path("responses").propertyStream().map(entry -> entry.getKey()).toList())
+                .contains("200", "201");
+        assertThat(root.at("/components/schemas/StoneEncyclopediaIndexResponse/properties").propertyStream().map(entry -> entry.getKey()).toList())
+                .containsExactlyInAnyOrder("documentKey", "sourceVersion", "indexedFragments");
+        assertThat(root.at("/components/schemas/StoneEncyclopediaDeleteResponse/properties").propertyStream().map(entry -> entry.getKey()).toList())
+                .containsExactly("id");
     }
 
     @Test

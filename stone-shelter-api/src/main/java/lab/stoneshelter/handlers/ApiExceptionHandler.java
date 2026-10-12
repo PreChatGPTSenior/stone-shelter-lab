@@ -1,6 +1,11 @@
 package lab.stoneshelter.handlers;
 
 import java.net.URI;
+import lab.stoneshelter.exceptions.InvalidStoneDocumentIndexRequestException;
+import lab.stoneshelter.exceptions.StoneDocumentIndexConflictException;
+import lab.stoneshelter.exceptions.StoneDocumentDependencyUnavailableException;
+import lab.stoneshelter.exceptions.StoneDocumentSourceNotFoundException;
+import lab.stoneshelter.exceptions.StoneDocumentSourceUnindexableException;
 import jakarta.servlet.http.HttpServletResponse;
 import lab.stoneshelter.exceptions.StoneChatUnavailableException;
 import lab.stoneshelter.exceptions.StoneChatRateLimitedException;
@@ -33,6 +38,31 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler(InvalidStoneDocumentIndexRequestException.class)
+    public ProblemDetail documentInvalid(InvalidStoneDocumentIndexRequestException exception) {
+        return problemDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(StoneDocumentIndexConflictException.class)
+    public ProblemDetail documentConflict(StoneDocumentIndexConflictException exception) {
+        return problemDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(StoneDocumentSourceNotFoundException.class)
+    public ProblemDetail documentMissing(StoneDocumentSourceNotFoundException exception) {
+        return problemDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(StoneDocumentSourceUnindexableException.class)
+    public ProblemDetail documentUnindexable(StoneDocumentSourceUnindexableException exception) {
+        return problemDetail(HttpStatus.UNPROCESSABLE_CONTENT, exception.getMessage());
+    }
+
+    @ExceptionHandler(StoneDocumentDependencyUnavailableException.class)
+    public ProblemDetail documentUnavailable(StoneDocumentDependencyUnavailableException exception) {
+        return problemDetail(HttpStatus.SERVICE_UNAVAILABLE, exception.getMessage());
+    }
+
     @ExceptionHandler(StoneReservationConflictException.class)
     public ProblemDetail handleReservationConflict(StoneReservationConflictException exception) {
         return problemDetail(HttpStatus.CONFLICT, exception.getMessage());
