@@ -34,11 +34,76 @@ For every feature:
 2. Do not implement undocumented requirements.
 3. Update specification before implementation if behavior changes.
 4. Define or update HTTP contract requirements in the specification before implementation. The generated OpenAPI document is the source of truth; do not maintain a separate handwritten HTTP contract. Define or update AsyncAPI contracts before Kafka implementation.
-5. Implement.
-6. Run verification.
-7. Check implementation against acceptance criteria.
-8. Do not create commits unless explicitly requested
-9. Do not push unless explicitly requested.
+5. Ensure the task list starts with an explicit environment readiness ticket and
+   complete it for the entire requested ticket batch before execution.
+6. Implement only when all required environment checks pass.
+7. Run verification.
+8. Check implementation against acceptance criteria.
+9. Do not create commits unless explicitly requested
+10. Do not push unless explicitly requested.
+
+## Environment readiness (mandatory)
+
+- Every feature task list and every requested batch of tickets must begin with
+  an explicit environment readiness ticket. Preserve existing task IDs when
+  adding it; its first position is mandatory even if its ID is numerically later.
+  If this ticket is absent, do not start executing tasks: report the missing
+  prerequisite. Adding it requires authorization to edit the task list.
+- Execute the readiness ticket before the rest of the requested batch and check
+  prerequisites for every ticket in that batch, not only the next ticket.
+  Record the covered task IDs. A readiness result for one task does not establish
+  readiness for a larger batch. Do not start the batch unless all its required
+  environment prerequisites are ready. Completing this prerequisite does not
+  authorize execution of unrequested implementation tickets.
+- Before starting or resuming any implementation task, prepare the environment
+  as needed and perform read-only readiness checks of all prerequisites required
+  by the current specification, selected task and permitted verification.
+- Check application service states, health and connectivity at the endpoints
+  actually used by the backend, frontend or tests. A running process or container
+  alone does not establish readiness. Report stopped application services even
+  when the selected task does not use them, explaining their task impact.
+- Verify pinned tool/runtime versions, required installed models and source
+  resources, and effective environment configuration in the execution context.
+  Check the JDK selected by JAVA_HOME for Maven, not only java on PATH.
+  Report secret settings only as present or missing; never print secret values.
+- The agent must explicitly supply the necessary environment variables for its
+  own checks, tests and implementation commands whenever their values can be
+  obtained from authorized configuration, pinned project decisions or verified
+  session context. Use command-scoped variables or an explicitly controlled
+  process environment, including the required JAVA_HOME and service endpoints.
+  Do not ask the user to export known values in another terminal; those exports
+  do not propagate to the agent. This is permitted during read-only preflight
+  and does not authorize persistent configuration changes. Never invent secrets
+  or silently substitute values. Report unavailable required values as blockers.
+- The agent owns routine environment startup and setup within the authorized
+  task scope. Start Docker Desktop or the Docker daemon when needed, then start
+  the required existing project containers and services, including backend,
+  frontend, database, storage and other task dependencies. Start an installed
+  local provider such as Ollama when required. Perform the available necessary
+  setup independently using the project's pinned versions and approved
+  configuration; do not ask the user to run commands the agent can execute.
+  Provision missing environment resources declared by the current task from
+  its approved sources when setup is authorized; preserve existing resources.
+  Use only services needed for the requested task or explicitly requested stack.
+  Starting services does not authorize additional implementation tickets.
+- All required prerequisites must be confirmed ready before application code
+  changes. If any required component is missing, stopped, unhealthy,
+  misconfigured, incompatible or cannot be verified, do not begin or resume
+  implementation. First perform authorized routine preparation, then recheck;
+  do not bypass a failed prerequisite or claim readiness without verification.
+- Always output a readiness report identifying the checked ticket batch,
+  components, expected and observed states and the overall ready/blocked result.
+  When any prerequisite prevents completing the entire batch, identify the
+  affected task IDs and concrete corrective actions, then stop without starting
+  its implementation tickets. Do not label unchecked components as ready or infer readiness
+  from an earlier session. Recheck the affected prerequisites after correction
+  before continuing authorized implementation.
+- Keep verification focused and read-only. Routine service startup is permitted
+  environment preparation before verification; it must not be reported as a
+  read-only action. Persistent configuration changes, model downloads and source
+  provisioning follow the task's scope and applicable authorization. Do not run
+  business imports or application tests as readiness checks. Environment work
+  does not authorize additional implementation tasks, commits or pushes.
 
 ## Repository structure
 
@@ -59,11 +124,23 @@ For every feature:
 ## Feature workflow (mandatory)
 1. Read `constitution.md` and the current feature spec.
 2. If there is no spec — do NOT write code. Say so and stop.
-3. Write code task by task from `tasks.md`. One task = one commit.
-4. After each task: run tests, report back in one line.
+3. Require an explicit environment readiness ticket first in the task list;
+   complete it for every ticket in the requested batch and report the result.
+   Do not execute the batch if the ticket is missing or its checks are blocked.
+4. Write code task by task from `tasks.md`. One task = one commit.
+5. After each task: run tests, report back in one line.
 
 ## Rules
 
+- Do not modify the root `README.md`. Maintain environment setup instructions
+  only in the root `environment-setup.md`.
+- Record every explicitly accepted out-of-scope decision in both the corresponding
+  feature ADR in `docs/adr/` and `docs/out-of-scope-decisions.md`. Keep decision IDs
+  and meaning consistent, and link each entry to the feature specification.
+  Update both documents whenever an accepted exclusion changes. Record only
+  confirmed decisions; do not treat proposals, unanswered questions or assumptions
+  as accepted exclusions. This recording rule does not authorize scope changes
+  or implementation.
 - Mandatory for both frontend and backend: every commit message must start with
   the exact directory name of the specification being worked on, for example
   `0005-ui-mock-to-code: refactor catalog components (T0005-012)`. If the current
