@@ -1,6 +1,6 @@
 # Feature 0020 Acceptance Criteria
 
-Status: Criteria defined from accepted ADR-0020; not executed.
+Status: All nine criteria verified on 2026-10-12.
 
 Read [spec.md](spec.md). These are planned acceptance outcomes, not verification
 evidence. Permitted selectors and file boundaries live in [tasks.md](tasks.md).
@@ -43,6 +43,13 @@ Explicit DLQ provisioning uses configurable default 24-hour retention. PostgreSQ
 
 ## Verification Evidence
 
-No application checks or fresh environment readiness have been performed for
-this feature in the documentation-synchronization task. Record actual evidence
-only when the explicitly selected execution ticket has run.
+READY batch prerequisites and individual selector results are recorded in tasks.md.
+All checks used JDK 23.0.2 and disposable PostgreSQL with mocked Kafka; no live
+business publication was performed.
+
+| Criteria | Evidence |
+| --- | --- |
+| AC-0020-001, 004, 005, 007 | OutboxDispatcherTest: 7 passing cases, including automatic scheduling, batch bound, retry timing, independent progress, outage/restart recovery. |
+| AC-0020-002, 003, 006 | OutboxKafkaContractTest: 4 passing cases; dispatcher verifies acknowledged state transitions and absence of an active database transaction during sends. |
+| AC-0020-008, 009 | OutboxDeliveryPersistenceTest: 4 passing cases; durable state/defaults/constraints and explicit retention provisioning. No PostgreSQL expiry or DLQ consumer exists. |
+| All criteria: boundaries | OutboxArchitectureTest: 5 passing cases; source and canonical AsyncAPI reviewed. |

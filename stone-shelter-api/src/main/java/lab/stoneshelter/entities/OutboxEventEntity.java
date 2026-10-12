@@ -13,6 +13,11 @@ public class OutboxEventEntity {
     private JsonNode payload;
     private Instant createdAt;
     private OutboxDeliveryState deliveryState;
+    private int attemptCount;
+    private Instant nextAttemptAt;
+    private String lastError;
+    private Instant publishedAt;
+    private Instant deadLetteredAt;
 
     public OutboxEventEntity() {
     }
@@ -31,4 +36,14 @@ public class OutboxEventEntity {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public OutboxDeliveryState getDeliveryState() { return deliveryState; }
     public void setDeliveryState(OutboxDeliveryState deliveryState) { this.deliveryState = deliveryState; }
+    public int getAttemptCount() { return attemptCount; }
+    public void setAttemptCount(int attemptCount) { this.attemptCount = attemptCount; }
+    public Instant getNextAttemptAt() { return nextAttemptAt; }
+    public void setNextAttemptAt(Instant nextAttemptAt) { this.nextAttemptAt = nextAttemptAt; }
+    public String getLastError() { return lastError; }
+    public void setLastError(String lastError) { this.lastError = lastError; }
+    public Instant getPublishedAt() { return publishedAt; }
+    public void setPublishedAt(Instant publishedAt) { this.publishedAt = publishedAt; }
+    public Instant getDeadLetteredAt() { return deadLetteredAt; }
+    public void setDeadLetteredAt(Instant deadLetteredAt) { this.deadLetteredAt = deadLetteredAt; }
 }

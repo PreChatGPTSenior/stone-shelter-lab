@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import lab.stoneshelter.entities.OutboxEventEntity;
+import lab.stoneshelter.entities.OutboxDeadLetterEntity;
 import lab.stoneshelter.enums.OutboxDeliveryState;
 import lab.stoneshelter.exceptions.OutboxIdentityConflictException;
 import lab.stoneshelter.exceptions.OutboxValidationException;
@@ -16,6 +17,13 @@ import lab.stoneshelter.mappers.entities.OutboxWriteRequestToOutboxEventEntityMa
 import lab.stoneshelter.repositories.OutboxEventRepository;
 import lab.stoneshelter.services.OutboxPayloadValidationService;
 import lab.stoneshelter.services.OutboxService;
+import lab.stoneshelter.services.OutboxDispatcherService;
+import lab.stoneshelter.services.OutboxDeliverySettings;
+import lab.stoneshelter.services.OutboxDeliveryTransactionService;
+import lab.stoneshelter.services.OutboxEventRoutingService;
+import lab.stoneshelter.services.OutboxKafkaTopicService;
+import lab.stoneshelter.repositories.OutboxKafkaRepository;
+import lab.stoneshelter.mappers.entities.OutboxEventEntityToOutboxDeadLetterEntityMapper;
 import lab.stoneshelter.shared.OutboxWriteRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +37,10 @@ class OutboxArchitectureTest {
             OutboxWriteRequest.class, OutboxEventEntity.class, OutboxDeliveryState.class,
             OutboxWriteRequestToOutboxEventEntityMapper.class, OutboxWriteException.class,
             OutboxValidationException.class, OutboxIdentityConflictException.class,
-            OutboxPayloadValidationService.class, OutboxService.class, OutboxEventRepository.class);
+            OutboxPayloadValidationService.class, OutboxService.class, OutboxEventRepository.class,
+            OutboxDispatcherService.class, OutboxDeliverySettings.class, OutboxDeliveryTransactionService.class,
+            OutboxEventRoutingService.class, OutboxKafkaTopicService.class, OutboxKafkaRepository.class,
+            OutboxDeadLetterEntity.class, OutboxEventEntityToOutboxDeadLetterEntityMapper.class);
 
     @Test
     void applicationServicesAndPersistenceKeepTheirLayerBoundaries() {
@@ -54,18 +65,24 @@ class OutboxArchitectureTest {
         assertThat(Arrays.stream(OutboxWriteRequest.class.getRecordComponents()).map(RecordComponent::getName))
                 .containsExactly("eventId", "eventType", "schemaVersion", "payload");
         assertThat(OutboxWriteRequest.class.getRecordComponents()).hasSizeLessThanOrEqualTo(4);
-        assertThat(OutboxEventEntity.class.isRecord()).isFalse();
-        assertThat(Modifier.isPublic(OutboxEventEntity.class.getDeclaredConstructor().getModifiers())).isTrue();
-        for (Field field : OutboxEventEntity.class.getDeclaredFields()) {
+        verifyEntityShape(OutboxDeadLetterEntity.class);
+        verifyEntityShape(OutboxEventEntity.class);
+    }
+
+    private void verifyEntityShape(Class<?> entityClass) throws Exception {
+        assertThat(entityClass.isRecord()).isFalse();
+        assertThat(Modifier.isPublic(entityClass.getDeclaredConstructor().getModifiers())).isTrue();
+        for (Field field : entityClass.getDeclaredFields()) {
             assertThat(Modifier.isPrivate(field.getModifiers())).isTrue();
             String suffix = Character.toUpperCase(field.getName().charAt(0)) + field.getName().substring(1);
-            assertThat(OutboxEventEntity.class.getMethod("get" + suffix).getReturnType()).isEqualTo(field.getType());
-            assertThat(OutboxEventEntity.class.getMethod("set" + suffix, field.getType()).getReturnType()).isEqualTo(void.class);
+            assertThat(entityClass.getMethod("get" + suffix).getReturnType()).isEqualTo(field.getType());
+            assertThat(entityClass.getMethod("set" + suffix, field.getType()).getReturnType()).isEqualTo(void.class);
         }
     }
 
     @Test
     void mappingAndObjectTransformationApisReturnTheirTargets() throws Exception {
+        assertThat(OutboxEventEntityToOutboxDeadLetterEntityMapper.class).isAssignableTo(AbstractEntityMapper.class);
         assertThat(OutboxWriteRequestToOutboxEventEntityMapper.class).isAssignableTo(AbstractEntityMapper.class);
         assertThat(OutboxWriteRequestToOutboxEventEntityMapper.class.getPackageName())
                 .isEqualTo("lab.stoneshelter.mappers.entities");
@@ -84,9 +101,8 @@ class OutboxArchitectureTest {
     }
 
     @Test
-    void persistenceFeatureAddsNoDeliveryModelOrStorageIntegration() {
-        noClasses().should().dependOnClassesThat().resideInAnyPackage("org.apache.kafka..", "org.springframework.kafka..",
-                "org.springframework.ai..", "org.springframework.data.redis..", "io.minio..", "..controllers..", "..handlers..")
+    void deliveryDoesNotIntroduceModelsStorageOrHttpManagement() {
+        noClasses().should().dependOnClassesThat().resideInAnyPackage("org.springframework.ai..", "org.springframework.data.redis..", "io.minio..", "..controllers..", "..handlers..")
                 .check(javaClasses);
     }
 }
