@@ -31,6 +31,15 @@ public class StoneCardEmbeddingRepository {
                 stoneCardEmbeddingEntity.getEmbeddingProfile(), vector(stoneCardEmbeddingEntity.getEmbedding()));
     }
 
+    public void deleteById(long stoneId) {
+        jdbcTemplate.update("DELETE FROM stone_card_embedding WHERE stone_id = ?", stoneId);
+    }
+
+    public boolean hasIncompatibleProfile(String embeddingProfile) {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(
+                "SELECT EXISTS (SELECT 1 FROM stone_card_embedding WHERE embedding_profile <> ?)", Boolean.class, embeddingProfile));
+    }
+
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW)
     public StoneCardSearchResultEntity search(StoneCardSearchCriteria stoneCardSearchCriteria) {
         if (Boolean.TRUE.equals(jdbcTemplate.queryForObject(

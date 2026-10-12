@@ -1,6 +1,6 @@
 # Feature 0022 Acceptance Criteria
 
-Status: Criteria defined from accepted ADR-0022; not executed.
+Status: Feature 0022 scope verified; shared-admission extension awaits T0024-005.
 
 Read [spec.md](spec.md). These are planned acceptance outcomes, not verification
 evidence. Permitted selectors and file boundaries live in [tasks.md](tasks.md).
@@ -43,6 +43,15 @@ Incompatible profiles wait for correction without automatic switching/rebuild. E
 
 ## Verification Evidence
 
-No application checks or fresh environment readiness have been performed for
-this feature in the documentation-synchronization task. Record actual evidence
-only when the explicitly selected execution ticket has run.
+Whole-batch readiness and fresh feature checks are recorded in tasks.md.
+Named selectors ran with isolated PostgreSQL and mocked Kafka/embedding providers.
+
+| Criteria | Evidence |
+| --- | --- |
+| AC-0022-001–004 | StoneIndexProcessingTest: 4 passing cases; preparation outside transactions, stale skip, recheck and commit before ack. Native startup/manual-offset settings reviewed. StoneIndexProcessingPersistenceTest: 5 passing cases; atomic apply/delete, tombstones, concurrency, rollback and restart-visible state. |
+| AC-0022-005–008 | StoneIndexRetryTest: 4 passing cases; 3 total attempts across restart, 2s/4s nack backoff, no charges for Kafka/Ollama/storage/profile waits, direct malformed-contract DLQ and lossless bytes, durable transfer recovery before source ack. |
+| AC-0022-009 and boundaries | StoneIndexProcessingArchitectureTest: 4 passing cases; layers, entity shapes and source-coordinate attempt state. No processed-event UUID registry, retry topics, profile switching, gap recovery or management API introduced. |
+
+All 17 current-feature cases pass. Healthy model-slot occupancy/token-budget
+waiting under AC-0022-006 is explicitly dependent on the shared guard installation
+and named regression selector in T0024-005; it has not been claimed verified here.

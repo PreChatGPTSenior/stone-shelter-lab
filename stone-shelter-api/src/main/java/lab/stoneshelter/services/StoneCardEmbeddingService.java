@@ -40,6 +40,16 @@ public class StoneCardEmbeddingService {
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public StoneCardSaveResponse save(StoneCardSaveRequest stoneCardSaveRequest) {
+        try {
+            return stoneCardEmbeddingEntityToStoneCardSaveResponseMapper.toDto(
+                    stoneCardEmbeddingTransactionService.save(prepare(stoneCardSaveRequest)));
+        } catch (DataAccessException exception) {
+            throw new StoneDocumentDependencyUnavailableException("The stone-card index could not be saved.", exception);
+        }
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public StoneCardEmbeddingEntity prepare(StoneCardSaveRequest stoneCardSaveRequest) {
         validate(stoneCardSaveRequest);
         StoneCardEmbeddingEntity stoneCardEmbeddingEntity = stoneCardSaveRequestToStoneCardEmbeddingEntityMapper.toEntity(stoneCardSaveRequest);
         StoneDocumentEmbeddingEntity stoneDocumentEmbeddingEntity = stoneDocumentEmbeddingService.embed(
@@ -47,12 +57,7 @@ public class StoneCardEmbeddingService {
                         clock.instant().plus(stoneDocumentIndexSettings.embeddingTimeout())));
         stoneCardEmbeddingEntity.setEmbeddingProfile(stoneDocumentEmbeddingEntity.profile());
         stoneCardEmbeddingEntity.setEmbedding(stoneDocumentEmbeddingEntity.vector());
-        try {
-            return stoneCardEmbeddingEntityToStoneCardSaveResponseMapper.toDto(
-                    stoneCardEmbeddingTransactionService.save(stoneCardEmbeddingEntity));
-        } catch (DataAccessException exception) {
-            throw new StoneDocumentDependencyUnavailableException("The stone-card index could not be saved.", exception);
-        }
+        return stoneCardEmbeddingEntity;
     }
 
     private void validate(StoneCardSaveRequest stoneCardSaveRequest) {
