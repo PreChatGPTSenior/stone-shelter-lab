@@ -6,6 +6,19 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0023: Stone-Card Initial Indexing and Reindexing
+
+Accepted on 2026-10-12. Feature: [specification](../specs/0023-stone-card-reindexing/spec.md).
+Decision record: [ADR-0023](adr/0023-stone-card-reindexing.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0023-001 | Changes to the embedding model, profile or dimensionality | Reindex only with the current agreed embedding profile. Do not switch models even at the same dimensionality, migrate vector dimensions or implement profile/dimension migration in this feature. |
+| OOS-0023-002 | Job cancellation | Provide no job-cancellation operation in the initial scope. |
+| OOS-0023-003 | Job-history expiry and automatic cleanup | Retain job history and errors indefinitely; defer decisions about when to clean them and any cleanup implementation. |
+| OOS-0023-004 | End-to-end index-completion tracking | Initially report durable event enqueueing as ENQUEUED. Revisit tracking actual consumer completion and final index readiness in a separate discussion. |
+| OOS-0023-005 | Scheduled recurring reindexing | Use explicit operator-triggered initial indexing and recovery, without daily or other scheduled recurring runs. |
+
 ## Feature 0022: Stone-Card Index Event Processing
 
 Accepted on 2026-10-12. Feature: [specification](../specs/0022-stone-card-index-event-processing/spec.md).
