@@ -6,6 +6,18 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0022: Stone-Card Index Event Processing
+
+Accepted on 2026-10-12. Feature: [specification](../specs/0022-stone-card-index-event-processing/spec.md).
+Decision record: [ADR-0022](adr/0022-stone-card-index-event-processing.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0022-001 | Separate processed-event UUID registry | Skip duplicate and stale work using per-stone sourceVersion state; do not add a separate registry of successfully processed UUIDs. Durable attempt tracking remains required. |
+| OOS-0022-002 | Automatic model switching and incompatible-profile index rebuilding | Stop processing until configuration is corrected; do not change the embedding model or rebuild automatically. |
+| OOS-0022-003 | Automatic recovery of events expired from Kafka | Restore missing index work through explicit reindexing in feature 0023 rather than automatic gap recovery in feature 0022. |
+| OOS-0022-004 | Extended consumer observability and management interfaces | Keep logs, required processing state and DLQ error information. Do not add dedicated metrics, new HTTP operations or a management UI. |
+
 ## Feature 0021: Stone-Card Index Event Publication
 
 Accepted on 2026-10-12. Feature: [specification](../specs/0021-stone-card-index-event-publication/spec.md).
