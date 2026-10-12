@@ -17,3 +17,6 @@ databaseChangeLog:
   - include:
       file: 0017-create-stone-document-index.xml
       relativeToChangelogFile: true
+  - include:
+      file: 0018-create-stone-card-embedding.xml
+      relativeToChangelogFile: true
