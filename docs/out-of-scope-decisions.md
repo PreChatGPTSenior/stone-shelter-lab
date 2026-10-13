@@ -6,6 +6,17 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0025: Semantic Stone Candidate Search
+
+Accepted on 2026-10-13. Feature: [specification](../specs/0025-semantic-stone-candidate-search/spec.md).
+Decision record: [ADR-0025](adr/0025-semantic-stone-candidate-search.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0025-001 | Offering or opening a catalog view filtered by the found candidate IDs | For now, show at most five stones in chat and state that more were found when applicable. A future agent-assisted offer to view the found IDs in the catalog is deferred; no catalog-navigation integration or additional-results UI is implemented in this feature. |
+| OOS-0025-002 | Substantive evidence-based explanation and model-written answers | Feature 0025 selects/checks candidates and provides minimal truthful backend-template text. Feature 0026 owns substantive explanations using the structured card/document evidence, as accepted in Q0025-008 and Q0025-016. |
+| OOS-0025-003 | Broad query-quality evaluation and threshold tuning | Use the agreed initial source thresholds/limits and mandatory basic functional qualification here. Feature 0027 owns the broader representative-query quality evaluation, as accepted in Q0025-021; no tuning campaign is part of 0025. |
+
 ## Feature 0024: Exact LLM Search
 
 Accepted on 2026-10-12. Feature: [specification](../specs/0024-exact-llm-search/spec.md).
