@@ -6,6 +6,15 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0030: Reliable Search Analytics — Phase 2
+
+Accepted on 2026-10-13. Feature: [specification](../specs/0030-reliable-search-analytics/spec.md).
+Decision record: [ADR-0030, phase 2](adr/phase-2/0030-reliable-search-analytics.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0030-001 | Entire reliable search analytics feature in the current development phase | Defer all analytics-specific discussion/preparation, contracts, event publication, storage/migrations, consumers and verification to phase 2 as feature 0030. Current-phase streaming API 0028 and widget 0029 do not depend on analytics. Existing indexing outbox/Kafka work and feature 0027 qualification remain unchanged. |
+
 ## Feature 0027: LLM Search Query Qualification
 
 Accepted on 2026-10-13. Feature: [specification](../specs/0027-llm-search-query-qualification/spec.md).
@@ -44,8 +53,8 @@ Decision record: [ADR-0024](adr/0024-exact-llm-search.md).
 
 | ID | Accepted exclusion | Scope boundary |
 | --- | --- | --- |
-| OOS-0024-001 | Native model tool calling | Use structured interpretation followed by backend execution. After feature 0030, check whether tool calling was covered by another discussed feature; if not, discuss a separate tooling feature. |
-| OOS-0024-002 | Additional model invocation for result wording | Render exact-search result text with backend templates. After feature 0030, check whether model-generated wording was covered elsewhere; if not, discuss it separately. |
+| OOS-0024-001 | Native model tool calling | Use structured interpretation followed by backend execution. After feature 0029, check whether tool calling was covered by another discussed feature; if not, discuss a separate tooling feature. |
+| OOS-0024-002 | Additional model invocation for result wording | Render exact-search result text with backend templates. After feature 0029, check whether model-generated wording was covered elsewhere; if not, discuss it separately. |
 | OOS-0024-003 | Semantic matching of unsupported properties and intended uses | Do not drop unsupported wishes or infer exact properties; semantic matching belongs to feature 0025. |
 | OOS-0024-004 | Care and geological explanations | This stage provides exact catalog search; substantive care/geological answers belong to feature 0026. |
 | OOS-0024-005 | Dedicated evaluation of context and output-token sizing | Start with an 8192-token total context and a 512-token output cap; defer detailed parameter evaluation and tuning. Mandatory readiness and basic functional verification remain in feature 0024, with broad query-quality evaluation in feature 0027. |

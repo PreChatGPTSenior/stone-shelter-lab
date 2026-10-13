@@ -59,7 +59,7 @@ Actual Ollama/control outage closes send/history/replay until verified recovery,
 
 ## AC-0024-014: Initial qualification and scope
 
-Named basic structured-output/token/profile checks are required, not a broad quality/tuning suite. No semantic matching, care answers, external provider, extra wording call or native tooling is added; preserve the after-0030 follow-ups.
+Named basic structured-output/token/profile checks are required, not a broad quality/tuning suite. No semantic matching, care answers, external provider, extra wording call or native tooling is added; preserve the after-0029 follow-ups.
 
 ## Verification Evidence
 

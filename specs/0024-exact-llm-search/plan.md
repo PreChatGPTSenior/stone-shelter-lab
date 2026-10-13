@@ -102,7 +102,7 @@ atomicity. Changes are explicitly owned/allowlisted by this feature's task.
 The contract format follows [AsyncAPI 3.0.0](https://www.asyncapi.com/docs/reference/specification/v3.0.0).
 Provider usage/profile qualification must verify the installed runtime against
 [Ollama embedding metadata](https://docs.ollama.com/api/embed), not infer reliability
-from documentation alone. After-0030 tooling/wording checkpoints stay in ADR-0024;
+from documentation alone. After-0029 tooling/wording checkpoints stay in ADR-0024;
 semantic search, document answers and broad quality work remain later features.
 
 ## Environment and Execution Gate

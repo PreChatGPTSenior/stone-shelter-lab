@@ -187,7 +187,7 @@ paths and the 0022 consumer. Background indexing waits; Markdown import waits
 only within its existing overall deadline, preserving all-or-nothing publication.
 No synchronous model wait is added to stone creation.
 
-FUP-0024-001 and FUP-0024-002 remain discussion checkpoints after feature 0030
+FUP-0024-001 and FUP-0024-002 remain discussion checkpoints after feature 0029
 for native tools and model-generated result wording, unless already explicitly
 covered by another discussed feature. No feature 0025 work is requested here.
 

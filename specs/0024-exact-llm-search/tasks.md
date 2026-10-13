@@ -397,7 +397,7 @@ blindly refunded. Native Spring JDK HTTP timeout covers headers/body, and the
 complete turn processing/commit stage has a bounded deadline. Short ledger/read
 transactions have explicit SQL timeouts.
 
-Model quality/tuning and all after-0030 tooling/wording checkpoints remain outside
+Model quality/tuning and all after-0029 tooling/wording checkpoints remain outside
 scope with unchanged IDs. No feature 0025, push or live deployment is performed.
 The user authorized one final feature commit after successful verification.
 

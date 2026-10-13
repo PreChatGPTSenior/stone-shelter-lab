@@ -152,8 +152,8 @@ Matching entries are maintained in the
 
 | ID | Accepted exclusion | Scope boundary |
 | --- | --- | --- |
-| OOS-0024-001 | Native model tool calling | Use structured interpretation followed by backend execution. After feature 0030, check whether tool calling was covered by another discussed feature; if not, discuss a separate tooling feature. |
-| OOS-0024-002 | Additional model invocation for result wording | Render exact-search result text with backend templates. After feature 0030, check whether model-generated wording was covered elsewhere; if not, discuss it separately. |
+| OOS-0024-001 | Native model tool calling | Use structured interpretation followed by backend execution. After feature 0029, check whether tool calling was covered by another discussed feature; if not, discuss a separate tooling feature. |
+| OOS-0024-002 | Additional model invocation for result wording | Render exact-search result text with backend templates. After feature 0029, check whether model-generated wording was covered elsewhere; if not, discuss it separately. |
 | OOS-0024-003 | Semantic matching of unsupported properties and intended uses | Do not drop unsupported wishes or infer exact properties; semantic matching belongs to feature 0025. |
 | OOS-0024-004 | Care and geological explanations | This stage provides exact catalog search; substantive care/geological answers belong to feature 0026. |
 | OOS-0024-005 | Dedicated evaluation of context and output-token sizing | Start with an 8192-token total context and a 512-token output cap; defer detailed parameter evaluation and tuning. Mandatory readiness and basic functional verification remain in feature 0024, with broad query-quality evaluation in feature 0027. |
@@ -161,10 +161,15 @@ Matching entries are maintained in the
 | OOS-0024-007 | External-provider implementation in the initial delivery | Prepare a provider interface while running only local Ollama initially; no external provider connection or automatic fallback is selected here. |
 | OOS-0024-008 | Queuing customer chat requests for model admission | Customer chat requests receive an immediate busy/capacity or token-budget rejection. Background indexing waits without consuming event-specific processing attempts or entering DLQ. Markdown imports wait within their existing overall deadline and fail without partial publication if it expires. |
 
-## Follow-up Checkpoint After Feature 0030
+## Follow-up Checkpoint After Feature 0029
+
+Numbering update on 2026-10-13: the former final streaming widget 0030 is
+now 0029. These checkpoints keep the same feature identity; analytics is now
+0030 and entirely deferred to phase 2. See
+[ADR-0030](phase-2/0030-reliable-search-analytics.md).
 
 - FUP-0024-001 corresponds to OOS-0024-001: review the discussed features after
-  0030 for native tool calling. If none covers it, open a separate discussion
+  0029 for native tool calling. If none covers it, open a separate discussion
   so tooling is addressed rather than silently forgotten.
 - FUP-0024-002 corresponds to OOS-0024-002: perform the same review for an
   additional model call that formulates result text.

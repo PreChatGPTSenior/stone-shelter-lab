@@ -167,6 +167,18 @@ implementation specification or an authorization to execute future tasks.
 
 ## Technical Proposals — Not Yet Finalized
 
+### Subsequent Phase Boundary — 2026-10-13
+
+The user subsequently removed reliable search analytics entirely from the
+current development phase. Its publication/storage notes above and below retain
+future intent; they are not current-phase obligations. Former feature 0028 is
+now [0030, phase 2](../../specs/0030-reliable-search-analytics/spec.md), with the
+complete instruction and OOS-0030-001 in
+[ADR-0030](phase-2/0030-reliable-search-analytics.md).
+Streaming API/widget are renumbered from 0029/0030 to 0028/0029 and do not depend
+on analytics. Existing shared indexing outbox/Kafka requirements and feature 0027
+qualification remain unchanged. No implementation is authorized by this update.
+
 These recommendations were discussed but were not individually confirmed as
 final implementation choices. Preserve that distinction when writing features.
 

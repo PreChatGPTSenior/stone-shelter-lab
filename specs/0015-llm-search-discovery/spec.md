@@ -11,6 +11,21 @@ specifications. Decisions are recorded in
 [ADR-0007](../../docs/adr/0007-llm-search-discovery.md); acceptance criteria belong
 in [acceptance.md](acceptance.md).
 
+## Current Development Phase — Update on 2026-10-13
+
+Reliable search analytics publication and storage, originally feature 0028, are
+entirely outside this development phase and retained as
+[0030 for phase 2](../0030-reliable-search-analytics/spec.md).
+[ADR-0030](../../docs/adr/phase-2/0030-reliable-search-analytics.md) records the
+user's instruction and OOS-0030-001. The analytics notes below retain future
+intent, not current-phase requirements. Shared indexing outbox/Kafka work remains
+in scope under its existing specifications; this deferral concerns analytics.
+
+Former streaming API 0029 is now [0028](../0028-chat-streaming-api/spec.md);
+former widget 0030 is now [0029](../0029-chat-streaming-widget/spec.md).
+Neither depends on deferred analytics. [0027 qualification](../0027-llm-search-query-qualification/spec.md)
+and its approved documentation remain unchanged.
+
 ## Scope and Starting Stack
 
 - English only. Russian-language support and stone-card localization are out
@@ -82,14 +97,14 @@ Combine card retrieval, document passages and exact filters to answer requests
 such as choosing a stone for a shelf. Provide explanations, clarification and
 follow-up answers using the agreed search behavior.
 
-### 8. Reliable Analytics Publication
+### 8. Reliable Analytics Publication — Deferred to Phase 2
 
 Define the analytics AsyncAPI contract and publish query text, the found count
 and only the presented stones through the shared outbox/Kafka mechanism.
 Exact-search counts cover all database matches; semantic-search counts cover
 found candidates before presentation is limited to five.
 
-### 9. Analytics Storage
+### 9. Analytics Storage — Deferred to Phase 2
 
 Consume Kafka analytics events and store the query text, count and presented
 stones in PostgreSQL. Handle duplicate delivery without duplicate records.
@@ -104,5 +119,6 @@ navigation.
 ## Contract Requirements
 
 Generate HTTP contracts from Spring MVC controllers and shared DTOs; generated
-OpenAPI remains the source of truth. Define separate indexing and analytics
-AsyncAPI contracts before Kafka implementation.
+OpenAPI remains the source of truth. Define indexing AsyncAPI contracts before
+its Kafka implementation. Analytics contract preparation belongs entirely to
+the deferred phase-2 feature.
