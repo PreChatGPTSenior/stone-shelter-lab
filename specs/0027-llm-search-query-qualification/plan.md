@@ -1,7 +1,9 @@
 # Feature 0027 Technical Plan
 
-Status: Prepared for future explicitly requested tickets. No environment check,
-fixture provisioning, model call, baseline or human answer review has run.
+Status: Fixed-set harness delivered; original evidence is incomplete/failed.
+27 of 28 turns were submitted, 26 fully retained; the remaining independent phase
+remains unattempted; the approved configured quota now permits its reservation. User review is deferred; the proposed
+production correction awaits separate agreement. No final qualification pass.
 
 Start with [spec.md](spec.md), [acceptance.md](acceptance.md),
 [ADR-0027](../../docs/adr/0027-llm-search-query-qualification.md) and
@@ -20,8 +22,9 @@ capabilities cover the need; no dependency change is planned.
 Do not recreate the search algorithm in the oracle. Compare observed IDs,
 conditions, route, evidence/contradiction decisions, references, counters and
 response properties with reviewed outcomes. Actual vector scores are diagnostic
-evidence rather than fabricated deterministic scores. Human-reviewed free text
-provides answer-quality evidence independent of production checker verdicts.
+evidence rather than fabricated deterministic scores. Independent automatic checks and agent review of retained free text provide
+current answer-quality evidence; label the reviewer and reasons, and keep later
+user review deferred without relying solely on production checker verdicts.
 
 Controlled valid drafts/checking and generation failures use test-owned provider
 wrappers/overrides at existing seams; coordinate late fixture mutations there.
@@ -74,11 +77,12 @@ digests and compatible embedding metadata. Report conflicts with older documents
 or observed versions rather than silently changing pins. Do not inspect dependency
 manifests or framework configuration for this no-dependency-change feature.
 
-Record effective inherited shared concurrency, 100000-token UTC daily ledger,
+Record effective inherited shared concurrency and configured UTC daily test quota
+(MODEL_DAILY_TOKEN_BUDGET, qualification default 200000; application default 100000),
 8192 context, interpretation/checking 512 output and generation 1024 output,
 per-call/turn deadlines, candidate/document limits, source thresholds and
 evidence/generation/query-embedding/refresh bounds from 0025/0026. Use approved
-baseline values; introduce no alternative setting. The 0026 completion margin
+baseline values except the separately approved test-quota amendment. The 0026 completion margin
 stays inside the original deadline.
 
 Report backend/frontend and other project service states with ticket impact.
@@ -91,7 +95,8 @@ change or missing feature implementation is a readiness workaround.
 
 Verify fixture transcription/harness without live inference first; then collect
 the original baseline with installed models and designated controlled cases.
-Human review records actual fixed-output verdicts. Conditional diagnosis is a
+Autonomous assessment records independent fixed-output verdicts without waiting
+for user review. Conditional diagnosis is a
 separately selected ticket, never an automatic next step after failure.
 
 Write evidence to the exact report paths in tasks.md rather than scanning build
@@ -106,17 +111,18 @@ outputs or system logs. The machine-readable report retains:
   eligibility/refresh facts.
 - Actual usage/reservations, admission/call outcomes and functional timeout
   failures without timing distributions, CPU/memory or model-speed analysis.
-- Automatic verdicts, displayed answer/links, actual or pending human judgments,
+- Automatic verdicts, displayed answer/links, autonomous judgments and deferred human-review status,
   original scores, diagnostic hypotheses and limitations.
 
 The readable report summarizes evidence, review and status. Baseline collected/
 review pending is distinct from final qualification. Fixed denominators and
 original scores remain visible alongside repeats. Required incomplete cases or
 control failures produce incomplete/blocked status; do not raise limits or bypass
-admission to finish. Actual human review cannot be replaced with assumed approval.
+admission to finish. Deferred human review cannot be represented as approved; current autonomous
+assessment is separately identified and does not require user input.
 
 The future personal manual test set is deferred under OOS-0027-003. It is neither
-a prerequisite nor a replacement for the approved fixed-set human review.
+a prerequisite nor a replacement for current autonomous fixed-set assessment.
 
 ## Diagnosis and Correction Boundary
 
@@ -139,3 +145,24 @@ Review retained evidence against acceptance.md, exact file scope and unchanged
 public contracts. Record pass/fail/review-pending/incomplete honestly. Prepared
 documentation is separate from delivered implementation, qualification and the
 deferred manual application acceptance. No commits/pushes or 0028 work.
+
+
+## Approved Budget Amendment Implementation
+
+The existing ModelInvocationSettings already supports MODEL_DAILY_TOKEN_BUDGET.
+Remove qualification/launcher hard-coded 100000 overrides, use test default
+200000 with the same validated environment key, and serialize the actual effective
+value. Capture private RAG template quota causes in test-only observation, classify
+direct/wrapped quota exceptions and stop baseline/diagnostic loops with incomplete
+status. Production endpoints/guards/DTOs/schema/dependencies remain unchanged.
+Use StoneSearchQueryQualificationTest controlled selectors only; no inference or
+original rerun is required to verify this change. Preserve the existing ledger.
+
+
+## Confirmed Reservation Deferral
+
+D0027-012 / OOS-0027-004 defers request-sized embedding reservations and tokenizer/
+byte/special-token reservation redesign from this delivery. Keep the existing
+32768 admission reserve; no implementation task is added for that proposal.
+The approved configurable daily test quota of 200000 and incomplete classification
+remain delivered. See ADR-0027 and the central out-of-scope register.

@@ -1,8 +1,9 @@
 # Feature 0027: LLM Search Query Qualification
 
-Status: Discussion complete; documentation prepared. The concrete set was
-user-approved on 2026-10-13. Runtime readiness, implementation and qualification
-results are NOT RUN.
+Status: Approved fixed-set harness implemented; external readiness and fixture
+checks pass. Original baseline evidence is incomplete, with preserved outages
+and observed quality/hard failures; the approved doubled test quota is implemented. User review is deferred; separately proposed
+correction agreement remains pending; final qualification is NOT PASSED.
 
 ## Goal and References
 
@@ -35,8 +36,10 @@ claiming ordinary generation quality from controlled answers. Do not create
 public debug routes or production test hooks. The fixture calendar affects date
 interpretation only; real usage accounting and deadlines retain advancing clocks.
 
-Automatic candidate/hard checks use reviewed fixture oracles; the user reviews
-fixed-set generated replies against the agreed rubric. Production grounding
+Automatic candidate/hard checks use reviewed fixture oracles; current answer
+assessment is autonomous, using independent checks and agent review against the
+agreed rubric, without requiring user involvement. User review is a separate
+later stage under OOS-0027-005. Production grounding
 verdicts are evidence, not the sole independent oracle. Semantic candidate quality
 and ordinary generated-answer quality are assessed separately. A valid selection
 template preserves its functional meaning without hiding failed normal generation.
@@ -59,6 +62,24 @@ for fixture embeddings, baseline and diagnostics. Interrupted/incomplete runs
 retain evidence and actual status; they cannot pass using smaller denominators,
 fabricated human review or overridden controls.
 
+## Test Token Budget Configuration
+
+The user approved doubling the isolated real-model test daily quota on 2026-10-14.
+Qualification reads MODEL_DAILY_TOKEN_BUDGET from its command/process environment;
+its test default is 200000 tokens per actual UTC day. The existing application
+setting remains configurable; its default stays 100000. Test execution uses the
+existing owned isolated ledger and preserves earlier usage/reservations.
+Effective limits are recorded for each new attempt; historical limits/scores are
+never rewritten. No deadline/context/output/concurrency/source threshold changes.
+
+A token-quota interruption means verification is incomplete, including an
+otherwise saved selection template caused by quota exhaustion. Record actual
+response, exception/stage and accounting; do not classify the interrupted answer
+as ordinary quality failure or count it as a success. Preserve independently
+observed functional failures. Stop further model collection without automatic
+retries, smaller denominators or refunds. Controlled quota-boundary tests are
+separate from natural-query quality scoring.
+
 ## Confirmed Scope Boundaries
 
 Accepted exclusions are recorded with matching IDs in ADR-0027 and the
@@ -68,7 +89,13 @@ Accepted exclusions are recorded with matching IDs in ADR-0027 and the
 - OOS-0027-002: performance measurements, benchmarks and speed optimization.
 - OOS-0027-003: the user's separately collected personal manual application-
   acceptance set, to be used after implementation. It need not be supplied now;
-  the approved fixed-set qualification and its human answer review remain in scope.
+  the approved fixed-set autonomous qualification remains in scope.
+- OOS-0027-004: smaller request-sized embedding reservations and related
+  tokenizer/byte/special-token redesign. Retain 32768 per embedding call in this
+  delivery; the approved configurable 200000 test daily quota remains implemented.
+
+- OOS-0027-005: user assessment of fixed-set generated replies in this phase;
+  defer it to a separate later stage while current assessment remains autonomous.
 
 ## Dependencies
 
@@ -80,7 +107,7 @@ prior verification is not evidence of current runtime readiness.
 ## Discussion Completion
 
 No product questions remain open. Future observed failures may need separately
-agreed corrections; actual human review requires produced answers. Neither blocks
+agreed corrections; later user review remains a separate deferred stage. Neither blocks
 completing the documentation now. Design approval is not a qualification result.
 
 ## Contract and Implementation Preparation

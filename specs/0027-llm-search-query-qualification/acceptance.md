@@ -1,8 +1,9 @@
 # Feature 0027 Acceptance Criteria
 
-Status: Fixture, scenario oracles and review/scoring design approved by the user
-in Q0027-009 on 2026-10-13. All execution criteria remain NOT RUN. No provisioning,
-model call, application test or generated-answer review has run.
+Status: Approved fixture/harness implemented and verified; original baseline
+collection is in progress with preserved failures/outages. Final qualification is
+NOT PASSED. Current assessment is autonomous; user review is deferred; approved oracles below
+remain unchanged.
 
 Requirements: [spec.md](spec.md). Discussion record:
 [ADR-0027](../../docs/adr/0027-llm-search-query-qualification.md).
@@ -122,13 +123,17 @@ fails the applicable hard rule; it cannot be excused by the 80% target.
   route/candidate outcome, including expected partial/zero/fallback behavior;
   multi-turn cases require every specified turn. At least ceil(0.8 x 9) = **8/9**.
 - Answer-quality cohort: Q027-001–003, Q027-007–012, Q027-014–015 and Q027-019,
-  twelve scenarios. At least ceil(0.8 x 12) = **10/12**, confirmed by user review.
+  twelve scenarios. At least ceil(0.8 x 12) = **10/12**, supported by independent
+  automatic checks and agent rubric assessment; user review is deferred.
   All expected generated replies in a multi-turn scenario must satisfy the rubric.
 - For each normal generated reply, review: correct permitted content/source
   precedence; relevant answer; no invented individual properties; clear unmatched
   wishes/alternative labels; short introduction/per-stone coverage where required;
   no user-visible provenance. Exact string equality is not required.
-- A valid template in an ordinary A scenario fails that scenario's A outcome;
+- A token-quota-interrupted attempt is INCOMPLETE_BUDGET_EXHAUSTED, including
+  a saved template whose private cause is quota exhaustion; retain actual output/
+  accounting without treating the interrupted answer as a quality failure/success.
+- A valid template for a non-quota failure in an ordinary A scenario fails that scenario's A outcome;
   it may still pass hard/candidate checks. A skipped expected answer because
   selection failed its quality oracle is not an explanation-quality pass.
 - Preserve one baseline attempt and every approved diagnostic repetition.
@@ -144,15 +149,20 @@ fails the applicable hard rule; it cannot be excused by the 80% target.
 Fixture rows, scenario oracles and concrete cohort assignment: **APPROVED
 (Q0027-009, D0027-010)**. Design approval is not an evaluation result.
 
-Environment readiness: **NOT RUN**. Fixture provisioning/embeddings, baseline,
-diagnostics and answer-quality review: **NOT RUN**. Documentation preparation
-runs no application tests and creates no application data. Future execution needs
-a separate request and fresh readiness for the selected ticket batch.
+Environment readiness and fixture transcription: **PASS**. Compatible embeddings
+were prepared under actual guarded accounting and retained for unchanged reuse.
+Original baseline: **IN PROGRESS**, with earlier interruptions preserved. Approved
+profile-correction diagnostic: **FAILED** at the unchanged call deadline. Actual
+answer-quality user review: **DEFERRED_OUT_OF_SCOPE**; autonomous assessment
+records reviewer identity and independent reasons. See qualification-results.json,
+qualification-report.md and ADR-0027 for exact stages and limitations.
 
 ## Execution Acceptance Criteria
 
-All criteria below are **NOT RUN**; the approved fixture/scenario/scoring sections
-above define their oracles. No execution criterion passes solely from documentation.
+The approved fixture/scenario/scoring sections below remain the original oracles.
+AC-0027-001/002 pass the recorded readiness and fixture checks. Complete-scenario
+criteria remain incomplete; Q027-008 already fails the unasked-filter hard rule.
+No criterion passes solely from documentation or a favorable repetition.
 
 | ID | Required execution evidence |
 | --- | --- |
@@ -162,20 +172,85 @@ above define their oracles. No execution criterion passes solely from documentat
 | AC-0027-004 | All 20 scenarios and their 28 user turns have one recorded original baseline attempt, literal inputs, resolved expected IDs/outcomes and effective model/configuration metadata; natural-query cases use installed real models. |
 | AC-0027-005 | All baseline turns meet the 100% hard gate, independently of semantic/answer scoring, including exact/date/AVAILABLE constraints, contradictions, references, truthful property claims, hidden provenance and bounded retries. |
 | AC-0027-006 | Automatic candidate checks and retained evidence support at least 8/9 successful semantic-quality scenarios under the approved per-scenario oracles. |
-| AC-0027-007 | The user's recorded fixed-output review supports at least 10/12 successful ordinary generated-answer scenarios under the approved rubric; all required replies in each multi-turn case are assessed. |
+| AC-0027-007 | Independent automatic checks and recorded agent assessment support at least 10/12 successful ordinary generated-answer scenarios under the approved rubric; all required replies in each multi-turn case are assessed without requiring user verdicts. |
 | AC-0027-008 | Ordinary expected-generation templates and skipped expected answers are not counted as successful answer quality; controlled failure/template cases are assessed separately without inflating either quality cohort. |
 | AC-0027-009 | Controlled test-only race/failure instrumentation exercises Q027-017/018/020 deterministically, with preserved hard checks, no production control endpoint and no claim of ordinary real-generation success from controlled drafts. |
 | AC-0027-010 | Each diagnostic repetition identifies a failed/ambiguous baseline and an explicit instability hypothesis, begins from the original fixture and stays within two additional attempts per scenario; all attempts remain visible and original scores are unchanged. |
 | AC-0027-011 | Outages, usage/capacity/deadline failures and unexercised scenarios are classified with actual causes; incomplete evidence cannot pass by reducing denominators or overriding existing controls. |
 | AC-0027-012 | Poor results are localized using interpretation/retrieval/evidence/generation/reference/control evidence before proposing corrections. Production fixes, changed thresholds or alternative-threshold trials require a separately agreed concrete scope. |
-| AC-0027-013 | Machine-readable evidence and a readable report retain fixture/profile/configuration identity, baseline and diagnostic outcomes, human review, limitations and honest final status, without secret values or performance benchmarks. |
+| AC-0027-013 | Machine-readable evidence and a readable report retain fixture/profile/configuration identity, baseline and diagnostic outcomes, autonomous assessment and deferred human-review status, limitations and honest final status, without secret values or performance benchmarks. |
 | AC-0027-014 | Production application source, existing HTTP/Kafka contracts, schema, dependency versions and frontend remain unchanged by qualification; verification uses only the selected ticket's permitted files and focused selector. |
-| AC-0027-015 | The final report distinguishes current fixed-set qualification and its human answer review from the deferred personal-set application acceptance; neither design approval nor fixed-set success claims that later acceptance is complete. |
+| AC-0027-015 | The final report distinguishes current autonomous fixed-set qualification from deferred user review and personal-set application acceptance; neither design approval nor fixed-set success claims that later acceptance is complete. |
 
 ## Deferred Personal Manual Acceptance
 
 [OOS-0027-003](../../docs/adr/0027-llm-search-query-qualification.md) records the
 user's separate personal scenario set, to be collected during development and
 used for manual application acceptance after implementation. It is not supplied
-or required now. It does not replace this approved fixed set or remove its human
-generated-answer review. No later acceptance result or scenario content is assumed.
+or required now. It does not replace this approved fixed set; current answer assessment remains
+autonomous, while user review of the fixed replies is separately deferred under
+OOS-0027-005. No later acceptance result or scenario content is assumed.
+
+
+## Current Execution Evidence — 2026-10-14 Local Date
+
+AC-0027-001/002: PASS for recorded readiness and faithful fixture/real-vector
+preparation; current remaining inference readiness is BLOCKED by actual budget.
+AC-0027-003/008/010–013/015: retained isolation/accounting/classification/limited
+diagnostic/reporting evidence, with explicit missing original payload and pending
+review; no final overall pass. AC-0027-004 INCOMPLETE (27 submitted, 26 fully
+retained of 28). AC-0027-005 FAIL through observed original hard violations;
+AC-0027-006 FAIL (2/9). AC-0027-007 FAIL (0/12 autonomous assessment); every A scenario already
+has an unmet required turn. AC-0027-009 PARTIAL: Q027-017/018 pass controlled
+races; Q027-020 independent failure phase is incomplete/unproven.
+AC-0027-014: no production change by this qualification harness; the separately
+agreed full-profile correction was delivered in 0026, with original failures
+preserved. No new public contract/schema/dependency/frontend change under 0027.
+
+Test-only preservation/oracle follow-up: two named controlled checks PASS, no
+model calls or original repeat. Previous false-positive WRONG_SIZE:B07 on the
+already approved LARGE turn is retained separately; actual date/reference and
+failed scenario results remain. See qualification-results.json,
+qualification-report.md and ADR-0027 for exact evidence, not a success claim.
+
+
+## Configurable Test Quota Amendment — 2026-10-14
+
+| ID | Required verification |
+| --- | --- |
+| AC-0027-016 | Qualification defaults to 200000 daily test tokens, accepts positive MODEL_DAILY_TOKEN_BUDGET overrides, rejects invalid limits and reports the effective supplied value; the application default remains 100000. |
+| AC-0027-017 | Direct/wrapped daily token exhaustion and quota-caused saved selection templates are retained as INCOMPLETE_BUDGET_EXHAUSTED; collection stops, answer quality remains ungraded, original accounting/independent failures/fixed denominators are preserved, and controlled quota tests exercise this without live inference. |
+
+The explicit user-approved quota change supersedes the earlier fixed 100000 test
+value for future execution only. Historical attempts keep their original limits.
+It does not approve pending production corrections, threshold changes, human
+quality verdicts, repeated original queries or mock form submission.
+
+
+AC-0027-016/017 execution: PASS, two controlled named checks, zero failures/errors,
+no inference. Configurable default 200000/positive override/invalid rejection and
+unchanged production default 100000 verified. Wrapped direct rejection and a real
+RAG service's quota-caused TEMPLATE retain delivery facts while marking answer
+verification INCOMPLETE_BUDGET_EXHAUSTED; independent failures remain visible.
+The preserved 68958 charge leaves 131042 under the approved quota; the old
+budget-readiness blocker is resolved. Original missing/unattempted phase evidence
+still prevent final qualification; user review is separately deferred and is not
+a current blocker.
+
+
+## Current Assessment Ownership Amendment — D0027-013
+
+Human assessment is outside this phase (OOS-0027-005); its absence is no blocker
+for current 0027 execution or acceptance. Automatic/agent assessment retains the
+existing rubric/targets/cohorts and explicit PASS/FAIL/INCOMPLETE/UNASSESSED
+status with reasons. No human approval or later manual acceptance is fabricated;
+production grounding alone cannot certify independent answer quality. Older
+PENDING-human notes below/above are historical and superseded by this amendment.
+
+
+D0027-013 current assessment evidence: T0027-004 completed autonomously, original
+A=0/12 because every A scenario has a failed required turn; original R=2/9.
+No human verdict or reduced denominator. Individual generated Q027-019 turn 1
+passes the agent rubric; turns 3/5 fail with independent reasons recorded in JSON.
+AC-0027-007 therefore FAIL, not human-review pending; other original completeness/
+hard failures remain. Writer policy check PASS (one test, no inference).
