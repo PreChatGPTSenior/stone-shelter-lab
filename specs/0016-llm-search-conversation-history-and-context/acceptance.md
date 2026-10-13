@@ -11,8 +11,8 @@ Accepted amendment on 2026-10-13: the browser-cookie portion of AC-0016-006/016
 now follows the narrow [0028 rule](../0028-chat-streaming-api/spec.md) and its
 [acceptance](../0028-chat-streaming-api/acceptance.md). Server retention remains
 completed-turn-only. Earlier verification covers the original implementation;
-the streaming/GET-cookie amendment is **NOT RUN**, owned by future 0028/0029
-tickets, and is not satisfied by historical 0016 results. Full detailed policy
+the streaming/GET-cookie amendment is **PASS** under 0028
+native HTTP/Redis verification, separately from historical 0016 results. Full detailed policy
 review is deferred under OOS-0028-004 after phase-1 implementation.
 
 | ID | Given / When | Expected result | Verification |

@@ -356,3 +356,13 @@ feature [acceptance evidence](../../specs/0016-llm-search-conversation-history-a
 separates automated tests, HTTP/proxy smoke and the unavailable browser checks.
 These results do not qualify model invocation capacity, provider cancellation
 or financial accounting.
+
+### Streaming Amendment Functional Evidence — 2026-10-14
+
+Feature 0028 separately verifies new admitted-stream early cookies, no early
+denied/replay renewal, JSON new-commit behavior and healthy GET synchronization
+using actual remaining session lifetime. Native HTTP/Redis tests confirm GET and
+replay do not extend server TTL, and unknown acknowledgement retains one recoverable
+pair without regeneration. Actual 0029 API browser completion/history/reload works
+on isolated owned fixtures. This does not complete the deferred detailed cookie
+policy review or alter OOS-0028-004.

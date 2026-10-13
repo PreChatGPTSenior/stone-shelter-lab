@@ -32,6 +32,11 @@ abstract class StoneChatRedisTestSupport {
         redis = new StoneChatRedisRepository(connectionFactory, settings);
     }
     protected String key() { String key = "chat:probe:" + UUID.randomUUID(); keys.add(key); return key; }
+    protected void prepareRedisConnection() {
+        try (var connection = connectionFactory.getConnection()) {
+            if (!"PONG".equals(connection.ping())) throw new IllegalStateException("Test Redis connection preparation failed");
+        }
+    }
     @AfterEach
     void cleanRedisKeys() {
         try { if (redis != null) redis.delete(keys); }

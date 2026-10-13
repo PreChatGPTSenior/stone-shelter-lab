@@ -69,9 +69,9 @@ class StoneChatbotServiceTest {
         when(history.append(anyString(), any(), anyString(), any())).thenThrow(new StoneChatUnavailableException());
         assertThatThrownBy(() -> service.sendMessage(request, "session", committed)).isInstanceOf(StoneChatUnavailableException.class);
         verify(guard, times(1)).close(); verify(committed, never()).run();
-        doThrow(new StoneChatUnavailableException()).when(admission).authorize("session", request.conversationId(), true);
+        doThrow(new StoneChatUnavailableException()).when(admission).check("session", request.conversationId(), true);
         assertThatThrownBy(() -> service.sendMessage(request, "session", committed)).isInstanceOf(StoneChatUnavailableException.class);
-        org.mockito.Mockito.doNothing().when(admission).authorize("session", request.conversationId(), true);
+        org.mockito.Mockito.doNothing().when(admission).check("session", request.conversationId(), true);
         doAnswer(invocation -> invocation.getArgument(3)).when(history).append(anyString(), any(), anyString(), any());
         StoneChatMessageRequest newRequest = new StoneChatMessageRequest(request.conversationId(), UUID.randomUUID(), "new turn", null);
         assertThat(service.sendMessage(newRequest, "session", committed).text()).isEqualTo("Exact catalog result");
@@ -98,7 +98,7 @@ class StoneChatbotServiceTest {
         verify(history, never()).append(anyString(), any(), anyString(), any()); verify(committed, never()).run(); verify(guard).close();
     }
 
-    @Test void entireTurnDeadlineClosesLeaseAndPreventsLatePersistence() throws Exception {
+    @Test void entireTurnDeadlineRetainsLiveLeaseUntilActualExitAndPreventsLatePersistence() throws Exception {
         var history = mock(StoneChatConversationRepository.class); var serialization = mock(StoneChatConversationSerializationService.class);
         var availability = mock(StoneChatAvailabilityService.class);
         when(availability.execute(any())).thenAnswer(call -> call.<java.util.function.Supplier<?>>getArgument(0).get());
@@ -122,8 +122,9 @@ class StoneChatbotServiceTest {
         try {
             assertThatThrownBy(() -> service.sendMessage(new StoneChatMessageRequest(conversationId, UUID.randomUUID(), "basalt", null), "session", committed))
                     .isInstanceOf(StoneChatUnavailableException.class);
-            assertThat(entered.await(1, TimeUnit.SECONDS)).isTrue(); assertThat(closed.get()).isTrue();
+            assertThat(entered.await(1, TimeUnit.SECONDS)).isTrue(); assertThat(closed.get()).isFalse();
         } finally { finish.countDown(); if (worker.get() != null) worker.get().join(2000); }
+        assertThat(closed.get()).isTrue();
         verify(history, never()).append(anyString(), any(), anyString(), any()); verify(committed, never()).run();
     }
 

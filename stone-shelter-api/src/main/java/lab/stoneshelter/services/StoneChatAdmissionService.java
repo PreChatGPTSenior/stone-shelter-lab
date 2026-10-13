@@ -36,5 +36,10 @@ public class StoneChatAdmissionService {
     public void authorize(String sessionId, UUID conversationId, boolean send) {
         guards.availability().assertReady(); limiter.consume(send, true, sessionId); sessions.authorize(sessionId, conversationId, send);
     }
+    public void check(String sessionId, UUID conversationId, boolean send) {
+        guards.availability().assertReady(); limiter.consume(send, true, sessionId); sessions.authorize(sessionId, conversationId, false);
+    }
+    public void claim(String sessionId, UUID conversationId) { sessions.authorize(sessionId, conversationId, true); }
+    public long remainingRetentionSeconds(String sessionId) { return sessions.remainingRetentionMillis(sessionId) / 1000; }
     public long retentionSeconds() { return settings.ttl().toSeconds(); }
 }

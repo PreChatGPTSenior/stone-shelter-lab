@@ -20,7 +20,7 @@ public class StoneChatBindingInterceptor implements HandlerInterceptor {
         String cookie = null;
         if (request.getCookies() != null) for (Cookie candidate : request.getCookies())
             if ("stone_chat_session".equals(candidate.getName())) { cookie = candidate.getValue(); break; }
-        request.setAttribute(SESSION, admission.bind(cookie, sessionId -> writeCookie(response, request, sessionId, admission.retentionSeconds())));
+        request.setAttribute(SESSION, admission.bind(cookie, sessionId -> { if (!request.getRequestURI().equals("/api/v1/chat/messages/stream")) writeCookie(response, request, sessionId, admission.retentionSeconds()); }));
         return true;
     }
     public static void writeCookie(HttpServletResponse response, HttpServletRequest request, String sessionId, long seconds) {

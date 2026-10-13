@@ -18,6 +18,8 @@ import java.util.function.Consumer;
 import javax.sql.DataSource;
 import lab.stoneshelter.criteria.StoneDocumentEmbeddingCriteria;
 import lab.stoneshelter.entities.StoneChatTurnEntity;
+import lab.stoneshelter.enums.StoneChatStreamEventType;
+import java.util.concurrent.TimeUnit;
 import lab.stoneshelter.entities.StoneDocumentEmbeddingEntity;
 import lab.stoneshelter.entities.StoneDocumentEmbeddingInputEntity;
 import lab.stoneshelter.entities.StoneDocumentIndexEntity;
@@ -347,6 +349,29 @@ class StoneRagChatIntegrationTest extends StoneChatRedisTestSupport {
         doThrow(new InvalidStoneRagOutputException()).when(httpChatbot).sendMessage(any(), anyString(), any());
         restClient.post().uri("/api/v1/chat/messages").header("Origin", "http://localhost:5173").body(request("knowledge")).exchange().expectStatus().isEqualTo(502)
                 .expectBody().jsonPath("$.code").isEqualTo("CHAT_INVALID_MODEL_OUTPUT");
+    }
+    @Test void streamingUsesTheCheckedRagPipelineAndOnlyConfirmedHistoryCanSupplyDeltas() throws Exception {
+        card("Alpha"); route.set(selection("[\"BASALT\"]", "[]", "shelf", ""));
+        var request = request("shelf basalt"); var stream = chatbot.startMessage(request, session, () -> () -> {});
+        assertThat(stream.nextEvent(3).getType()).isEqualTo(StoneChatStreamEventType.STARTED);
+        var saved = stream.getCompletion().get(5, TimeUnit.SECONDS);
+        assertThat(history.findById(session, conversation).turns()).hasSize(1);
+        StringBuilder text = new StringBuilder(); boolean completed = false;
+        for (var event = stream.nextEvent(3); event != null; event = stream.nextEvent(3)) {
+            if (event.getType() == StoneChatStreamEventType.TEXT_DELTA) { assertThat(event.getStones()).isEmpty(); text.append(event.getText()); }
+            if (event.getType() == StoneChatStreamEventType.COMPLETED) { completed = true; assertThat(event.getText()).isEqualTo(saved.text()); assertThat(event.getStones()).isEqualTo(saved.stones()); }
+        }
+        assertThat(completed).isTrue(); assertThat(text.toString()).isEqualTo(saved.text()); assertThat(generations.get()).isEqualTo(1);
+        assertThat(chatbot.sendMessage(request, session, () -> { throw new AssertionError("Replay cookie renewal"); }).text()).isEqualTo(saved.text());
+        assertThat(generations.get()).isEqualTo(1); stream.transportExited();
+    }
+    @Test void streamingKeepsTheCurrentTurnTemplateExceptionWithoutReopeningLaterOperations() throws Exception {
+        card("Alpha"); route.set(selection("[\"BASALT\"]", "[]", "shelf", "")); installProviderFailure(false);
+        var stream = chatbot.startMessage(request("shelf basalt"), session, () -> () -> {});
+        var saved = stream.getCompletion().get(5, TimeUnit.SECONDS);
+        assertThat(saved.text()).contains("Alpha").doesNotContain("It fits the shelf."); assertThat(saved.stones()).hasSize(1);
+        assertThat(history.findById(session, conversation).turns()).hasSize(1);
+        assertThatThrownBy(availability::assertReady).isInstanceOf(StoneChatUnavailableException.class); stream.transportExited();
     }
     private StoneChatMessageRequest request(String text) { return new StoneChatMessageRequest(conversation, UUID.randomUUID(), text, null); }
     private long card(String name) { long id = jdbcTemplate.queryForObject("INSERT INTO stone(storage_uuid,name,stone_type,size,adoption_status,admission_date,biography) VALUES(?,?,'BASALT','SMALL','AVAILABLE',?,'suitable for a shelf') RETURNING id", Long.class, UUID.randomUUID(), name, Timestamp.from(Instant.now())); ids.add(id); jdbcTemplate.update("INSERT INTO stone_card_embedding(stone_id,text,embedding_profile,embedding) VALUES(?,?,?,?::vector)", id, name, (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)), Arrays.toString(query().vector())); return id; }

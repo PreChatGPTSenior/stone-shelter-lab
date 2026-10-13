@@ -74,6 +74,7 @@ class StoneChatbotControllerTest {
             doAnswer(invocation -> { if (invocation.<Boolean>getArgument(0)) origin.validate(invocation.getArgument(3)); return null; })
                     .when(admission).prepare(anyBoolean(), anyString(), nullable(String.class), nullable(String.class));
             when(admission.bind(nullable(String.class), any())).thenReturn("test-session");
+            when(admission.remainingRetentionSeconds(anyString())).thenReturn(86400L);
             when(admission.retentionSeconds()).thenReturn(86400L); return admission;
         }
         @Bean StoneRagConversationService exactSearch() { return mock(StoneRagConversationService.class); }

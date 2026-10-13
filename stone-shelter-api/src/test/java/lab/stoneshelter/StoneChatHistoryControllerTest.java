@@ -11,10 +11,10 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @AutoConfigureRestTestClient
 class StoneChatHistoryControllerTest {
     @Autowired RestTestClient restClient;
-    @Test void normalAbsenceReturnsRequestedIdentityAndNoCookieRefresh() {
+    @Test void normalAbsenceReturnsRequestedIdentityAndSynchronizesRemainingCookieLifetime() {
         UUID id = UUID.randomUUID();
         restClient.get().uri("/api/v1/chat/conversations/" + id + "/messages").exchange().expectStatus().isOk()
-                .expectHeader().doesNotExist("Set-Cookie").expectBody().jsonPath("$.conversationId").isEqualTo(id.toString())
+                .expectHeader().valueMatches("Set-Cookie", ".*Max-Age=86400.*").expectBody().jsonPath("$.conversationId").isEqualTo(id.toString())
                 .jsonPath("$.messages").isEmpty();
     }
     @Test void malformedPathUuidIsBadRequest() {

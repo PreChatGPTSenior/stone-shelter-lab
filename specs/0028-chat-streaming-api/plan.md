@@ -1,6 +1,6 @@
 # Feature 0028 Technical Plan
 
-Status: Prepared, all execution NOT RUN. Read [spec.md](spec.md),
+Status: Implemented and qualified; factual verification is in acceptance.md/ADR-0028. Read [spec.md](spec.md),
 [acceptance.md](acceptance.md), [tasks.md](tasks.md) and
 [ADR-0028](../../docs/adr/0028-chat-streaming-api.md). Acceptance criteria live
 exclusively in acceptance.md; these are technical preparation choices within the

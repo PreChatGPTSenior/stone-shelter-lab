@@ -22,6 +22,7 @@ import lab.stoneshelter.exceptions.StoneDocumentSourceNotFoundException;
 import lab.stoneshelter.exceptions.StoneDocumentSourceUnindexableException;
 import jakarta.servlet.http.HttpServletResponse;
 import lab.stoneshelter.exceptions.StoneChatUnavailableException;
+import lab.stoneshelter.exceptions.StoneChatStreamCapacityExceededException;
 import lab.stoneshelter.exceptions.StoneChatRateLimitedException;
 import lab.stoneshelter.exceptions.StoneChatConversationBusyException;
 import lab.stoneshelter.exceptions.StoneChatConversationNotFoundException;
@@ -52,6 +53,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+    private final StoneChatProblemDetailFactory chatProblems = new StoneChatProblemDetailFactory();
     @ExceptionHandler(StoneCardReindexConflictException.class)
     public ProblemDetail reindexConflict(StoneCardReindexConflictException exception) {
         return problemDetail(HttpStatus.CONFLICT, exception.getMessage());
@@ -159,69 +161,69 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ModelCapacityExceededException.class)
     public ProblemDetail modelCapacity(ModelCapacityExceededException exception, HttpServletResponse response) {
         response.setHeader(HttpHeaders.RETRY_AFTER, "1");
-        return chatProblem(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_CAPACITY_EXCEEDED", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(ModelTokenBudgetExceededException.class)
     public ProblemDetail modelBudget(ModelTokenBudgetExceededException exception, HttpServletResponse response) {
         long milliseconds = Duration.between(Instant.now(), exception.getRetryAt()).toMillis();
         response.setHeader(HttpHeaders.RETRY_AFTER, Long.toString(Math.max(1, (milliseconds + 999) / 1000)));
-        return chatProblem(HttpStatus.TOO_MANY_REQUESTS, "CHAT_TOKEN_BUDGET_EXCEEDED", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(InvalidStoneExactSearchOutputException.class)
     public ProblemDetail invalidModelOutput(InvalidStoneExactSearchOutputException exception) {
-        return chatProblem(HttpStatus.BAD_GATEWAY, "CHAT_INVALID_MODEL_OUTPUT", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(InvalidStoneSemanticSearchOutputException.class)
     public ProblemDetail invalidSemanticOutput(InvalidStoneSemanticSearchOutputException exception) {
-        return chatProblem(HttpStatus.BAD_GATEWAY, "CHAT_INVALID_MODEL_OUTPUT", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(StoneSemanticSearchLimitExceededException.class)
     public ProblemDetail semanticLimit(StoneSemanticSearchLimitExceededException exception) {
-        return chatProblem(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_SEMANTIC_LIMIT_EXCEEDED", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(InvalidStoneRagOutputException.class)
     public ProblemDetail invalidRagOutput(InvalidStoneRagOutputException exception) {
-        return chatProblem(HttpStatus.BAD_GATEWAY, "CHAT_INVALID_MODEL_OUTPUT", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(StoneRagAnswerLimitExceededException.class)
     public ProblemDetail ragLimit(StoneRagAnswerLimitExceededException exception) {
-        return chatProblem(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_RAG_LIMIT_EXCEEDED", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(ModelAdmissionDeferredException.class)
     public ProblemDetail indexAdmissionDeferred(ModelAdmissionDeferredException exception) {
         return problemDetail(HttpStatus.SERVICE_UNAVAILABLE, "Indexing admission is temporarily unavailable.");
     }
 
+    @ExceptionHandler(StoneChatStreamCapacityExceededException.class)
+    public ProblemDetail chatStreamCapacity(StoneChatStreamCapacityExceededException exception, HttpServletResponse response) {
+        response.setHeader(HttpHeaders.RETRY_AFTER, "1"); return chatProblems.create(exception).problem();
+    }
     @ExceptionHandler(StoneChatUnavailableException.class)
     public ProblemDetail chatUnavailable(StoneChatUnavailableException exception) {
-        return chatProblem(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_UNAVAILABLE", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(StoneChatOriginRejectedException.class)
     public ProblemDetail chatOrigin(StoneChatOriginRejectedException exception) {
-        return chatProblem(HttpStatus.FORBIDDEN, "CHAT_ORIGIN_REJECTED", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(StoneChatConversationNotFoundException.class)
     public ProblemDetail chatNotFound(StoneChatConversationNotFoundException exception) {
-        return chatProblem(HttpStatus.NOT_FOUND, "CHAT_CONVERSATION_NOT_FOUND", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(StoneChatTurnConflictException.class)
     public ProblemDetail chatConflict(StoneChatTurnConflictException exception) {
-        return chatProblem(HttpStatus.CONFLICT, "CHAT_TURN_CONFLICT", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(StoneChatRateLimitedException.class)
     public ProblemDetail chatRate(StoneChatRateLimitedException exception, HttpServletResponse response) {
         response.setHeader(HttpHeaders.RETRY_AFTER, Long.toString(exception.getRetryAfter()));
-        return chatProblem(HttpStatus.TOO_MANY_REQUESTS, "CHAT_RATE_LIMITED", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
     @ExceptionHandler(StoneChatConversationBusyException.class)
     public ProblemDetail chatBusy(StoneChatConversationBusyException exception, HttpServletResponse response) {
         response.setHeader(HttpHeaders.RETRY_AFTER, "1");
-        return chatProblem(HttpStatus.TOO_MANY_REQUESTS, "CHAT_CONVERSATION_BUSY", exception.getMessage());
+        return chatProblems.create(exception).problem();
     }
-    private ProblemDetail chatProblem(HttpStatus status, String code, String detail) {
-        ProblemDetail problem = problemDetail(status, detail); problem.setProperty("code", code); return problem;
-    }
-
     private ProblemDetail problemDetail(HttpStatus status, String detail) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
         problemDetail.setType(URI.create("about:blank"));

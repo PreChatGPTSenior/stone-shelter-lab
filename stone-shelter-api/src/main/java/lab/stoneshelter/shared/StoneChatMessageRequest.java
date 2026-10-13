@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
-@Schema(description = "A demo chat turn persisted with its completed response.")
+@Schema(description = "A chat turn persisted atomically with its complete checked response.")
 public record StoneChatMessageRequest(
         @NotNull @Schema(description = "Client conversation UUID; correlation only, not authentication.",
                 requiredMode = Schema.RequiredMode.REQUIRED) UUID conversationId,

@@ -917,3 +917,155 @@ repetition. No model/profile/limit/gold change occurred.
 T0025-002 is complete as a basic prototype gate. T0025-003 onward remains the
 requested production implementation sequence; final providers and feature
 acceptance are unverified. No feature commit/push has been created yet.
+
+## Independent T0028-002 Readiness — 2026-10-13
+
+Covered: T0028-002 transport prototype only, within the previously authorized
+0025–0029 batch. External tools remain JDK 23.0.2/Maven 3.9.9, Boot 4.1.1 and
+actual cached MVC 7.0.9/Tomcat 11.0.24. Targeted public API metadata confirms the
+existing native async output and container hooks; no dependency/version change.
+Backend health UP and API-mode frontend HTTP 200. PostgreSQL/Redis/Kafka/MinIO
+remain running; this isolated prototype uses no catalog/history/model resource.
+0027's actual full-profile integration defect blocks search-coupled production
+integration, not this explicitly model-free test-only transport prototype.
+
+Result: READY for the independent prototype. Required search/model correction
+and human review remain unresolved; no 0028 production implementation starts
+before its native resource guarantee qualification passes.
+
+Prototype design uses Servlet nonblocking WriteListener/isReady and one pending
+frame, actual native connection-abort support, onComplete plus callback-exit
+ownership, four no-queue slots and independent controlled result processing.
+Qualify actual sockets/backpressure/disconnect/cleanup instead of assuming async
+completion or a timer releases a blocked native writer. Use short isolated
+functional deadlines only; production defaults remain the accepted 10/15 seconds.
+Official Servlet/MVC semantics inform the approach, but only pinned runtime tests
+can establish its actual cleanup guarantees. No model/quality inference is claimed.
+
+## T0028-002 — Actual Native Prototype Outcome
+
+PASS: qualifyPrototype through actual Boot 4.1.1/MVC 7.0.9/Tomcat 11.0.24 HTTP.
+Normal literal Unicode/whitespace fragments concatenate exactly, sequence is
+contiguous, links appear only in completed and replay has no deltas. Post-open
+controlled failure keeps HTTP 200 and delivers error without success. Four held
+streams reject the fifth with HTTP 503 before started and without processing.
+
+Real nonreading sockets establish backpressure during preparation started/heartbeat
+flushes and after saved-result readiness. Preparation pressure uses bounded valid
+SSE comment padding, not extra public event fields. A separate large controlled
+saved reply exercises ordinary delivery pressure. Actual native connection abort,
+onComplete and callback exit precede slot release; socket EOF/reset, zero live
+writers, cleared pending frame and empty canceled timer queue are observed.
+A deliberately delayed replay attachment expires before first delivery, proving
+saved readiness is the deadline origin rather than the first fragment.
+
+Client disconnect is observed and transport resources released before the waiting
+worker is allowed to finish; it then saves once under its original bound. Disconnect
+after save retains that immutable result. No provider/ledger/history application
+success is inferred from controlled prototype storage. No model calls, benchmark,
+new dependency, production route/source or persistent configuration change.
+
+Proceed with independent T0028-003 settings/state/DTO/mapping. Search-coupled
+T0028-004 still requires separately resolved 0027 full-profile defect. Production
+native implementation will be requalified, not accepted merely from this prototype.
+
+## T0028-003 — Actual Independent State/Contract Outcome
+
+PASS: StoneChatStreamStateTest, five focused tests, no inference/database import.
+Validated 4 streams/10-second delivery/15-second heartbeat/10-second write/256
+code-point defaults, no zero/infinite/unrepresentable timer values and write no
+longer than delivery. Native timer values must be representable positive
+milliseconds; rejecting sub-millisecond values prevents Servlet timeout zero from
+silently disabling its finite timeout. Initial accepted defaults are unchanged.
+
+Immediate capacity has no waiting queue and double owner close cannot manufacture
+extra slots. State emits started only before confirmation; subsequent literal
+Unicode deltas use an immutable copied saved snapshot, followed by one full
+completed result. Replay has no deltas; failure has one terminal error; empty
+saved text needs no delta. Wrong-turn confirmation and null DTO mapping fail.
+Transport exit is idempotent and does not cancel admitted completion.
+
+Shared public payloads have the exact accepted fields. Internal runtime handle/
+exception/callback metadata is hidden and is not a public JSON response. Entity/
+service state has no HTTP/ProblemDetail dependency; HTTP problem context remains
+shared/mapper boundary material. Record carriers have at most four components,
+larger carriers use private fields/no-argument construction/accessors. The
+five-field completed DTO uses setter mapping and all DTO mappers inherit technical
+null-source validation. No new route or common-search/cookie behavior is claimed.
+
+## T0028-004/005 Implementation Scope
+
+The user's necessary-type authorization covers shared orchestration changes in
+StoneChatbotService, read-only session-retention queries, admission, existing
+binding/history HTTP boundaries and availability's healthy stream-capacity
+exception classification. Shared admission checks session quota/foreign ownership
+before zero-wait stream capacity, then claims a new conversation. A rejected fresh
+stream exposes no early session cookie and creates no orphan conversation owner.
+JSON and SSE use one worker/confirmed snapshot pipeline; the worker owns its guard
+until actual exit even when the HTTP caller leaves. The immutable snapshot becomes
+ready only after acknowledged append and final control/fence checks.
+
+Additional handler/configuration types own native connection closure, framing,
+resource lifetimes and common public ProblemDetail mapping. Application services
+and entities remain protocol-independent. No dependency/property/schema change.
+
+The inherited JSON timeout test previously expected immediate guard closure while
+a deliberately stubborn worker was still executing. The accepted actual-exit
+streaming rule amends that lifetime: JSON/SSE retain the guard until the worker
+exits, while explicit original-deadline checks forbid late append. The test now
+requires the guard still held at timeout, closed after actual exit and zero late
+persistence/cookie callback. No test oracle is relaxed. A JSON wait timeout closes
+shared readiness rather than inventing a completed result.
+
+Native integration initially hit the inherited per-session POST burst of three:
+a fourth changed-payload POST and the fourth held stream correctly received 429.
+Keep production quotas unchanged. The conflicting-payload oracle now uses its own
+fresh two-request fixture; transport saturation uses four independent sessions,
+then a fifth session, so it reaches transport capacity without bypassing quotas.
+The rejected fifth request must create no conversation owner or model work; healthy
+history remains usable. This diagnoses fixture admission interference, not an
+application permission to bypass request protection.
+
+Actual source names are StoneChatStreamController/StoneChatStreamService. Final
+native qualification lives in StoneChatStreamIntegrationTest#qualifyFinalTransport,
+exercising the production handler rather than the retained independent prototype.
+The ticket path/selector notation is synchronized with these routine implementation
+choices. Additional controlled RAG integration tests use the actual PostgreSQL/RAG
+pipeline before any stream delta and verify current-turn template completion while
+future readiness stays closed. They add no real inference or production test hook.
+The generic shared request description now identifies an atomic checked chat turn,
+and JSON's existing AVAILABLE catalog wording is preserved in generated OpenAPI.
+
+## Independent Delivery Watchdog
+
+Review found a concrete resource risk in letting the single timer serialize/write:
+a slow frame preparation on that timer could prevent deadline enforcement for
+other streams. Production uses a fixed writer pool bounded by transport capacity,
+a SynchronousQueue with no waiting tasks and one coalesced scheduled/executing pump
+per stream. The independent single timer only checks deadlines and requests pumps.
+Native write callbacks dispatch to the same bounded pool. Ownership is counted
+before dispatch and released only after native completion plus actual writer exit;
+rejected dispatch drops/coalesces work for the next tick without queue growth.
+Recheck expiry after serialization before any write. Final native qualification
+adds a controlled blocked frame-preparation seam to prove the timer closes the
+connection while the live writer still retains its slot, then releases resources
+after the writer actually returns. No processing/model cancellation is added.
+
+Final native/contract/architecture/history selectors pass: 15 tests, including
+production slow-reader native closure, expired replay readiness and a blocked
+frame-preparation worker retaining its live slot until actual exit. Earlier
+focused common-pipeline checks pass: 13 RAG, eight semantic conversation, three
+chatbot, five stream-state and one session test. Existing history-header tests
+now assert the already accepted 0028 amendment rather than the superseded no-read-
+cookie rule; actual Redis separately proves GET/replay do not extend server TTL.
+HTTP ProblemDetail retains its existing shape; only stream problems add positive
+retryAfterSeconds from the shared mapping.
+
+The final grouped-resource source passes ten actual native cases plus two
+architecture checks. An additional native HTTP/Redis foreign/expired-cookie case
+passes: retained ownership cannot transfer, neither denial emits started/early
+cookie, no model work repeats, and the original saved pair remains recoverable
+under its original identity. Real-source SQL compatibility independently passes
+using unchanged cached embeddings, with no inference/quality-score substitution.
+The full limited-context application image builds and the real API/widget smoke
+returns/retains an acknowledged answer. All T0028-001–T0028-006 are complete.

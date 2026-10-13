@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import lab.stoneshelter.exceptions.StoneChatConversationBusyException;
+import lab.stoneshelter.exceptions.StoneChatStreamCapacityExceededException;
 import lab.stoneshelter.exceptions.StoneChatConversationNotFoundException;
 import lab.stoneshelter.exceptions.StoneChatOriginRejectedException;
 import lab.stoneshelter.exceptions.StoneChatRateLimitedException;
@@ -94,7 +95,7 @@ public class StoneChatAvailabilityService {
     public void assertReady() { if (!tracking.status().get().ready()) throw new StoneChatUnavailableException(); }
     public <T> T execute(Supplier<T> work) {
         try { return work.get(); }
-        catch (StoneChatRateLimitedException | StoneChatConversationBusyException | StoneChatConversationNotFoundException
+        catch (StoneChatStreamCapacityExceededException | StoneChatRateLimitedException | StoneChatConversationBusyException | StoneChatConversationNotFoundException
                 | StoneChatOriginRejectedException | StoneChatTurnConflictException | ModelCapacityExceededException
                 | ModelTokenBudgetExceededException | InvalidStoneExactSearchOutputException
                 | InvalidStoneSemanticSearchOutputException | StoneSemanticSearchLimitExceededException

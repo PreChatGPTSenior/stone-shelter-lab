@@ -1,9 +1,8 @@
 # Feature 0028 Acceptance Criteria
 
-Status: Current baseline accepted; every execution criterion is NOT RUN.
-Read [spec.md](spec.md), [plan.md](plan.md), [tasks.md](tasks.md) and
-[ADR-0028](../../docs/adr/0028-chat-streaming-api.md). Preparing documentation
-is not readiness, prototype evidence, implementation or integration acceptance.
+Status: Accepted baseline implemented and verified under the requested 0025–0029
+batch. Evidence below distinguishes actual native transport, controlled business
+outcomes and the separate real-model qualification in 0027.
 
 | ID | Required observable outcome and evidence |
 | --- | --- |
@@ -47,9 +46,26 @@ GET/replay. Earlier 0016 results do not count as this amendment's evidence.
 
 ## Evidence and Deferred Follow-Up
 
-All AC-0028-001–015: NOT RUN. No prototype/runtime checks/models have been executed
-in documentation preparation. Exact selectors and future writable paths are in
-tasks.md; no full suite or broad quality campaign is authorized.
+AC-0028-001–015: PASS for the accepted streaming baseline. Readiness covers the
+requested batch; the native prototype passes; actual production HTTP/Redis/socket
+integration passes ten cases plus an additional foreign/expired-cookie case, and generated JSON/YAML/architecture/history checks
+pass five additional cases. Final grouped-resource recheck passes ten native and
+two architecture cases. Common PostgreSQL/RAG integration passes 13 cases,
+semantic conversation integration eight, chatbot three, stream state five and
+session storage one. No full backend suite or new inference campaign was run.
+
+Evidence includes literal Unicode/whitespace, acknowledged pair before deltas,
+shared JSON/SSE replay, payload conflict, Origin/input rejection, post-open error,
+lost commit acknowledgement/recovery, client-disconnect continuation, four streams
+and fifth rejection, no ghost owner on overflow, slow socket closure, expired
+saved-readiness delivery and independent watchdog closure while a live writer
+retains its slot. Actual Redis proves GET/replay do not extend server TTL; the
+accepted remaining-lifetime cookie amendment has separate functional proof.
+
+The full application image builds; isolated actual API health is UP, generated
+OpenAPI exposes the stream, and 0029 browser smoke receives a saved checked answer
+and restores it through real history/reload. This functional smoke does not certify
+0027's fixed-set model-quality thresholds. Detailed execution is in ADR-0028.
 
 OOS-0028-004 defers full detailed cookie-rule review until after implementation
 of phase 1. It does not remove AC-0028-014 or move 0028/0029 out of this phase.

@@ -51,6 +51,11 @@ public class StoneChatSessionRepository {
             if (result != 1) throw redis.unavailable(new IllegalStateException("Session lost during authorization"));
         }
     }
+    public long remainingRetentionMillis(String sessionId) {
+        long ttl = redis.execute(commands -> commands.pttl(StoneChatRedisRepository.bytes(sessionKey(sessionId))));
+        if (ttl <= 0) throw redis.unavailable(new IllegalStateException("Session lost before cookie synchronization"));
+        return ttl;
+    }
     public void probe(String prefix) {
         String session = prefix + "session"; String owner = prefix + "owner";
         try {

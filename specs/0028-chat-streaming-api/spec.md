@@ -1,8 +1,7 @@
 # Feature 0028: Chat Streaming API
 
-Status: Discussion complete; specification, acceptance, plan and tasks prepared.
-All 23 questions are answered. Runtime readiness, implementation, prototype and
-integration verification are NOT RUN.
+Status: Accepted baseline implemented and functionally qualified; all T0028 tickets
+complete. See acceptance.md and ADR-0028 for native, integration and contract evidence.
 
 ## Goal and References
 
@@ -112,7 +111,7 @@ exit. Failure to qualify these bounds blocks dependent production tickets.
 
 ## Initial Transport Configuration
 
-Technical settings within the accepted resource policy; none is runtime-qualified:
+Runtime-qualified defaults within the accepted resource policy:
 
 | Setting | Initial value | Validation / scope |
 | --- | --- | --- |
@@ -160,6 +159,5 @@ Broad model-quality evaluation remains 0027's separate scope.
 
 Required 0025/0026 capabilities must be delivered and freshly checked for the
 selected batch; prepared documents do not prove runtime availability. No unresolved
-product question remains for the current baseline. Current authorization is
-preparing documentation only: no task execution, source edits, application tests,
-models, provisioning, commits or pushes.
+product question remains for the current baseline. The user subsequently authorized continuous execution of all 0025–0029 tasks,
+necessary type changes and one whole-feature commit per feature. No push.
