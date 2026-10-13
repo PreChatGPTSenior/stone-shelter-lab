@@ -14,6 +14,13 @@ includes the full task ID; one commit covers one task.
 
 ## Preparation
 
+Subsequent documentation amendment on 2026-10-13: feature 0028 owns the accepted
+streaming/browser-cookie timing and non-extending history-cookie synchronization
+change; 0029 owns the widget handoff. Existing completed 0016 tickets/evidence do
+not claim that amendment implemented. No 0016 ticket is requested or reopened by
+this note. Full detailed rule review is deferred after phase-1 implementation
+under [OOS-0028-004](../../docs/adr/0028-chat-streaming-api.md).
+
 - [x] **T0016-001 — Finalize implementation tickets for accepted policies.**
   Preserve accepted D-001–D-011 and finalize technical representation/configuration
   details: cookie name/path and allowed origins/proxies, Redis schema/operations,

@@ -257,7 +257,12 @@ the original message/context before committed replay; conflicts become 409.
 Replay is quota-charged but takes no processing permit and refreshes no TTL.
 Maintain an exclusive UUID owner lookup so another session cannot create a
 second transcript under the same retained conversationId. Newly committed turns
-align session/cookie/owner retention with history; GET/replay do not extend it.
+align server session/owner retention with history; GET/replay do not extend it.
+Browser-cookie timing has the subsequently accepted narrow 0028 exception:
+renew before a newly admitted stream opens, then synchronize to remaining server
+session lifetime on healthy authorized history GET without extending server TTL.
+Its implementation/verification belongs to 0028/0029, not historical 0016 results;
+full detailed policy review is deferred after phase 1 under OOS-0028-004.
 
 ## Frontend Approach
 

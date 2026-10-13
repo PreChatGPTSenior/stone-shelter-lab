@@ -189,7 +189,27 @@ existing owner binding whose transcript is still empty. Foreign UUIDs return
 fresh session after healthy admission, but cannot transfer a retained UUID or
 its messages. Existing owner/session bindings remain valid for their retained
 histories; a newly committed pair refreshes aligned session/cookie/ownership
-lifetimes. Reads, replay, rate checks and rejected attempts do not refresh them.
+lifetimes. Reads, replay, rate checks and rejected attempts do not extend
+authoritative server retention. The narrow streaming cookie exception below
+changes browser-header timing only.
+
+### Subsequent Streaming Cookie Amendment — Accepted, Not Implemented
+
+On 2026-10-13, [0028 Q0028-023](../../docs/adr/0028-chat-streaming-api.md)
+accepted renewing the browser cookie before opening a newly admitted streaming
+turn; denied and retained-replay attempts receive no such early renewal.
+Only newly persisted completed pairs extend server session/ownership/history
+retention. A successful authorized healthy history GET may synchronize browser
+cookie expiry to the remaining actual session lifetime without extending any
+server expiry or recreating lost ownership. JSON retains normal new-commit cookie
+renewal; cookies remain server-issued, HttpOnly and under existing attributes.
+After streaming completed, the widget performs history reconciliation/synchronization
+when dependencies permit. Read failures remain failures, not empty history.
+
+This is an accepted future amendment owned by feature 0028 and its 0029 handoff,
+not a claim that the existing 0016 implementation already has this behavior.
+Full detailed review/redesign of this cookie rule is deferred until after phase-1
+implementation under OOS-0028-004; baseline qualification remains required.
 
 Validate POST source Origin against the explicitly configured frontend-origin
 allowlist as part of CSRF protection. Reject missing, null or untrusted origins
@@ -357,7 +377,9 @@ User entries have empty
 references and null context. An unknown or expired conversation returns the
 requested UUID and an empty array when no retained foreign ownership exists.
 A foreign retained conversation returns 404. GET does not refresh history,
-ownership, session/cookie or deduplication TTL and never appends messages.
+ownership, server-session or deduplication TTL and never appends messages.
+The accepted 0028 amendment permits browser-cookie synchronization to the
+remaining server-session lifetime; it does not make GET server retention activity.
 
 Malformed UUIDs and invalid send requests return HTTP 400 RFC 9457
 ProblemDetail. Required-dependency failures return HTTP 503 ProblemDetail for
@@ -436,7 +458,7 @@ policy. No runtime task is authorized by this documentation update.
 | --- | --- | --- |
 | D-001 | Browser ownership | Redis anonymous session and opaque HttpOnly/SameSite=Lax cookie, Secure under HTTPS; sessionStorage conversation UUID; exclusive server owner, foreign UUID 404, no transfer after cookie loss; POST Origin validation; align 24-hour binding/cookie retention; cookie name/path/config annotations finalized in the binding ticket |
 | D-002 | Context bounds | Latest 10 complete pairs and 20,000 characters including deterministic reference/context representation; discard oldest whole pairs, omit an oversized newest pair, preserve stored history; future model-token budget includes prompt/RAG/output allowance |
-| D-003 | Activity | Only a newly completed persisted pair refreshes the 24-hour history/deduplication TTL and aligned owner/session/cookie lifetime; GET, replay, navigation and rejected/failed attempts do not refresh |
+| D-003 | Activity | Only a newly completed persisted pair refreshes authoritative 24-hour history/deduplication and owner/session retention; GET, replay, navigation and rejected/failed attempts do not extend server retention. Browser-cookie timing has the narrow accepted 0028 amendment above, not yet implemented |
 | D-004 | Retry identity | Required client UUID turnId; same authorized identity/payload replays the exact committed result, changed payload 409; atomically persist identity/pair/response; retention-bounded guarantee; reconcile history after loss/reload without automatic POST |
 | D-005 | Rates and charging | Accepted configurable burst/refill table, separate send/history session/IP budgets; IP before session allocation, replay charged, no refund of consumed tokens; 429/Retry-After; full-recovery expiry plus 60 seconds; no strict rolling-minute claim |
 | D-006 | Bucket4j qualification | Accepted candidate 8.21.0 at matching explicit artifact versions with existing JDK 23 / Boot 4.1.1 / managed Lettuce; compile/concurrent real-Redis/expiry evidence remains in T0016-007; no second client or implicit downgrade |

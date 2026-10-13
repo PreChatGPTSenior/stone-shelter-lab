@@ -251,6 +251,27 @@ ownership/execution protocol before a stronger guarantee can be claimed.
 
 ## Final Decisions
 
+### Subsequent Streaming Cookie Amendment — 2026-10-13
+
+[ADR-0028, Q0028-023 and D0028-025/026](0028-chat-streaming-api.md) records the
+actual question and user's acceptance of a narrow amendment to browser-cookie
+timing. Newly admitted streams renew the browser cookie before headers are sent;
+only completed-pair persistence extends authoritative server retention. Healthy
+authorized history GET may synchronize browser expiry with the remaining server
+session lifetime, without extending server expiry. Denied/replay attempts have
+no early streaming renewal; JSON retains new-commit renewal and all ownership/
+cookie secrecy/attribute rules remain.
+
+This supersedes the earlier blanket browser-cookie-on-read prohibition only to
+that extent; D-003's server completed-turn-only retention remains unchanged.
+Earlier implementation evidence does not verify the amendment. Delivery belongs
+to future 0028/0029 tickets, with no 0016 implementation requested now.
+
+The user explicitly deferred a full detailed discussion/redesign of this rule
+until after phase-1 implementation. OOS-0028-004 is recorded in the feature ADR
+and [central register](../out-of-scope-decisions.md); baseline functional checks
+remain required. This is not a deferral of all streaming or a scheduled action.
+
 | Responsibility | Selected mechanism | Scope |
 | --- | --- | --- |
 | Request rate | Bucket4j and Redis | Accepted anonymous-session and broader IP gates with separate send/history buckets |

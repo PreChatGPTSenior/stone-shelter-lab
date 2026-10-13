@@ -15,6 +15,18 @@ Decision record: [ADR-0030, phase 2](adr/phase-2/0030-reliable-search-analytics.
 | --- | --- | --- |
 | OOS-0030-001 | Entire reliable search analytics feature in the current development phase | Defer all analytics-specific discussion/preparation, contracts, event publication, storage/migrations, consumers and verification to phase 2 as feature 0030. Current-phase streaming API 0028 and widget 0029 do not depend on analytics. Existing indexing outbox/Kafka work and feature 0027 qualification remain unchanged. |
 
+## Feature 0028: Chat Streaming API
+
+Accepted on 2026-10-13. Feature: [specification](../specs/0028-chat-streaming-api/spec.md).
+Decision record: [ADR-0028](adr/0028-chat-streaming-api.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0028-001 | User-visible streaming of unverified generation | Find/check the relevant data and prepare the complete validated answer before sending answer-text fragments. Do not expose speculative model prose or raw generation tokens before those checks; generation expresses what the application has established may be shown. Existing 0026 knowledge-only and insufficient-information rules remain applicable. |
+| OOS-0028-002 | Separate server-side turn cancellation | Do not add a separate cancellation operation or endpoint in this development phase. Closing/stopping transport display does not cancel an admitted turn; preserve completion/history recovery under existing deadlines and controls. Internal termination on deadline, ownership loss or dependency failure and actual-work permit/accounting rules remain applicable. |
+| OOS-0028-003 | Automatic stream reconnection and fragment-offset resumption | Do not automatically reconnect/resend or resume delivery from a last fragment in this phase. Recover through authoritative history or an explicit unchanged-turn retry that returns the whole saved result; do not retain a fragment replay log or create a resume subscription. |
+| OOS-0028-004 | Full detailed review of the streaming cookie/session-lifetime rule | Defer the full detailed discussion and any broader redesign of this rule until after implementation of the first development phase. Use the narrowly accepted Q0028-023 baseline in this phase and qualify it normally; this deferral does not postpone features 0028/0029, change server completed-turn-only retention or authorize unagreed policy changes. |
+
 ## Feature 0027: LLM Search Query Qualification
 
 Accepted on 2026-10-13. Feature: [specification](../specs/0027-llm-search-query-qualification/spec.md).
