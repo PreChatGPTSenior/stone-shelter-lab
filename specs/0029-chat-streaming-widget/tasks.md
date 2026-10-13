@@ -1,8 +1,8 @@
-# Feature 0030 Tasks
+# Feature 0029 Tasks
 
 Status: Initial preparation outline; no implementation tickets authorized.
 
-- [ ] T0030-001 — Establish environment readiness for the entire explicitly
+- [ ] T0029-001 — Establish environment readiness for the entire explicitly
   requested implementation batch after its requirements, file allowlists and
   permitted verification are finalized. Check actual tools, configuration and
   required service endpoints; supply authorized command-scoped values, report

@@ -1,4 +1,4 @@
-# Feature 0030: Chat Streaming Widget
+# Feature 0029: Chat Streaming Widget
 
 Status: Initial draft for discussion. Not ready for implementation.
 
@@ -21,8 +21,8 @@ Integrate the backend streaming contract into the existing React chat widget.
 
 ## Delivery Boundary to Refine
 
-- Use the completed feature 0029 contract; do not invent another stream protocol in the UI.
-- Backend search/indexing/analytics changes remain in their respective features.
+- Use the completed feature 0028 contract; do not invent another stream protocol in the UI.
+- Backend search/indexing changes remain in their respective features. Reliable search analytics is outside this development phase.
 
 These boundaries organize discussion; they do not establish new accepted product
 exclusions. Record newly accepted out-of-scope decisions in the feature ADR and
@@ -30,13 +30,19 @@ exclusions. Record newly accepted out-of-scope decisions in the feature ADR and
 
 ## Dependencies
 
-- [0029-chat-streaming-api](../0029-chat-streaming-api/spec.md).
+- [0028-chat-streaming-api](../0028-chat-streaming-api/spec.md).
 - [0016-llm-search-conversation-history-and-context](../0016-llm-search-conversation-history-and-context/spec.md).
 
 Existing capabilities must pass fresh readiness checks; their documentation or
 prior verification is not evidence of current runtime readiness.
 
 ## Open Decisions
+
+Former feature 0030 is now 0029; its readiness ticket is T0029-001.
+The new [0030 analytics feature](../0030-reliable-search-analytics/spec.md) is
+entirely deferred to phase 2, as recorded in
+[the phase-2 ADR](../../docs/adr/phase-2/0030-reliable-search-analytics.md).
+No analytics implementation or analytics dependency is part of this widget phase.
 
 - Pending/partial/error UI states and retry interaction.
 - Navigation, reload and duplicate-completion reconciliation.
