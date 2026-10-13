@@ -948,3 +948,513 @@ implementation tasks remain unchecked. This ADR is the detailed discussion
 record, not implementation evidence; acceptance criteria live exclusively in
 acceptance.md. Documentation checks establish consistency only, not current
 environment readiness, model qualification or feature acceptance.
+
+## Execution Request and Blocked Readiness — 2026-10-13
+
+The user requested execution of every task in features 0025–0029 without stopping
+at individual task/feature boundaries, and one commit for each entire completed
+feature rather than one per task. This is explicit implementation/test/feature-
+commit authorization for that batch, superseding the earlier documentation-only
+stop boundary. It does not authorize pushing, feature 0030, relaxing acceptance,
+production fixes inside 0027 qualification, or replacing actual human review.
+No new product question or exclusion was introduced by this execution request.
+
+Fresh batch preflight is BLOCKED, as recorded in
+[the feature task evidence](../../specs/0025-semantic-stone-candidate-search/tasks.md#requested-batch-readiness--2026-10-13).
+The unavailable browser prevents required actual T0029-006 verification. Existing
+backend liveness is healthy but the current vector/index/usage-ledger schema and
+embedding endpoint configuration are absent in that running deployment. Maven's
+Java mismatch was resolved for checks by supplying the installed JDK 23.0.2
+explicitly. Installed Ollama 0.40.3 remains covered by prior approval.
+
+Preparation started the existing API-mode UI server and successfully built the
+preceding implemented backend image with tests skipped. No application deployment,
+schema migration, source import, inference or application test followed. No
+implementation ticket started, no feature is accepted and no commit was created.
+This is environment evidence, not an accepted out-of-scope decision. All selected
+readiness prerequisites must be rechecked after correction before execution.
+
+## Browser Connection and Readiness Recovery — 2026-10-13
+
+The user reported completing browser setup. Fresh inventory and an actual local
+page observation establish connected Chrome access; the earlier browser blocker
+is resolved. The agent also started the current preceding backend with approved
+command-scoped settings. Its existing Liquibase migrations applied, required
+vector/index/usage tables now exist, profile mismatch checks return zero and the
+actual history GET is healthy. No feature requirement or exclusion changed.
+
+The entire requested 0025–0029 external environment batch is READY, with exact
+components, covered IDs, preparation and command requirements recorded in
+[the current task readiness evidence](../../specs/0025-semantic-stone-candidate-search/tasks.md#fresh-batch-readiness-after-browser-connection--2026-10-13).
+Mandatory model/transport qualification and within-batch producer deliveries are
+still gates; this readiness result does not claim their future acceptance. The
+previous blocked report remains historical evidence. User authorization remains
+continuous execution and one commit per completed feature, with no push.
+
+
+## Shared Producer Qualification Gate — 2026-10-13
+
+Chrome connection and current external environment readiness were confirmed.
+T0025-002 then failed actual prototype qualification: semantic-only shelf input
+was classified CLARIFY instead of SEARCH; evidence output invented a source ID
+not supplied by the backend, including after one correction. Detailed original
+outputs, successful checks and a pending exact correction proposal are retained
+in [ADR-0025](0025-semantic-stone-candidate-search.md#t0025-002--actual-prototype-qualification-failure).
+
+Dependent implementation remains unexecuted under the mandatory qualification
+gate. No feature is complete and no feature commit/push was created. This is
+execution evidence, not a new product exclusion or approval of a correction.
+
+
+## T0025-002 — Actual Prototype Qualification Failure
+
+The user's browser connection removed the environmental browser blocker. The
+agent prepared the current preceding backend and verified fresh full-batch
+external readiness before creating the two explicitly allowed qualification
+artifacts. Only the named class was executed. Four tests ran: compatible vectors
+and full fresh-input capacity passed; interpretation and evidence failed. Final
+production providers and broad 0027 quality were not exercised.
+
+The first test-source compile failures were agent mistakes: the existing mapper
+requires both settings and Clock, the embedding entity exposes vector(), primitive
+double-array assertions require a stream finite-value check, and Liquibase setup
+throws a checked exception. Those defects were corrected in the new test before
+any live model execution. They are not model qualification failures.
+
+### Retained original and permitted corrective outputs
+
+Input: Find a stone for a shelf. Expected: SEARCH with the explicit use wish,
+no invented color or date. Original response:
+
+```json
+{"action":"CLARIFY","criteria":{"stoneTypes":[],"stoneSizes":[],"availability":["AVAILABLE"],"admissionDateRanges":[{"startInclusive":"2026-10-13","endExclusive":"2026-10-14"}]},"resetSearch":false,"reference":null,"questions":["What color do you prefer for the stone on a shelf?","Is there a specific use in mind for this stone?"],"reason":"More specific criteria are needed to proceed.","wishes":[{"key":"use","text":"shelf"},{"key":"color","text":""}]}
+```
+
+After the single permitted correction:
+
+```json
+{"action":"CLARIFY","criteria":{"stoneTypes":[],"stoneSizes":[],"availability":["AVAILABLE"],"admissionDateRanges":[{"startInclusive":"2026-10-13","endExclusive":"2026-10-14"}]},"resetSearch":false,"reference":null,"questions":["What color do you prefer for the stone on a shelf?","Is there a specific use in mind for this stone?"],"reason":"More specific preferences are needed to narrow the search.","wishes":[{"key":"color","text":"neutral"},{"key":"use","text":"decorative"}]}
+```
+
+First evidence fixture: B11, current biography This stone is suitable for a shelf.,
+wishes suitable for a shelf and blue, no supplied document sources. Expected:
+card-supported use, unknown blue, no source ID. Original response:
+
+```json
+{"candidates":[{"id":11,"wishes":[{"key":"use","cardVerdict":"SUPPORTED","cardQuote":"Name: B11. Type: BASALT. Size: SMALL. Biography: This stone is suitable for a shelf.","sources":[{"id":"url","verdict":"SUPPORTED","quote":"Name: B11. Type: BASALT. Size: SMALL. Biography: This stone is suitable for a shelf."}]},{"key":"color","cardVerdict":"CONTRADICTED","cardQuote":"blue","sources":[]}]}]}
+```
+
+After the single permitted correction:
+
+```json
+{"candidates":[{"id":11,"wishes":[{"key":"use","cardVerdict":"SUPPORTED","cardQuote":"Name: B11. Type: BASALT. Size: SMALL. Biography: This stone is suitable for a shelf.","sources":[{"id":"url","verdict":"SUPPORTED","quote":"Name: B11. Type: BASALT. Size: SMALL. Biography: This stone is suitable for a shelf."}]},{"key":"color","cardVerdict":"SUPPORTED","cardQuote":null,"sources":[{"id":"url","verdict":"SUPPORTED","quote":"Name: B11. Type: BASALT. Size: SMALL. Biography: This stone is suitable for a shelf."}]}]}]}
+```
+
+Strict independent assertions rejected these outputs. Interpretation mixed/
+availability examples and later type-only/veto/unknown evidence examples were not
+reached; this run provides no positive qualification evidence for them. Actual
+chat input/output usages were 237/135, 259/134, 287/183 and 309/232. Seven actual
+reservations (four chat, three embedding) charged 1840 tokens in the isolated
+PostgreSQL ledger on actual UTC day 2026-10-13. No production usage was deleted.
+Successful vectors and capacity checks are recorded in tasks.md. No dependent
+implementation, completed feature commit or push followed the failed gate.
+
+### Concrete pending correction proposal — not approved or applied
+
+Read-only source evidence: OllamaChatRepository.prompt unconditionally inserts
+an exact-search-only availability clarification pair before every supplied model
+request, including these semantic/evidence requests. Its assistant example has
+no wishes or evidence schema. The prototype additionally permits arbitrary source
+IDs in its evidence JSON schema. These are observed prompt/schema weaknesses;
+the claim that the injected example caused the model failure is a hypothesis,
+not a proven root cause or an assertion that qwen2.5:3b cannot handle the feature.
+
+Proposed smallest transport change for review:
+
+1. Add an explicit internal opt-out flag to StoneModelInvocationEntity, default
+   true, so existing exact-search callers keep their currently qualified prompt.
+2. Wrap only the two exact-only example messages in OllamaChatRepository.prompt
+   in that flag; preserve system/history/current input, byte-bound accounting,
+   probe, transport, retries, usage validation and all resource limits.
+3. The test-only semantic prototype opts out and uses a compact example matching
+   its own schema. Constrain evidence IDs/keys/source IDs/cardinality to the
+   actual supplied inputs (empty sources means maxItems 0), while retaining
+   independent backend-like quote, scope, unknown and contradiction assertions.
+4. Requalify changed inputs only with the same approved models, 8192/512 limits,
+   original per-example deadline and one correction. Retain this failed run;
+   do not replace it with a claim that the first qualification succeeded.
+5. Since the shared transport changes, rerun focused existing exact-provider
+   prompt/wire assertions without repeating its already-successful real-model
+   examples or running a full suite.
+
+Proposed code shape (documentation only):
+
+```java
+// StoneModelInvocationEntity: default preserves every existing exact caller.
+private boolean includeExactSearchExample = true;
+public boolean getIncludeExactSearchExample() { return includeExactSearchExample; }
+public void setIncludeExactSearchExample(boolean value) { includeExactSearchExample = value; }
+
+// OllamaChatRepository.prompt: only the existing example pair is conditional.
+if (invocation.getIncludeExactSearchExample()) {
+    messages.add(new UserMessage("Show all available stones."));
+    messages.add(new AssistantMessage(CLARIFICATION));
+}
+```
+
+Additional exact writable paths requiring agreement before this correction:
+
+- stone-shelter-api/src/main/java/lab/stoneshelter/entities/StoneModelInvocationEntity.java
+- stone-shelter-api/src/main/java/lab/stoneshelter/repositories/OllamaChatRepository.java
+
+Existing authorized test/resource/common evidence files remain in T0025-002.
+Proposed regression selector, existing class read-only:
+StoneExactSearchQualificationTest#failedSdkInvocationHasNoHiddenRetry+
+providerTrimsOnlyWholePairsPreservingCurrentRequestAndUtcInstructions+
+productionJdkTransportBoundsHeadersAndBodyAndDoesNotRetry.
+
+These two production paths and regression selectors are outside T0025-002's
+current exact allowlist/selector. No permission is inferred from the failure;
+await explicit agreement, update task execution scope first, and then apply the
+reviewed correction. Requirements, thresholds, deadlines, budget and acceptance
+gold remain unchanged. This pending proposal is not an accepted exclusion and
+therefore does not add an out-of-scope-register entry.
+
+
+## Authorized Necessary Type Changes — 2026-10-13
+
+The user explicitly approved the pending T0025-002 shared-prompt correction and
+broadened source-type scope for the selected batch, translated: "Yes, do it; if
+a task requires changes within features 25 through 29, all types may be modified."
+Necessary related production/test type changes for the accepted 0025–0029 behavior
+are therefore authorized even if a prepared ticket's original list omitted them.
+Record exact additional paths, reasons and focused checks before each such change;
+this approval supersedes the original type-file isolation blocker, not acceptance
+or unrelated scope. No dependency/version change, feature 0030, engineering-log
+access, push, gold relaxation, or fabricated human review is authorized.
+
+For the already reviewed T0025-002 correction, additional writable types are:
+stone-shelter-api/src/main/java/lab/stoneshelter/entities/StoneModelInvocationEntity.java
+and stone-shelter-api/src/main/java/lab/stoneshelter/repositories/OllamaChatRepository.java.
+Make the exact-only example optional with its original default preserved. Update
+the authorized semantic prototype/fixture to use its own format and supplied-ID
+constraints. Focused verification adds the three existing controlled exact-search
+qualification methods from the reviewed proposal; they perform no live inference.
+Recheck changed interpretation/evidence/capacity tests, retaining the earlier
+failed evidence and not repeating unchanged successful embedding qualification.
+
+Continuous execution and one commit per entire completed feature remain requested.
+The original task lists remain the implementation guide; broad type permission
+is not permission to invent behavior or bypass prerequisite qualification.
+
+
+### Authorized correction attempt 1 — retained outcome
+
+The two reviewed transport changes were applied with includeExactSearchExample
+true by default, false for new semantic prototype calls. Dynamic evidence schema
+IDs/source cardinality now reflect supplied inputs. Focused rerun: three controlled
+exact-search methods PASS; changed semantic capacity PASS (upper bound 7780);
+interpretation/evidence methods FAIL. Six tests total, two failures, no errors.
+The unchanged successful vector qualification was not repeated.
+
+Shelf-only SEARCH and partial-card support now pass. Mixed small red basalt for
+a shelf still omits color on both attempts. Type-only support still copies the
+document quote into cardVerdict SUPPORTED on both attempts; the card is silent.
+Later generic/veto/unknown cases were not reached. Actual chat usages were
+215/105, 225/110, 247/110, 233/53, 235/58 and 257/58: six reservations,
+1906 charged tokens in the isolated actual UTC-day ledger. Prior failed evidence
+is retained and requirements/gold/resource settings are unchanged.
+
+Evidence-supported next correction within the user's broader necessary-type
+approval: retain the optional exact example; make the compact interpretation
+example include simultaneous color/use wishes; classify individual-card and
+type-source text in distinct bounded source batches with supplied-ID constraints.
+Backend aggregation retains candidate/wish/source coverage and card precedence.
+No quote can acquire card authority merely because the document text was present
+in the same prompt. This changes internal prototype packing, not a public HTTP
+contract or expected outcome. Requalify changed formats and capacity; do not rerun
+unchanged successful exact regression or vector checks.
+
+
+### Authorized correction attempt 2 — retained outcome
+
+Separate source classification now passes partial-card, type-only, individual
+contradiction and unknown evidence, with verbatim source checks and unchanged
+expected verdicts. Capacity passes (7880 upper bound). Interpretation fails at
+shelf-only because the model adds a color wish whose text is the literal string
+null; one repair repeats that invalid invented wish. Three tests, one failure;
+unchanged vectors/exact transport were not rerun. Actual usages: 207/73,
+193/35, 182/37, 201/49, 182/37, 189/35, 176/34, 257/61, 279/61;
+nine reservations charged 2288 tokens in the isolated actual UTC-day ledger.
+
+The remaining defect is variable wish-array shape/absence representation. The
+next necessary internal-format correction uses explicit nullable color/use slots
+and an additional keyed-wish list, then maps only present wishes to canonical
+key/text criteria. This does not add a structured color to a catalog stone or
+relax the independent expected wished-key oracle. JSON null means absence;
+literal null/empty placeholders remain invalid. Requalify only the changed
+interpretation/capacity inputs; evidence classification is unchanged and is not
+repeated. No public route, model/profile, resource bound or requirement changes.
+
+
+## Basic Producer Qualification Recovered — 2026-10-13
+
+The accepted necessary-type correction preserved default exact-search prompts,
+removed their injection from new formats, made wish absence explicit through
+nullable slots and classified each evidence source in its own authority scope.
+Actual requalification now covers every small fixed interpretation/evidence
+case, compatible vectors and complete fresh-input capacity. Three existing
+controlled exact transport regressions passed. All earlier failures and usage
+remain recorded in ADR-0025/tasks; they were not erased or replaced by lucky
+repetition. No model/profile/limit/gold change occurred.
+
+T0025-002 is complete as a basic prototype gate. T0025-003 onward remains the
+requested production implementation sequence; final providers and feature
+acceptance are unverified. No feature commit/push has been created yet.
+
+
+## Bounded Retrieval Delivery — T0025-003
+
+Implemented the planned settings/domain/shared carriers, live-filtered SQL
+repository and response mapper. Five focused isolated PostgreSQL tests pass;
+no model calls or user catalog/source mutations occurred. Invalid test source-
+version was corrected to the existing immutable-source SHA-256 contract, and
+queries remain scoped to the approved encyclopedia document. The initial new
+settings/defaults alone were documented in environment-setup.md. No acceptance
+gold, existing migration or dependency was changed.
+
+Next, T0025-004 needs a shared structured-model invocation service, a turn-wide
+execution/counter/cache entity, a source-level verdict enum and an input mapper
+in addition to the originally prepared types. Exact additions/reasons/selector
+are recorded in tasks.md under the user's necessary-type approval. Source
+classification preserves the independently qualified card/type authority boundary.
+Production integration, final qualification and feature commit remain pending.
+
+## T0025-004 — Actual Outcome
+
+PASS: StoneSemanticEvidenceTest, seven tests; live-row mapping recheck
+StoneSemanticRetrievalTest, five tests. Twelve tests, no failures/errors.
+Controlled transport/providers only, no inference. Strict complete source/wish
+pairs and verbatim quotes, separate card/type authority, current-card veto,
+partial/unknown aggregation, complete sentence segmentation, cache invalidation,
+context/output packing, one repair and whole-turn cap, actual usage settlement
+and permit retention until actual worker exit passed. Short source aliases and
+48-character verbatim quote bounds keep the qualified 512-token output batches
+bounded without truncating evidence. Actual storage UUID/photo are mapped from
+current rows. No feature completion/commit is claimed.
+
+## T0025-005 — Necessary Types Before Execution
+
+Under the user's approved 0025–0029 necessary-type scope, add
+entities/StoneSemanticPreparedTurnEntity.java and
+mappers/entities/StoneSemanticPreparedTurnEntityToStoneChatTurnEntityMapper.java
+for a domain-only prepared selection handoff and mapped completed turn;
+mappers/dtos/StoneSemanticSearchCriteriaToStoneSemanticSearchStateResponseMapper.java
+for mandatory prompt state; and internal evidence fields on StoneChatTurnEntity
+for optional persisted checked facts. The semantic raw decision uses nullable
+color/use slots qualified by T0025-002 and mapped keyed wishes. The exact
+preparation API is reused after the single semantic interpretation, without a
+second model call or soft-wish rejection. Existing focused selectors are retained.
+
+T0025-005 additionally requires entities/StoneSemanticCheckedCandidateEntity.java:
+compact displayed-candidate ID/wishes/checked-proof metadata avoids persisting
+JPA associations, full vector projections or per-turn execution state in history.
+It remains optional internal metadata and does not add HTTP fields.
+
+T0025-005 also updates StoneChatbotControllerTest's unused search mock bean
+to the new semantic delegate type so existing controller/history/transport test
+contexts retain their original HTTP assertions. The new focused integration
+selector reuses that native HTTP context for generated JSON/YAML and semantic
+error contracts, alongside actual isolated PostgreSQL and Redis flow fixtures.
+
+## T0025-005 — Actual Outcome
+
+PASS: StoneSemanticChatIntegrationTest, eight tests; exact preparation and chatbot
+regressions, 19 tests. Real isolated PostgreSQL/Redis, native HTTP generated
+JSON/YAML, controlled inference/embeddings. Covers single interpretation, exact-only
+no semantic calls, current-card priority/veto, partial/overflow counts, exact
+alternatives only at semantic zero, partial late removal and exactly one shared-
+vector refresh, state retention/replacement/reset, persisted compact proof, replay
+without new calls/cookie, healthy local-limit history and fail-closed dependency
+errors. Initial integration setup failed due to an incorrect embedding accessor,
+spying a Spring transaction proxy, and restubbing a throwing/default-answer mock;
+fixed only test wiring, retaining assertions. No production inference occurred.
+
+The internal domain prepared-turn handoff avoids reverse DTO mapping and persists
+only displayed IDs/wishes/proofs; the dedicated ready response API remains mapped
+and available. The updated technical plan records this implementation choice.
+T0025-006 final production qualification/architecture is still pending.
+
+## T0025-006 — First Final Qualification and Necessary Correction
+
+Final production check failed: interpretation generated an unsolicited invalid
+date D2026-10-12T00:00:00Z after its one correction; the first partial-card fixture
+classified absent blue information as CONTRADICTED instead of UNKNOWN. Compatible
+real vectors and the complete initial-state current-input capacity bound 8045
+passed. Isolated actual UTC-day ledger: six reservations, 1406 charged tokens.
+No acceptance/commit or dependent feature implementation is claimed.
+
+The architecture fixture initially used a domain-package wildcard that also
+matched mappers.entities, and treated a settings Component as an application
+Service. Correct its selectors to actual domain packages and Service annotations;
+responsibility and transaction requirements remain unchanged.
+
+The user's explicit necessary-type correction approval covers the required
+0025 production prompt corrections: OllamaSemanticSearchProvider's compact full
+JSON example/empty date groups and OllamaSemanticEvidenceProvider's explicit
+absence-versus-contradiction example. This reopens only the affected T0025-004/005
+provider inputs. Preserve the independent fixture expectations, profile, 8192/512,
+50/120-second bounds and all counters/thresholds. Recheck changed interpretation,
+evidence and prompt capacity plus corrected architecture; retain the successful
+unchanged vector evidence instead of repeating its inference.
+
+Final correction attempt 1: card partial support and shelf/mixed interpretation
+now pass; capacity 8083 passes and both architecture tests pass. Generic explicit
+availability still produces SEARCH rather than CLARIFY; the type-only card
+classification twice cites a quote that is not acceptable verbatim evidence.
+Six reservations charged 2218 actual tokens. Unchanged vectors were not repeated.
+
+Next necessary correction reuses the existing qualified deterministic
+StoneExactSearchSettings.schemaFor availability-only constraints. Its pure schema
+helper and availability matcher become static (no configuration/behavior change),
+so the semantic provider can add its wish grammar to that already constrained
+schema while respecting inherited narrowing/wishes. Include
+services/StoneExactSearchSettings.java in the necessary type scope.
+
+Add raw production evidence diagnostics to the test-only qualification wrapper
+to distinguish unsupported verdicts from malformed quotes before further fixes.
+Repeat only failed semantic interpretation/evidence cases as required by changed
+inputs; retain successful unchanged capacity/architecture/vector evidence.
+
+Final correction attempt 2: all three interpretation fixtures PASS, including
+forced clarification for explicit fresh availability-only. Raw evidence confirms
+the remaining defect: the silent B12 card is classified SUPPORTED with quote
+suitable for a shelf, borrowed from the prompt/request rather than its current
+text; the generic one repair repeats it. Six reservations, 2243 charged tokens.
+
+Necessary evidence correction removes that overlapping positive-shelf example
+and clearly distinguishes a requested wish from source facts. Carry a bounded
+internal validation correction through InvalidStoneSemanticSearchOutputException
+and StoneSemanticEvidenceService's one allowed repair, identifying a nonverbatim
+quote by supplied alias/key without exposing source text through public errors.
+Exception messages remain generic; the counter, one-repair policy and strict
+quote oracle are unchanged. Recheck controlled evidence and only the remaining
+real evidence fixture. Successful unchanged interpretation/capacity/vector/
+architecture evidence remains retained.
+
+Evidence correction attempt 3: seven controlled evidence tests PASS, but real
+silent-card classification still copies the wished phrase suitable for a shelf
+as a quote (CONTRADICTED) on both original and precise correction. Three
+reservations charged 975 tokens. Nothing invalid was accepted; no thresholds,
+gold expectations, limits or successful feature acceptance were changed.
+
+The observed confusion is between two text fields in the wire input: desired
+wish text and supplied source text. The next necessary compact-wire correction
+encodes desired wishes as a key-to-desire map, separate from the source text
+objects. Shared application DTOs and output/provenance contracts remain unchanged.
+This preserves all wishes/source text and reduces prompt bytes; no evidence is
+skipped. Verify this wire distinction through controlled SDK assertions, then
+repeat only the changed real evidence fixture.
+
+Evidence correction attempt 4: controlled SDK/guard/evidence checks PASS. Real
+wire separation removes the borrowed quote, but the silent card is incorrectly
+CONTRADICTED using none, and the positive type passage is also CONTRADICTED.
+Three reservations, 952 actual tokens. The independent semantic oracle correctly
+rejects this result. The new request assertion initially used the wrong
+MockRestServiceServer API; corrected its technical API without altering assertions.
+
+Restore the source-specific format already qualified in T0025-002: one source
+object plus the wish array and the qualified concise instructions. Do not send
+redundant stone-type metadata to the classifier: backend candidate/source scope
+validation owns applicability before invocation, and the actual text remains
+complete. Pack wishes/meaningful source segments within the same 512 bound, with
+one source per model batch. This is a compact format choice, not a scope/ranking/
+resource change; all required sources are still processed with the same 20-call
+cap, cache, one repair and deadline. Full multi-source arrays were not qualified
+on the installed small model and are not claimed delivered. Recheck controlled
+packing/transport/integration, changed real evidence, and final architecture.
+
+Evidence correction attempt 5: controlled evidence, integration and architecture
+pass (17 tests). Real source-specific classification still assigns CONTRADICTED
+to both the silent card and positive type passage, using valid but irrelevant
+quotes. Three reservations, 805 tokens. This remains a semantic qualification
+failure and blocks completed-feature acceptance; no commit is made.
+
+Before another production edit, reopen the test-only T0025-002 format gate in
+the existing qualification class: qualify two explicit boolean questions,
+supported/contradicted, mapped to the same SUPPORTED/UNKNOWN/CONTRADICTED domain
+verdicts. Both true is invalid; both false is UNKNOWN/null. Use the unchanged
+four-case source/wish/quote oracle, short known aliases, existing guarded
+transport and unchanged resource limits. This tests whether the selected model
+can reliably express the accepted semantics without conflating the verdict
+labels. It does not loosen the gold set or claim final production readiness.
+
+Binary test-only gate failed on the first partial-card fixture: absent blue is
+marked contradicted=true with null quote. One reservation, 344 tokens. No binary
+production format was implemented.
+
+A final targeted diagnosis replays the exact original T0025-002 qualified
+source-specific protocol: fixture instructions, full supplied source identifiers
+and the original quote schema, rather than newly introduced aliases/grammar
+constraints. Keep the same independent oracle and at most its original single
+correction. This separates production-format differences from a failure to
+reproduce the earlier model qualification. No additional query set or resource
+change is authorized; if this reproduction fails, dependent delivery remains
+blocked rather than claiming that the selected model has been qualified.
+
+Original-protocol reproduction also fails: the model treats Biography: none.
+as an explicit contradiction on initial and corrective calls. Three reservations,
+776 tokens. This rules out newly added aliases alone as the cause.
+
+Inspection identifies a concrete source-preparation defect: the production input
+mapper invents the technical text Biography: none. for a null biography. That is
+absence metadata, not a factual negative statement. Correct
+StoneSemanticCandidateEntityToStoneSemanticEvidenceCandidateRequestMapper to omit
+only that absent field; preserve every supplied current name/type/size/biography
+fact. No actual source text or wish is truncated or reclassified by code.
+
+Final qualification must exercise that actual production card mapper, not the
+prototype's legacy textual absence sentinel. Decode the fixture's existing
+explicit card fields, with its none sentinel meaning null biography, and render
+through the mapper. Keep the original source/wish/quote/UNKNOWN oracle unchanged.
+The final four acceptance methods remain; diagnostic-only original/binary
+experiments are recorded here and removed after diagnosis, rather than adding
+failed experimental protocols to the production acceptance suite. No accepted
+requirement/assertion, selected model, limit or profile is removed or changed.
+
+Actual mapped-card final evidence PASS: all four fixed cases, eight real calls
+including one permitted precise quote correction, eight reservations charged
+2071 tokens. Silent card remains UNKNOWN, type passage SUPPORTED; explicit card
+veto and general absent blue remain correct. Controlled evidence seven tests and
+isolated live/Redis/native-HTTP integration eight tests also PASS (16 together).
+Original failed protocols and charges remain recorded; none were accepted.
+
+Before final acceptance, extend existing focused integration assertions to
+exercise inherited native HTTP capacity/budget/dependency codes and retry/cookie
+headers, and actual deletion alongside reservation in the late eligibility
+fixture. Recheck only those changed methods plus final architecture. No new
+selector class, inference, requirement, dependency or feature scope is added.
+
+## T0025-006 — Final Outcome and Feature Review
+
+PASS: final mapped-card/source production evidence (four fixed cases, eight actual
+calls including one bounded repair, 2071 tokens); final interpretation (three
+fixed inputs, already passed after availability-schema reuse); compatible real
+vectors and complete fresh input/required-state capacity bound 8083 retain their
+unchanged passes. Final architecture: two tests, no failures. The extended native
+HTTP/late-deletion methods: two tests, no failures. No unchanged successful
+inference was needlessly repeated, no full backend suite was run.
+
+Focused controlled evidence seven tests, retrieval five, integration eight,
+exact preparation 16 and chatbot atomicity three passed. Changed integration
+methods were rechecked as documented. Generated JSON/YAML expose the inherited
+public shapes and semantic/invalid/capacity/budget/dependency outcomes; native
+retry and failed-response cookie assertions pass. AC-0025-001–015 review is
+recorded in acceptance.md. No broad 0027 quality/human acceptance is inferred.
+
+Earlier failures remain historical evidence; the final format is one source
+with bounded wish batches, short source aliases, complete meaningful segments,
+strict verbatim 48-unit quotes and precise one-repair feedback. Missing null
+biography is omitted, not turned into a negative source assertion. No model,
+threshold, resource, HTTP success-field, dependency or schema change was made.
+All T0025 tickets are complete; no push is authorized.

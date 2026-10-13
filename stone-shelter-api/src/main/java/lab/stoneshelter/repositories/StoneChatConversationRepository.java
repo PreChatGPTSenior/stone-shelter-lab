@@ -59,6 +59,25 @@ public class StoneChatConversationRepository {
                                     || !range.startInclusive().isBefore(range.endExclusive())))
                         throw new IllegalArgumentException("Invalid stored exact-search metadata");
                 }
+                if (turn.getSemanticSearchState() != null) {
+                    var state = turn.getSemanticSearchState();
+                    if (state.getExact() == null || state.getWishes() == null || state.getMode() == null
+                            || state.getWishes().stream().anyMatch(wish -> wish == null)
+                            || state.getWishes().stream().map(lab.stoneshelter.criteria.StoneSemanticWish::key).distinct().count() != state.getWishes().size()
+                            || !Objects.equals(jsonMapper.writeValueAsString(state.getExact()), jsonMapper.writeValueAsString(turn.getExactSearchCriteria())))
+                        throw new IllegalArgumentException("Invalid stored semantic-search state");
+                }
+                if (turn.getSemanticCandidates() != null && (turn.getSemanticSearchState() == null
+                        || turn.getSemanticCandidates().size() != turn.getStones().size()))
+                    throw new IllegalArgumentException("Invalid stored semantic candidate proof");
+                if (turn.getSemanticCandidates() != null) for (int index = 0; index < turn.getSemanticCandidates().size(); index++) {
+                    var candidate = turn.getSemanticCandidates().get(index);
+                    if (candidate == null || candidate.id() != turn.getStones().get(index).id()
+                            || candidate.evidence().stream().anyMatch(proof -> proof == null || proof.verdict() == null
+                                    || proof.key() == null || proof.sourceId() == null))
+                        throw new IllegalArgumentException("Invalid stored semantic evidence");
+                }
+
             }
             return conversation;
         } catch (RuntimeException exception) { throw redis.unavailable(exception); }

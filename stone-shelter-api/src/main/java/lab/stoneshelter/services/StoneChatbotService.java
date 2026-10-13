@@ -29,9 +29,9 @@ public class StoneChatbotService {
                               StoneChatAdmissionService admission, StoneChatAvailabilityService availability) {}
     private record Mapping(StoneChatMessageRequestToStoneChatTurnEntityMapper request, StoneChatTurnEntityToStoneChatMessageResponseMapper response,
                            StoneChatConversationEntityToStoneChatHistoryResponseMapper history, StoneChatContextSelector context) {}
-    private record Execution(StoneExactSearchService search, Clock clock, Duration deadline) {}
+    private record Execution(StoneSemanticSearchService search, Clock clock, Duration deadline) {}
     private Execution execution;
-    @Autowired public void configureExactSearch(StoneExactSearchService search, Clock clock, StoneChatSettings settings) {
+    @Autowired public void configureSemanticSearch(StoneSemanticSearchService search, Clock clock, StoneChatSettings settings) {
         execution = new Execution(search, clock, settings.deadline());
     }
     private final Components components;
@@ -60,7 +60,7 @@ public class StoneChatbotService {
                 if (mapping.context().select(conversation.turns()) == null) throw new StoneChatUnavailableException();
                 guard.check(); components.availability().assertReady();
                 CompletableFuture<StoneChatTurnEntity> completion = new CompletableFuture<>();
-                Thread worker = Thread.ofVirtual().name("exact-search-turn").start(() -> {
+                Thread worker = Thread.ofVirtual().name("stone-search-turn").start(() -> {
                     try {
                         StoneChatTurnEntity completed = execution.search().complete(turn, conversation.turns(), processingDeadline);
                         guard.check(); components.availability().assertReady();

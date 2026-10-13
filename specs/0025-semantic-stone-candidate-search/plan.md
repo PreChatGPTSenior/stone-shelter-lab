@@ -1,7 +1,7 @@
 # Feature 0025 Technical Plan
 
-Status: Prepared from the accepted discussion. No implementation, qualification
-or environment readiness has been executed.
+Status: Implemented and focused verification completed on 2026-10-13. Actual
+provider-format corrections and retained failed attempts are recorded in ADR-0025.
 
 Read [spec.md](spec.md), [acceptance.md](acceptance.md),
 [tasks.md](tasks.md) and [ADR-0025](../../docs/adr/0025-semantic-stone-candidate-search.md).
@@ -168,7 +168,11 @@ hasMore, template text, candidates and effective state/evidence. It does not
 replace the public StoneChatMessageResponse. Use explicit shared nested types
 for candidate/wish/source metadata. Repository/evidence processing produces
 domain entities; dedicated DTO mappers assemble ready responses. A named entity
-mapper updates the original turn from the ready response and returns the result.
+mapper builds the completed turn from a domain-only prepared selection and returns
+the result. This internal handoff supports 0026 without reverse DTO-to-domain
+conversion; the mapped dedicated internal search response remains available.
+Persist only displayed candidate IDs, effective wishes and checked proofs, not
+JPA associations, projection vectors or execution caches.
 
 Minimal English templates distinguish no matches, exact alternatives, partial
 wishes and an additional-results notice. They do not assert color/use facts
@@ -240,3 +244,14 @@ benchmark, broad query set, host model download, production import, commit or pu
 Generated HTTP contract checks inspect both JSON and YAML OpenAPI, never a
 handwritten document. Qualification blockers require a reported agreed correction,
 not changes outside the task's exact writable paths.
+
+## Qualified Implementation Details
+
+Use one source per classification call, packing supported wish groups within
+512 and complete meaningful source segments within 8192. The source-specific
+format uses short aliases validated back to canonical provenance and strict
+verbatim quotes up to 48 UTF-16 units. One precise bounded repair consumes the
+same turn-wide cap. Backend aggregation applies current-card precedence. Omit a
+null biography from factual text instead of creating a Biography: none sentinel;
+all actual supplied card facts remain intact. Full-source arrays/other diagnostic
+protocols were not claimed qualified and their failures remain in ADR evidence.

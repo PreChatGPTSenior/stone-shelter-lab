@@ -81,12 +81,12 @@ public class StoneExactSearchSettings {
         return INSTRUCTIONS.formatted(utcDate, utcDate.minusDays(1)) + correction;
     }
 
-    public boolean isExplicitAvailabilityOnly(String request) {
+    public static boolean isExplicitAvailabilityOnly(String request) {
         return request.strip().toLowerCase(Locale.ROOT).matches(
                 "(?:please\\s+)?(?:(?:show|list|find|search(?:\\s+for)?|give\\s+me)\\s+)?(?:me\\s+)?(?:all\\s+)?(?:the\\s+)?available\\s+stones[.!?]?");
     }
 
-    public Map<String, Object> schemaFor(String request, boolean inheritedNarrowing) {
+    public static Map<String, Object> schemaFor(String request, boolean inheritedNarrowing) {
         JsonMapper jsonMapper = JsonMapper.builder().build();
         ObjectNode schema = (ObjectNode) jsonMapper.readTree(SCHEMA);
         if (!inheritedNarrowing && isExplicitAvailabilityOnly(request)) {

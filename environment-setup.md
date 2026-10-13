@@ -432,3 +432,20 @@ or installed frontend dependencies.
     docs/glossary.md                  domain vocabulary
     stone-shelter-api/                Spring Boot backend
     stone-shelter-ui/                 React frontend
+
+## Semantic Candidate Search Settings
+
+Feature 0025 uses these validated command/process environment settings; no catalog
+color field or automatic source import is added:
+
+| Variable | Default | Constraint |
+| --- | --- | --- |
+| STONE_SEMANTIC_SEARCH_CANDIDATE_LIMIT | 10 | Integer at least 6 |
+| STONE_CARD_SEARCH_MIN_SIMILARITY | 0.5 | Existing inclusive finite cosine threshold in [-1, 1] |
+| STONE_SEMANTIC_SEARCH_DOCUMENT_LIMIT | 10 | Positive integer |
+| STONE_SEMANTIC_SEARCH_DOCUMENT_MIN_SIMILARITY | 0.5 | Inclusive finite threshold in [-1, 1] |
+| STONE_SEMANTIC_SEARCH_MAX_EVIDENCE_CALLS | 20 | Positive whole-turn invocation cap including corrections/refresh |
+
+Invalid supplied values fail explicitly. These are initial accepted settings,
+not a claim that the thresholds have been broadly qualified or tuned. Query
+embeddings reuse the existing compatible profile and CUSTOMER model controls.

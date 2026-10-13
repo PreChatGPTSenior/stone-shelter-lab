@@ -13,6 +13,7 @@ public class StoneModelInvocationEntity {
     private int contextTokens;
     private int outputTokens;
     private Instant deadline;
+    private boolean includeExactSearchExample = true;
     public StoneModelInvocationEntity() {}
     public String getEndpoint() { return endpoint; }
     public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
@@ -30,4 +31,6 @@ public class StoneModelInvocationEntity {
     public void setOutputTokens(int outputTokens) { this.outputTokens = outputTokens; }
     public Instant getDeadline() { return deadline; }
     public void setDeadline(Instant deadline) { this.deadline = deadline; }
+    public boolean getIncludeExactSearchExample() { return includeExactSearchExample; }
+    public void setIncludeExactSearchExample(boolean includeExactSearchExample) { this.includeExactSearchExample = includeExactSearchExample; }
 }

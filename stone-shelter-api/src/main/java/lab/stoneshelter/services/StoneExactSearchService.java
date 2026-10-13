@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import lab.stoneshelter.criteria.StoneExactSearchCriteria;
 import lab.stoneshelter.entities.StoneChatTurnEntity;
 import lab.stoneshelter.entities.StoneExactSearchResultEntity;
+import lab.stoneshelter.entities.StoneExactSearchPreparationEntity;
 import lab.stoneshelter.shared.StoneExactSearchDecision;
 import lab.stoneshelter.enums.StoneExactSearchAction;
 import lab.stoneshelter.enums.StoneExactSearchReferenceKind;
@@ -45,20 +46,27 @@ public class StoneExactSearchService {
             try { decision = components.validation().validate(output); break; }
             catch (InvalidStoneExactSearchOutputException exception) { if (attempt == 1) throw exception; }
         }
+        StoneExactSearchPreparationEntity preparation = prepare(turn, history, decision, false);
+        return preparation.earlyTurn() != null ? preparation.earlyTurn() : search(turn, preparation.criteria());
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public StoneExactSearchPreparationEntity prepare(StoneChatTurnEntity turn, List<StoneChatTurnEntity> history,
+            StoneExactSearchDecision decision, boolean semanticNarrowing) {
         StoneExactSearchCriteria prior = decision.getResetSearch() ? null : previousCriteria(history);
         StoneExactSearchCriteria effective = merge(decision, decision.getResetSearch() ? null : prior);
         String request = turn.getMessage().toLowerCase(Locale.ROOT);
-        if (decision.getAction() == StoneExactSearchAction.UNSUPPORTED || unsupported(request))
-            return answer(turn, decision.getResetSearch() ? null : prior,
-                    "I can search by stone type, size, availability and admission date. Please choose one of these conditions.");
+        if (decision.getAction() == StoneExactSearchAction.UNSUPPORTED || !semanticNarrowing && unsupported(request))
+            return preparedAnswer(effective, answer(turn, decision.getResetSearch() ? null : prior,
+                    "I can search by stone type, size, availability and admission date. Please choose one of these conditions."));
         if (missingYear(request)) {
             effective.setAdmissionDateRanges(prior == null ? List.of() : prior.getAdmissionDateRanges());
-            return clarify(turn, effective, "Which year do you mean?");
+            return preparedAnswer(effective, clarify(turn, effective, "Which year do you mean?"));
         }
         if (decision.getAction() == StoneExactSearchAction.CLARIFY)
-            return answer(turn, effective, questions(decision.getQuestions()));
+            return preparedAnswer(effective, answer(turn, effective, questions(decision.getQuestions())));
         try { effective.setAdmissionDateRanges(resolveDates(request, effective.getAdmissionDateRanges())); }
-        catch (InvalidStoneExactSearchOutputException exception) { return clarify(turn, prior, "Please specify a valid calendar date."); }
+        catch (InvalidStoneExactSearchOutputException exception) { return preparedAnswer(effective, clarify(turn, prior, "Please specify a valid calendar date.")); }
         if (decision.getReference() != null) {
             Long id = null;
             if (decision.getReference().kind() == StoneExactSearchReferenceKind.PAGE_CONTEXT) {
@@ -73,10 +81,19 @@ public class StoneExactSearchService {
                 }
             }
             if (id == null || components.repository().findById(id).isEmpty())
-                return clarify(turn, prior, "That reference is ambiguous or the stone is no longer available.");
+                return preparedAnswer(effective, clarify(turn, prior, "That reference is ambiguous or the stone is no longer available."));
             effective.setStoneId(id);
         }
-        if (!effective.hasNarrowing()) return clarify(turn, prior, "Choose a narrowing condition before searching.");
+        if (!semanticNarrowing && !effective.hasNarrowing()) return preparedAnswer(effective, clarify(turn, prior, "Choose a narrowing condition before searching."));
+        return new StoneExactSearchPreparationEntity(effective, null);
+    }
+
+    private StoneExactSearchPreparationEntity preparedAnswer(StoneExactSearchCriteria effective, StoneChatTurnEntity answer) {
+        return new StoneExactSearchPreparationEntity(effective, answer);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public StoneChatTurnEntity search(StoneChatTurnEntity turn, StoneExactSearchCriteria effective) {
         StoneExactSearchResultEntity result = components.repository().search(effective);
         result.setTurn(turn);
         result.setText(result.getTotal() == 0 ? "No available stones match these conditions."

@@ -1,6 +1,6 @@
 # Feature 0025 Acceptance Criteria
 
-Status: Criteria prepared; not executed or accepted as implemented.
+Status: AC-0025-001–015 verified through the focused evidence below on 2026-10-13.
 
 Requirements: [spec.md](spec.md). Discussion: [ADR-0025](../../docs/adr/0025-semantic-stone-candidate-search.md).
 Execution boundaries and selectors: [tasks.md](tasks.md).
@@ -86,7 +86,59 @@ Real installed-model calls are confined to T0025-002 and its explicitly named
 final recheck in T0025-006. These are basic functional checks, not 0027's broad
 query-quality campaign or performance measurements.
 
-Evidence status: **NOT RUN** for every criterion. Documentation consistency and
+Initial preparation evidence status was NOT RUN; actual results follow below. Documentation consistency and
 whitespace checks are not runtime readiness, model qualification or acceptance.
 Append actual selector outcomes and criterion evidence only after authorized
 execution; do not replace planned expectations with invented pass claims.
+
+
+### Basic qualification evidence — 2026-10-13
+
+AC-0025-015: external requested-batch readiness and small test-only prototype
+qualification are complete; final production-provider/architecture acceptance
+remains pending. Interpretation: shelf-only/mixed/generic cases; source evidence:
+partial/type-only/card veto/unknown cases; compatible real vectors and complete
+fresh-input bound (8063) passed across the documented changed-format rechecks.
+Three controlled exact transport regressions passed. Original failed outputs and
+actual usage are retained in tasks/ADR; no broader query-quality claim is made.
+AC-0025-001–014 production integration evidence remains NOT RUN.
+
+
+### Retrieval evidence — T0025-003
+
+StoneSemanticRetrievalTest: five focused tests pass with isolated pinned PostgreSQL
+and synthetic vectors. Covers the repository portions of AC-0025-003/004/010/011,
+explicit settings/profile failure and internal mapping. Full evidence aggregation,
+conversation/HTTP/atomicity/ranking behavior and final acceptance remain pending.
+No complete feature acceptance is inferred from this focused result.
+
+### Evidence and integration — T0025-004/005
+
+Seven controlled evidence tests and eight actual isolated PostgreSQL/Redis/native
+HTTP integration tests pass. Sixteen exact preparation and three chatbot
+regressions pass. Coverage: AC-0025-001/002/005–014 through source validation,
+card veto/partial aggregation, ranking/counts/fallback/late refresh, strict state,
+no-model replay, local-limit atomicity and dependency closure; generated JSON and
+YAML retain public fields and specify semantic limit/error outcomes. The initial
+fixture/wiring failures and corrections remain in tasks/ADR. Final production
+model/context qualification and architecture review remain pending; these results
+do not establish broad model quality or user-reviewed 0027 acceptance.
+
+### Final criterion review — T0025-006
+
+| Criteria | Verified evidence |
+| --- | --- |
+| AC-0025-001/002 | Final real interpretation fixtures and controlled integration; exact-only/no generic selection, inherited/replaced/reset state and strict Redis/replay behavior. Missing dates/references retain the 16 exact preparation regressions. |
+| AC-0025-003/004 | Five isolated PostgreSQL/vector retrieval tests; live hard predicates before caps, inclusive independent source bounds, document-only recall, explicit profile/settings failures. Real compatible vectors and single-query refresh/cache integration pass. |
+| AC-0025-005/006/007 | Seven controlled evidence tests and final real mapped-card/source fixture; strict pair/quote/identity validation, card veto, partial/type-only and UNKNOWN evidence. Required null-biography omission and one precise correction are verified. |
+| AC-0025-008/009/010 | Controlled live integration: card-first/score/ID order, bounded count/overflow/five links, partial wishes, no filling semantic results, labeled ordered exact alternatives only at semantic zero. |
+| AC-0025-011 | Controlled current-pool reservation/deletion, whole-pool refill, one refresh with unchanged query vector, no initial-zero/evidence-rejection/partial-survival refresh or second loop. |
+| AC-0025-012 | Controlled context/output/complete segmentation/cache/cap/repair/actual-exit accounting checks; real final guarded calls and usage, full current-input bound 8083, mandatory-state overflow before reservation. |
+| AC-0025-013/014 | Real isolated Redis atomic pair/replay/healthy local limit/closed dependency behavior; three chatbot regressions; native HTTP 502/503/429 codes and retry/cookie headers. Generated JSON and YAML retain success/history fields and documented semantics. |
+| AC-0025-015 | External whole-batch readiness, recorded basic prototype and final changed-provider gates, two focused architecture tests and no dependency/schema/ingestion/Kafka/UI changes. |
+
+All criteria PASS at this agreed focused verification level. This is basic
+functional/model/architecture acceptance, not a claim of broad model quality,
+optimal thresholds or 0027's required human-reviewed fixed-set acceptance. Failed
+prototype/production attempts, diagnosis, corrections and actual token charges
+remain recorded in tasks/ADR; expected semantics were never relaxed.

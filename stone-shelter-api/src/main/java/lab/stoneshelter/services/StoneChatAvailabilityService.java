@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Propagation;
 import lab.stoneshelter.exceptions.ModelCapacityExceededException;
 import lab.stoneshelter.exceptions.ModelTokenBudgetExceededException;
 import lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException;
+import lab.stoneshelter.exceptions.InvalidStoneSemanticSearchOutputException;
+import lab.stoneshelter.exceptions.StoneSemanticSearchLimitExceededException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,7 +60,8 @@ public class StoneChatAvailabilityService {
         try { return work.get(); }
         catch (StoneChatRateLimitedException | StoneChatConversationBusyException | StoneChatConversationNotFoundException
                 | StoneChatOriginRejectedException | StoneChatTurnConflictException | ModelCapacityExceededException
-                | ModelTokenBudgetExceededException | InvalidStoneExactSearchOutputException exception) { throw exception; }
+                | ModelTokenBudgetExceededException | InvalidStoneExactSearchOutputException
+                | InvalidStoneSemanticSearchOutputException | StoneSemanticSearchLimitExceededException exception) { throw exception; }
         catch (RuntimeException exception) { invalidate(exception); throw new StoneChatUnavailableException(exception); }
     }
     @EventListener(ApplicationReadyEvent.class)

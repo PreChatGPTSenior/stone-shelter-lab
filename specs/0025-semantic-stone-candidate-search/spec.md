@@ -1,7 +1,8 @@
 # Feature 0025: Semantic Stone Candidate Search
 
-Status: Documentation prepared from the accepted discussion. Not implemented or
-runtime-qualified; execution requires a separately requested batch and readiness.
+Status: Implemented and focused acceptance verified on 2026-10-13 under the
+explicitly requested 0025–0029 batch. Basic final-provider qualification passes;
+broad user-reviewed query/answer quality remains feature 0027.
 
 ## Goal and References
 

@@ -58,8 +58,10 @@ public class OllamaChatRepository {
     public static Prompt prompt(StoneModelInvocationEntity invocation) {
         List<Message> messages = new ArrayList<>();
         messages.add(new SystemMessage(invocation.getSystem()));
-        messages.add(new UserMessage("Show all available stones."));
-        messages.add(new AssistantMessage(CLARIFICATION));
+        if (invocation.getIncludeExactSearchExample()) {
+            messages.add(new UserMessage("Show all available stones."));
+            messages.add(new AssistantMessage(CLARIFICATION));
+        }
         for (var turn : invocation.getHistory()) {
             messages.add(new UserMessage(turn.getMessage()));
             messages.add(new AssistantMessage(turn.getText()));
