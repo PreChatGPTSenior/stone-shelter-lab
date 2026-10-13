@@ -5,6 +5,9 @@ import java.util.UUID;
 import lab.stoneshelter.criteria.StoneExactSearchCriteria;
 
 public class StoneChatTurnEntity {
+    private StoneRagTurnStateEntity ragState;
+    public StoneRagTurnStateEntity getRagState() { return ragState; }
+    public void setRagState(StoneRagTurnStateEntity value) { ragState = value; }
     private StoneSemanticSearchStateEntity semanticSearchState;
     private List<StoneSemanticCheckedCandidateEntity> semanticCandidates;
     public StoneSemanticSearchStateEntity getSemanticSearchState() { return semanticSearchState; }

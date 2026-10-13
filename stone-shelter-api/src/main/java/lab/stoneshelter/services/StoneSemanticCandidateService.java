@@ -20,6 +20,7 @@ import lab.stoneshelter.entities.StoneSemanticSearchStateEntity;
 import lab.stoneshelter.enums.ModelAdmissionMode;
 import lab.stoneshelter.enums.StoneSemanticSearchMode;
 import lab.stoneshelter.exceptions.StoneChatUnavailableException;
+import lab.stoneshelter.exceptions.StoneRagAnswerLimitExceededException;
 import lab.stoneshelter.mappers.dtos.StoneSemanticSearchResultEntityToStoneSemanticSearchResponseMapper;
 import lab.stoneshelter.repositories.StoneSemanticSearchRepository;
 import lab.stoneshelter.shared.StoneSemanticSearchRequest;
@@ -103,6 +104,7 @@ public class StoneSemanticCandidateService {
         String text = wishes.stream().map(wish -> wish.key() + ": " + wish.text()).collect(Collectors.joining("\n"));
         StoneDocumentEmbeddingEntity cached = execution.getQueryCache().get(text);
         if (cached != null) return cached;
+        if (execution.getQueryEmbeddings() >= 2) throw new StoneRagAnswerLimitExceededException();
         Instant deadline = clock.instant().plusSeconds(50);
         if (execution.getModelDeadline().isBefore(deadline)) deadline = execution.getModelDeadline();
         execution.setQueryEmbeddings(execution.getQueryEmbeddings() + 1);

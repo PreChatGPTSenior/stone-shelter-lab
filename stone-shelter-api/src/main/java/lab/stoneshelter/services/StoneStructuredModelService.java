@@ -9,6 +9,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
+import lab.stoneshelter.exceptions.StoneModelProviderUnavailableException;
 import lab.stoneshelter.entities.StoneModelInvocationEntity;
 import lab.stoneshelter.entities.StoneChatTurnEntity;
 import lab.stoneshelter.entities.StoneModelResponseEntity;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class StoneStructuredModelService {
+    private enum Phase { PROVIDER, LEDGER, EXIT }
     private record Components(OllamaChatRepository repository, ModelInvocationAdmissionService admission,
             StoneExactSearchSettings settings, Clock clock) {}
     private final Components components;
@@ -59,6 +62,7 @@ public class StoneStructuredModelService {
         var lease = components.admission().acquire(ModelAdmissionMode.CUSTOMER, components.settings().contextTokens(), callDeadline);
         CompletableFuture<StoneModelResponseEntity> completion = new CompletableFuture<>();
         Thread worker;
+        AtomicReference<Phase> phase = new AtomicReference<>(Phase.PROVIDER);
         try {
             worker = Thread.ofVirtual().name("structured-stone-model").start(() -> {
                 StoneModelResponseEntity response = null;
@@ -68,15 +72,18 @@ public class StoneStructuredModelService {
                     components.repository().probe(components.settings().endpoint());
                     started = true;
                     response = components.repository().invoke(stoneModelInvocationEntity);
+                    phase.set(Phase.LEDGER);
                     lease.settle((long) response.inputTokens() + response.outputTokens());
+                    phase.set(Phase.PROVIDER);
                     components.repository().probe(components.settings().endpoint());
                 } catch (RuntimeException exception) {
-                    failure = exception;
+                    failure = phase.get() == Phase.PROVIDER ? new StoneModelProviderUnavailableException(lease.id(), exception) : exception;
                     if (!started) {
                         try { lease.settle(0); } catch (RuntimeException settlement) { exception.addSuppressed(settlement); }
                     }
-                    components.admission().failure(exception);
+                    components.admission().failure(failure);
                 }
+                phase.set(Phase.EXIT);
                 // Publish only after actual invocation/lease cleanup, never before it.
                 if (failure == null) completion.complete(response);
                 else completion.completeExceptionally(failure);
@@ -88,10 +95,13 @@ public class StoneStructuredModelService {
         try {
             return completion.get(Math.max(1, Duration.between(components.clock().instant(), callDeadline).toNanos()), TimeUnit.NANOSECONDS);
         } catch (InterruptedException exception) {
-            worker.interrupt(); Thread.currentThread().interrupt(); components.admission().failure(exception);
-            throw new StoneChatUnavailableException(exception);
+            worker.interrupt(); Thread.currentThread().interrupt();
+            RuntimeException failure = phase.get() == Phase.PROVIDER ? new StoneModelProviderUnavailableException(lease.id(), exception) : new StoneChatUnavailableException(exception);
+            components.admission().failure(failure); throw failure;
         } catch (TimeoutException exception) {
-            worker.interrupt(); components.admission().failure(exception); throw new StoneChatUnavailableException(exception);
+            worker.interrupt();
+            RuntimeException failure = phase.get() == Phase.PROVIDER ? new StoneModelProviderUnavailableException(lease.id(), exception) : new StoneChatUnavailableException(exception);
+            components.admission().failure(failure); throw failure;
         } catch (ExecutionException exception) {
             if (exception.getCause() instanceof RuntimeException runtimeException) throw runtimeException;
             throw new StoneChatUnavailableException(exception);

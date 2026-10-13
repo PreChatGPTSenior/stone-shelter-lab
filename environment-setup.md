@@ -449,3 +449,11 @@ color field or automatic source import is added:
 Invalid supplied values fail explicitly. These are initial accepted settings,
 not a claim that the thresholds have been broadly qualified or tuned. Query
 embeddings reuse the existing compatible profile and CUSTOMER model controls.
+
+## RAG Answer Settings
+
+Feature 0026 reads CHAT_RAG_OUTPUT_TOKENS (default 1024, positive and below the
+configured total chat context) and CHAT_RAG_MAX_GENERATION_CALLS (default 4,
+integer from 1 through 4). Interpretation/checking keep the existing 512 output
+allowance. The final five seconds of the original turn deadline are reserved
+for final eligibility/template/history work; model calls never gain extra time.

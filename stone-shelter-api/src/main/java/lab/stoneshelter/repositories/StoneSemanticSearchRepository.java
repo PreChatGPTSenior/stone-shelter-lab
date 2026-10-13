@@ -9,6 +9,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lab.stoneshelter.criteria.StoneExactSearchCriteria;
 import lab.stoneshelter.criteria.StoneSemanticPassageCriteria;
@@ -136,7 +137,8 @@ public class StoneSemanticSearchRepository {
 
     private void requireProfile(StoneDocumentEmbeddingEntity stoneDocumentEmbeddingEntity) {
         if (!StoneDocumentEmbeddingInputEntity.MODEL.equals(stoneDocumentEmbeddingEntity.model())
-                || !StoneDocumentEmbeddingInputEntity.PROFILE.equals(stoneDocumentEmbeddingEntity.profile())) {
+                || stoneDocumentEmbeddingEntity.profile() == null
+                || !stoneDocumentEmbeddingEntity.profile().matches(Pattern.quote(StoneDocumentEmbeddingInputEntity.PROFILE) + "/[0-9a-f]{64}")) {
             throw new StoneDocumentDependencyUnavailableException("Incompatible semantic query profile");
         }
         if (Boolean.TRUE.equals(jdbcTemplate.queryForObject("""

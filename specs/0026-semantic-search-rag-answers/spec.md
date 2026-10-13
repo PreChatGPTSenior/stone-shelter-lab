@@ -1,7 +1,8 @@
 # Feature 0026: Semantic Search and RAG Answers
 
-Status: Documentation prepared from the accepted discussion. Not implemented or
-runtime-qualified; execution requires a separately requested batch and readiness.
+Status: Implemented; focused final-provider, controlled integration and architecture
+verification completed. Final acceptance evidence is recorded below and in ADR-0026;
+broader fixed-query/human answer qualification remains feature 0027.
 
 ## Goal and References
 

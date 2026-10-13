@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional(readOnly = true, timeout = 5)
 public class StoneExactSearchRepository {
+    private record Query(String where, List<Object> values) {}
     private final JdbcTemplate jdbcTemplate;
     private final RowMapper<StoneEntity> mapper = (row, index) -> {
         StoneEntity stone = new StoneEntity(); stone.setId(row.getLong("id")); stone.setName(row.getString("name"));
@@ -31,25 +32,33 @@ public class StoneExactSearchRepository {
     }
     @Transactional(readOnly = true, isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ, timeout = 5)
     public StoneExactSearchResultEntity search(StoneExactSearchCriteria criteria) {
-        if (!criteria.hasNarrowing()) throw new IllegalArgumentException("Unfiltered exact search is forbidden");
+        Query query = query(criteria);
+        StoneExactSearchResultEntity result = new StoneExactSearchResultEntity(); result.setCriteria(criteria);
+        result.setTotal(jdbcTemplate.queryForObject("SELECT count(*) FROM stone" + query.where(), Long.class, query.values().toArray()));
+        result.setStones(jdbcTemplate.query("SELECT id,name,stone_type,size,adoption_status,admission_date FROM stone" + query.where()
+                + " ORDER BY admission_date DESC,id ASC LIMIT 5", mapper, query.values().toArray()));
+        return result;
+    }
+    public long count(StoneExactSearchCriteria stoneExactSearchCriteria) {
+        Query query = query(stoneExactSearchCriteria);
+        return jdbcTemplate.queryForObject("SELECT count(*) FROM stone" + query.where(), Long.class, query.values().toArray());
+    }
+    private Query query(StoneExactSearchCriteria stoneExactSearchCriteria) {
+        if (!stoneExactSearchCriteria.hasNarrowing()) throw new IllegalArgumentException("Unfiltered exact search is forbidden");
         StringBuilder where = new StringBuilder(" WHERE adoption_status='AVAILABLE'"); List<Object> values = new ArrayList<>();
-        in(where, values, "stone_type", criteria.getStoneTypes()); in(where, values, "size", criteria.getStoneSizes());
-        in(where, values, "adoption_status", criteria.getAvailability());
-        if (criteria.getStoneId() != null) { where.append(" AND id=?"); values.add(criteria.getStoneId()); }
-        if (!criteria.getAdmissionDateRanges().isEmpty()) {
+        in(where, values, "stone_type", stoneExactSearchCriteria.getStoneTypes()); in(where, values, "size", stoneExactSearchCriteria.getStoneSizes());
+        in(where, values, "adoption_status", stoneExactSearchCriteria.getAvailability());
+        if (stoneExactSearchCriteria.getStoneId() != null) { where.append(" AND id=?"); values.add(stoneExactSearchCriteria.getStoneId()); }
+        if (!stoneExactSearchCriteria.getAdmissionDateRanges().isEmpty()) {
             where.append(" AND ("); boolean first = true;
-            for (var range : criteria.getAdmissionDateRanges()) {
+            for (var range : stoneExactSearchCriteria.getAdmissionDateRanges()) {
                 if (!first) where.append(" OR "); first = false;
                 where.append("(admission_date>=? AND admission_date<?)");
                 values.add(Timestamp.from(range.startInclusive())); values.add(Timestamp.from(range.endExclusive()));
             }
             where.append(')');
         }
-        StoneExactSearchResultEntity result = new StoneExactSearchResultEntity(); result.setCriteria(criteria);
-        result.setTotal(jdbcTemplate.queryForObject("SELECT count(*) FROM stone" + where, Long.class, values.toArray()));
-        result.setStones(jdbcTemplate.query("SELECT id,name,stone_type,size,adoption_status,admission_date FROM stone" + where
-                + " ORDER BY admission_date DESC,id ASC LIMIT 5", mapper, values.toArray()));
-        return result;
+        return new Query(where.toString(), List.copyOf(values));
     }
     private void in(StringBuilder where, List<Object> parameters, String column, List<? extends Enum<?>> values) {
         if (values.isEmpty()) return;

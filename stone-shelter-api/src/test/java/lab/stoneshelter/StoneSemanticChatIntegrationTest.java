@@ -166,7 +166,7 @@ class StoneSemanticChatIntegrationTest extends StoneChatRedisTestSupport {
             StoneDocumentEmbeddingCriteria criteria = call.getArgument(0);
             assertThat(criteria.admissionMode()).isEqualTo(lab.stoneshelter.enums.ModelAdmissionMode.CUSTOMER);
             assertThat(criteria.query()).isTrue(); assertThat(criteria.deadline()).isBeforeOrEqualTo(clock.instant().plusSeconds(50));
-            return new StoneDocumentEmbeddingEntity(StoneDocumentEmbeddingInputEntity.MODEL, StoneDocumentEmbeddingInputEntity.PROFILE, vector(1), 3);
+            return new StoneDocumentEmbeddingEntity(StoneDocumentEmbeddingInputEntity.MODEL, (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)), vector(1), 3);
         });
         candidates = new StoneSemanticCandidateService(repository, checks, embedding, new StoneSemanticSearchResultEntityToStoneSemanticSearchResponseMapper(), settings, clock);
         var exact = new StoneExactSearchService(oldProvider, new StoneExactSearchValidationService(), context.getBean(StoneExactSearchRepository.class),
@@ -268,7 +268,10 @@ class StoneSemanticChatIntegrationTest extends StoneChatRedisTestSupport {
         var admission = mock(StoneChatAdmissionService.class);
         var chatbot = new StoneChatbotService(history, serialization, admission, availability, new StoneChatMessageRequestToStoneChatTurnEntityMapper(),
                 new StoneChatTurnEntityToStoneChatMessageResponseMapper(), new StoneChatConversationEntityToStoneChatHistoryResponseMapper(), new StoneChatContextSelector());
-        chatbot.configureSemanticSearch(search, clock, settings);
+        var delegate = mock(lab.stoneshelter.services.StoneRagConversationService.class);
+        when(delegate.complete(any(), any(), any())).thenAnswer(call -> new lab.stoneshelter.entities.StoneRagPreparedTurnEntity(
+                search.complete(call.getArgument(0), call.getArgument(1), call.getArgument(2)), null));
+        chatbot.configureRagSearch(delegate, clock, settings);
         var request = new StoneChatMessageRequest(conversation, UUID.randomUUID(), "red basalt for a shelf", null);
         output(decision("[\"BASALT\"]", "[]", "red", "shelf", false));
         try {
@@ -353,14 +356,14 @@ class StoneSemanticChatIntegrationTest extends StoneChatRedisTestSupport {
         long id = jdbcTemplate.queryForObject("INSERT INTO stone(storage_uuid,name,stone_type,size,adoption_status,admission_date,biography) VALUES(?,?,?,?,?,?,?) RETURNING id",
                 Long.class, UUID.randomUUID(), name, type, size, status, Timestamp.from(Instant.parse("2026-10-13T00:00:00Z")), biography); ids.add(id);
         if (score != null) jdbcTemplate.update("INSERT INTO stone_card_embedding(stone_id,text,embedding_profile,embedding) VALUES(?,?,?,?::vector)",
-                id, "Stale projection", StoneDocumentEmbeddingInputEntity.PROFILE, Arrays.toString(vector(score)));
+                id, "Stale projection", (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)), Arrays.toString(vector(score)));
         return id;
     }
     private void document(String type, String text) {
         jdbcTemplate.update("INSERT INTO stone_document_index(document_key,source_version,embedding_profile,language,indexed_fragments) VALUES(?,?,?,'en',1)",
-                StoneDocumentIndexEntity.DOCUMENT_KEY, "a".repeat(64), StoneDocumentEmbeddingInputEntity.PROFILE);
+                StoneDocumentIndexEntity.DOCUMENT_KEY, "a".repeat(64), (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)));
         jdbcTemplate.update("INSERT INTO stone_document_fragment(document_key,fragment_order,source_version,embedding_profile,language,stone_type,section_path,passage_text,embedding) VALUES(?,0,?,?,'en',?,'test',?,?::vector)",
-                StoneDocumentIndexEntity.DOCUMENT_KEY, "a".repeat(64), StoneDocumentEmbeddingInputEntity.PROFILE, type, text, Arrays.toString(vector(1)));
+                StoneDocumentIndexEntity.DOCUMENT_KEY, "a".repeat(64), (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)), type, text, Arrays.toString(vector(1)));
     }
     private double[] vector(double score) { double[] vector = new double[1024]; vector[0] = score; vector[1] = Math.sqrt(1 - score * score); return vector; }
     private StoneSemanticSearchCriteria criteria(String color, String use, boolean exact) {

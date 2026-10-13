@@ -1,7 +1,8 @@
 # Feature 0026 Technical Plan
 
-Status: Prepared from the accepted discussion. No implementation, model
-qualification or current environment readiness has been executed.
+Status: Implemented; focused final-provider, controlled integration and architecture
+verification completed. Final acceptance evidence is recorded below and in ADR-0026;
+broader fixed-query/human answer qualification remains feature 0027.
 
 Read [spec.md](spec.md), [acceptance.md](acceptance.md), [tasks.md](tasks.md)
 and [ADR-0026](../../docs/adr/0026-semantic-search-rag-answers.md).
@@ -80,6 +81,14 @@ cannot erase a project-world description or supply missing specimen properties.
 Only source-free prose and allowed catalog links reach the user.
 
 ## Generation and Final-Text Checking
+
+Final checking combines the existing deterministic visibility rule with structured
+model grounding. Apply the same visibility guard at the grounding service boundary
+as at draft validation; explicit forbidden attribution cannot be accepted by a
+model's positive verdict. A deterministic rejection returns a structured negative
+result without admission. Real-model qualification distinguishes its property/
+card-conflict verdicts from deterministic provenance enforcement and preserves
+the model's failed provenance attempts as limitations, not model successes.
 
 StoneRagAnswerService calls StoneRagAnswerProvider/OllamaRagAnswerProvider through
 existing guarded transport. Its internal schema has a short introduction, keyed

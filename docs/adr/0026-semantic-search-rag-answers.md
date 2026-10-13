@@ -907,3 +907,301 @@ truthful identification, not a literal red token. Accept red/color plus the
 unchanged uncertainty marker, while adding required shelf coverage. This does
 not accept missing wish explanations, invented matches or changed fixed-case
 meaning. Keep all route/ID/order/grounding/visibility oracles and approved limits.
+
+## T0026-002 — Gate Passed
+
+Changed routing/generation/capacity checks PASS (three tests). Actual source-free
+selection explanations cover both IDs/order, matched shelf and unconfirmed color;
+knowledge has no specimen links. Route-first flat grammar handles semantic-only,
+knowledge and mixed care without adding a care wish; one allowed shelf route
+correction removes invented hard filters. Six reservations charge 1977 actual
+tokens. Complete current-input generation bound 8118 remains within 8192.
+Unchanged three grounding fixtures retain their prior PASS. All four basic
+prototype methods now have recorded successful evidence; final production
+providers still require T0026-006. Earlier failures/unknown charges are retained.
+
+Fresh relevant production-entry checks: backend UP, Redis PONG, backend-reachable
+Ollama 0.40.3, delivered 0025 commit/signatures and pinned prior runtime context.
+READY for the requested T0026-003–006 dependencies. No new setup/import/download.
+
+## T0026-003 — Necessary Type Delivery
+
+Use the qualified flat route fields rather than a nested optional selection
+decision; mode replaces action and adds explanatory topic. Add
+mappers/dtos/StoneRagDecisionToStoneSemanticSearchDecisionMapper.java for explicit
+validated reuse and mappers/dtos/StoneRagKnowledgeCriteriaToStoneRagKnowledgeRequestMapper.java
+for ready requests. Extend the shared 0025 execution through StoneRagExecutionEntity
+without resetting its cache/counters/refresh. Query embedding and reference/current
+card retrieval stay in bounded domain services/repositories. The user's necessary-
+type approval covers these exact additions; no new HTTP route/field, dependency
+or requirement. Selector remains StoneRagKnowledgeTest, no real inference.
+
+T0026-003 delivers the shared-turn decision-driven prepare overload and a global
+two-query limit in the existing candidate service. StoneChatTurnEntity gains
+optional internal ragState accessors required by the reference service; public
+mappers still expose only existing fields. StoneRagAnswerLimitExceededException
+is needed now by execution/query-cap enforcement. These necessary type updates
+are covered by the user's scope approval; HTTP translation/commit exception
+handling remains T0026-005. New environment settings are documentation only.
+
+## T0026-003 — Actual Outcome
+
+PASS: StoneRagKnowledgeTest, five tests, no failures/errors. Pinned isolated
+PostgreSQL/vector, current reference facts and type scope, inclusive document
+threshold/cap, missing/unavailable reference before embedding, shared second-
+query/cache limit, explicit profile/settings failures, legacy selection versus
+knowledge convenience-link ordinals, DTO mapper/null contracts and independent
+generation/checking counters. Controlled embeddings only, no inference or user
+data changes. Optional internal route metadata is not a public response field.
+
+## T0026-004 — Necessary Types Before Execution
+
+Add entities/StoneRagGeneratedAnswerEntity.java with a small nested explanation
+record and mappers/dtos/StoneRagGeneratedAnswerEntityToStoneRagGeneratedAnswerResponseMapper.java
+for strict parsed draft mapping, plus
+mappers/dtos/StoneRagGenerationRequestToStoneRagGroundingRequestMapper.java for
+checker inputs. Add exceptions/InvalidStoneRagOutputException.java and preserve
+the already delivered generation-limit exception. Use the qualified explanation
+field, known ordered IDs, no source attribution and one bounded corrective cycle.
+Services map ready DTOs rather than construct response objects. All necessary
+type additions are within the user's approved 0025–0029 scope; no new client,
+HTTP route/field, dependency or resource choice. Selector StoneRagAnswerTest
+uses controlled providers/transport only.
+
+T0026-004 first controlled run: five of seven tests pass. Two new fixture mistakes
+are diagnosed: lowercase replacement did not alter the capitalized Shelf test
+text, and the invalid-answer call received a new execution object while the
+assertion inspected another. Correct the input mutations/object passed, keeping
+all expected rejection/counter assertions. Recheck only those changed methods.
+No real inference or production requirement/resource change is involved.
+
+## T0026-004 — Actual Outcome
+
+PASS: all seven controlled answer tests across the documented focused recheck.
+Strict draft fields/IDs/order/coverage/visibility, generator correction after
+grounding rejection, shared checking repair/cap, separate generation cap, earlier
+work deadline, empty-selection no-call behavior, selection-template versus
+knowledge-error decisions, complete meaningful source segments/indivisible
+context failure, and native existing-SDK 8192/1024 accounting are verified.
+Shared actual-exit behavior remains the delivered guarded transport. No real
+inference, new client/dependency, user data or uncontrolled full-suite run.
+
+## T0026-005 — Necessary Type Scope Before Execution
+
+Add exceptions/StoneModelProviderUnavailableException.java and update
+services/StoneStructuredModelService.java to distinguish actual provider-stage
+failures from admission/ledger/control failures without protocol dependencies.
+Add entities/StoneRagCompletionEvidenceEntity.java and
+mappers/entities/StoneRagPreparedTurnEntityToStoneChatTurnEntityMapper.java for
+backend-only current-turn completion proof and mapped catalog identities.
+Add mappers/dtos/StoneRagDecisionToStoneSemanticSearchDecisionMapper.java reuse
+(already delivered) and the planned decision-to-answer-criteria entity mapper.
+No proof/exception flag is serialized into public requests/responses or history.
+
+The trusted template branch requires an already checked admitted selection,
+known final explanation failure, unchanged control epoch, healthy ledger/database/
+Redis/current ownership and active original fence/deadline before/after commit.
+A model-stage outage keeps the global gate closed; recovery is never used to
+commit the current template. Admission/ledger/Redis/selection/uncertain-commit
+failures cannot obtain this exception. Source/ref state remains optional internal
+metadata and existing public shapes stay unchanged. The user approved necessary
+type changes across 0025–0029; this implements the accepted narrow exception,
+not a new bypass API. Focused selected integration/service/availability tests only.
+
+T0026-005 uses entities/StoneRagAnswerAssemblyEntity.java and
+mappers/entities/StoneRagAnswerAssemblyEntityToStoneChatTurnEntityMapper.java
+for the complete domain assembly, instead of mapping a completed frame back to
+itself. StoneRagPreparedTurnEntity is the private completed-turn/proof handoff.
+The shared execution gains an optional exact-result cache, so pure exact counts
+are preserved without another query/interpretation; existing exact/semantic
+decision-driven helpers gain the accepted mixed-topic selection overload.
+Knowledge-only reference links never become selections or template proof.
+No public DTO or client-supplied bypass flag changes.
+
+T0026-005 updates the existing controller mock bean and 0025 semantic integration
+chatbot wiring to the new prepared-turn delegate, preserving every earlier
+behavioral assertion. The domain assembly/mapper owns actual catalog identities,
+backend count framing and removes vanished generated explanations. Generated
+partial survivors are not refilled; failed prose templates may use the remaining
+checked pool. After total generated-list loss, consume only the unspent shared
+refresh. Required supplementary retrieval errors are not generation-only proof.
+Model-work-window exhaustion at the final stage is a local generation limit,
+allowing a valid selection template before the original deadline.
+
+T0026-005 initial isolated integration: eight tests PASS, including current
+model-only outage committing exactly one template with unknown 8192 charge,
+closed future send/history/replay until recovery, and rejection when a concurrent
+control failure changes the epoch. Earlier chatbot/availability regressions:
+eight tests PASS.
+
+The focused review identifies one necessary exact-count correction: after a
+late partial loss, refresh only the scalar current exact count, without selecting
+new candidates or refilling generated prose. Add
+repositories/StoneExactSearchRepository.java to necessary type scope and a
+service count delegate; reuse its identical hard-predicate builder. This preserves
+exhaustive pure-exact counts while keeping semantic/fallback counts bounded.
+Add focused integration coverage for exact/mixed care with no semantic wish,
+expired current-turn completion, ledger-control failure and unknown commit ack.
+No requirement, schema, dependency, threshold or public field changes.
+
+Extended T0026-005 integration: ten tests PASS, including corrected current
+exact count after partial loss, no generated refill, pure exact/mixed care with
+no semantic wish, expired template proof and ledger-probe rejection. The new
+lost-ack fixture initially intercepted the required history readiness probe,
+preventing test setup. Restrict its one-shot fault to the actual owned business
+history key and close the superseded test serialization scheduler. Preserve
+the assertion that an unacknowledged commit never reports success and remains
+a single recoverable pair. Recheck only that changed method.
+
+## T0026-005 — Actual Outcome
+
+PASS: all eleven isolated PostgreSQL/Redis/native-contract integration tests
+across the documented changed-method recheck; existing chatbot/availability
+regressions eight tests PASS. Verified generated/mixed/knowledge flows, single
+interpretation, pure exact counts, shared query vector/refresh, late partial
+removal without generated refill, knowledge state/reference identity, clean
+selection-template versus knowledge failure, actual model-only unknown-charge
+completion with global closure, control/ledger/expiry rejection, and one
+recoverable pair after an unacknowledged commit. Public generated JSON/YAML
+shapes and RAG/invalid errors remain source-free. No real inference in this ticket.
+
+T0026-006 will requalify final routing/generation/grounding providers and current
+prompt/state/context rather than infer a production pass from prototypes.
+Keep the earlier basic model failures/charges and all expected semantics.
+
+## T0026-006 — First Final Provider Outcome and Necessary Correction
+
+Final production run fails routing (care-only misclassified SELECTION after its
+correction) and grounding (unconfirmed color incorrectly treated as a positive
+color claim). Eight reservations charge 3224 tokens. Final current-input
+generation capacity 8156 passes; selected explanations pass. Knowledge's
+literal stones=[] exposes a missing functional assertion: nonblank alone does
+not establish a care answer. Add actual care-content validation, retaining
+legitimate source-free insufficiency and all existing expectations.
+
+Architecture layer test passes; its mapper-base assertion incorrectly includes
+small nested mapper input records. Restrict the base assertion to Mapper classes,
+while still checking every nested record's field count/dependencies.
+
+Necessary final format corrections: checker must receive an explicit draft-
+checking request, not the original selection question as its sole user message;
+preserve the complete original input as labeled data. Explicit uncertainty is
+not an affirmative property claim. Knowledge grammar uses an empty optional
+introduction so its actual answer is written in knowledge. Unambiguous care/
+geology questions without a selection verb constrain route to KNOWLEDGE; this
+implements accepted routing, not a new catalog filter or general name/ID lookup.
+Fresh absence state is rendered as none, with every actual inherited state kept.
+No model/threshold/resource/HTTP shape changes and no dependent 0027 execution.
+
+## T0026-006 — Retained Final Recheck Failures and Prompt Corrections
+
+The next final-provider recheck passed generation (including actual care content)
+and both architecture checks. Routing still invented type/size constraints for
+"Find a stone for a shelf", and grounding still rejected the legitimate partial
+explanation saying the red color was unconfirmed. Seven actual reservations
+charged 2683 tokens. These are failures, not replacement successes.
+
+Adding an explicit shelf-only extraction example corrected that route but leaked
+its shelf wish into the separate mixed-care request. The next attempt retained
+six actual reservations and 2469 charged tokens; the current-input generation
+bound remained 8156 within 8192. The checker twice rejected valid uncertainty:
+first it described the draft as claiming red, then treated unmatched red as a
+reason to reject the partial match. No gold or permitted partial semantics change.
+
+Necessary corrections to OllamaRagRoutingProvider.java distinguish literal wishes
+from example values and explicitly keep mixed care without a requested placement
+at use=null. OllamaRagGroundingProvider.java labels the individual target ID and
+states that an unmatched wish expressed as unconfirmed is a valid partial, whereas
+an affirmative unproved property is invalid. These are existing requirement
+corrections under the user's accepted necessary-type authorization, not quality
+threshold tuning. Recheck changed routing/grounding/capacity qualification and
+controlled source-segmentation/strict-validation methods only. Previously passed
+generation and architecture retain their evidence while their inputs are unchanged.
+
+No downstream 0027 ticket starts and no 0026 completed-feature commit is created
+while final provider qualification fails. Real usage from each failed attempt is
+reported rather than concealed by a favorable repetition.
+
+Further retained attempts: the example-isolation prompt still leaked shelf into
+mixed care and rejected valid uncertainty (six reservations, 2705 charged tokens).
+The compact routing prompt without a complete format example instead produced
+invalid shelf decisions; reason-first grounding with the actual individual-target
+mapper still rejected uncertainty (four reservations, 1792 charged tokens).
+Controlled strict-validation/source-segmentation checks passed; generation bound
+8156 stayed unchanged. No failure is removed from this record.
+
+The individual-check qualification now invokes the real production mapper, which
+selects the target card rather than including another specimen's wishes. It retains
+all three unchanged positive/negative prose oracles. Simplifying grounding, keeping
+the complete original question in system facts and making the user message solely
+the draft-validation task corrected uncertainty/invented-property classification.
+However, that run accepted explicit encyclopedia attribution, including its single
+correction (four reservations, 1564 charged tokens). The service's existing strict
+visibility validator rejects that prose independently; model qualification still
+fails rather than counting this as a model success. Explicitly require rejection
+of true statements that disclose sources.
+
+Routing next generates wishes before exact criteria to separate requested use
+from inferred type/size; keep mode first and retain the complete mixed schema
+example. This only changes private JSON property order, not fields or accepted
+semantics. Both changed providers, fresh-input packing and changed source packing
+are rechecked before acceptance. Model, thresholds, gold and resource caps remain
+unchanged.
+
+The literal-wish-first final route passes all three original route cases without
+correction. Final grounding now correctly accepts the unchanged uncertainty case
+and rejects the unchanged invented-red/soaking case, but still accepts forbidden
+attribution despite explicit instructions. Latest attempt: seven reservations,
+2937 charged tokens; required input bound 8156 and controlled segmentation pass.
+
+Necessary correction: reuse StoneRagAnswerValidationService's deterministic
+visibility rule at StoneRagGroundingService's public checking boundary, returning
+a structured invalid result before model admission for explicit forbidden source
+disclosure. Production draft validation already enforces this rule; an additional
+entrypoint must not let a model overturn it. This implements accepted source-free
+checking without relaxing any oracle or relying on another prompt retry.
+
+Final qualification must exercise the actual complete checking service: both
+property cases still invoke the installed model with the production mapper and
+unchanged boolean expectations; the same attribution fixture must be rejected
+with zero reservations. Preserve the raw model failure above and clearly attribute
+the source-disclosure rejection to the deterministic guard. It is not a claim
+that the installed model independently recognizes all forbidden attribution.
+
+
+## T0026-006 — Completed Focused Acceptance
+
+PASS: final complete grounding service accepts uncertainty and rejects invented
+individual properties through two actual installed-model calls; deterministic
+source-disclosure rejection consumes zero reservations. Two reservations charge
+909 tokens. Changed controlled source/strict checks and two architecture tests
+pass. Existing necessarily changed semantic-chat delegate wiring passes all eight
+controlled tests. Final literal-wish-first route and source-free selection/actual
+care generation retain their successful final-provider evidence; current-input
+capacity remains 8156 within 8192. See acceptance.md for all fifteen criterion
+groups and prior ticket evidence. No broad quality or human review is claimed.
+
+All six feature tickets are complete. Create the explicitly requested single
+whole-feature 0026 commit; no task-level commits and no push. Continue the selected
+0025–0029 batch, with 0027's actual human review remaining a required gate.
+
+## Real-Profile Integration Correction Confirmed by 0027
+
+The first real qualification exposed the delivered embedding producer's complete
+profile: base plus the model digest. Semantic retrieval incorrectly accepted only
+the base, and controlled fixtures had reproduced that incorrect shape. The user
+separately authorized this concrete necessary-type correction within 0025–0029.
+Retrieval now validates a 64-lowercase-hex digest suffix and still rejects unequal
+published/query profiles. Controlled semantic/knowledge/RAG fixtures use complete
+profiles; the negative test rejects bare and different-digest input without
+changing candidate/order oracles. Models, thresholds and resource controls are
+unchanged. Focused verification: 29 tests passed across StoneSemanticRetrievalTest,
+StoneSemanticChatIntegrationTest, StoneRagKnowledgeTest and
+StoneRagChatIntegrationTest. Preserve 0027's original failure/accounting. This
+integration correction is included in the existing unpublished whole-feature
+0026 commit; no extra task/fixup commit or push.
+
+The existing JSON OpenAPI regression expects AVAILABLE catalog wording. Restore
+that accurate catalog term in the route description; the focused previously
+failing generated JSON/YAML check passes unchanged. No response or business
+behavior changes.

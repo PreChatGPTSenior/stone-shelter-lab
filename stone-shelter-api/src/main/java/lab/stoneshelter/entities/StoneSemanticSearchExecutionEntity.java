@@ -7,6 +7,9 @@ import lab.stoneshelter.exceptions.StoneSemanticSearchLimitExceededException;
 
 /** Private per-turn state; never a persisted/public conversation response. */
 public class StoneSemanticSearchExecutionEntity {
+    private StoneExactSearchResultEntity exactResult;
+    public StoneExactSearchResultEntity getExactResult() { return exactResult; }
+    public void setExactResult(StoneExactSearchResultEntity value) { exactResult = value; }
     private Instant deadline;
     private Instant modelDeadline;
     private int evidenceCalls;

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import lab.stoneshelter.entities.StoneChatConversationEntity;
 import lab.stoneshelter.entities.StoneChatTurnEntity;
+import lab.stoneshelter.entities.StoneRagPreparedTurnEntity;
 import lab.stoneshelter.entities.StoneChatStoneEntity;
 import lab.stoneshelter.exceptions.StoneChatUnavailableException;
 import lab.stoneshelter.mappers.dtos.StoneChatConversationEntityToStoneChatHistoryResponseMapper;
@@ -13,7 +14,7 @@ import lab.stoneshelter.repositories.StoneChatConversationRepository;
 import lab.stoneshelter.services.StoneChatAdmissionService;
 import lab.stoneshelter.services.StoneChatAvailabilityService;
 import lab.stoneshelter.services.StoneChatbotService;
-import lab.stoneshelter.services.StoneSemanticSearchService;
+import lab.stoneshelter.services.StoneRagConversationService;
 import lab.stoneshelter.services.StoneChatSettings;
 import org.springframework.mock.env.MockEnvironment;
 import java.time.Clock;
@@ -54,12 +55,12 @@ class StoneChatbotServiceTest {
         StoneChatbotService service = new StoneChatbotService(history, serialization, admission, availability,
                 new StoneChatMessageRequestToStoneChatTurnEntityMapper(), new StoneChatTurnEntityToStoneChatMessageResponseMapper(),
                 new StoneChatConversationEntityToStoneChatHistoryResponseMapper(), new StoneChatContextSelector());
-        StoneSemanticSearchService exact = mock(StoneSemanticSearchService.class);
+        StoneRagConversationService exact = mock(StoneRagConversationService.class);
         when(exact.complete(any(), any(), any())).thenAnswer(invocation -> {
             StoneChatTurnEntity completed = invocation.getArgument(0); completed.setText("Exact catalog result");
-            completed.setStones(List.of(new StoneChatStoneEntity(42, "Real catalog stone"))); return completed;
+            completed.setStones(List.of(new StoneChatStoneEntity(42, "Real catalog stone"))); return new StoneRagPreparedTurnEntity(completed, null);
         });
-        service.configureSemanticSearch(exact, Clock.systemUTC(), new StoneChatSettings(new MockEnvironment()));
+        service.configureRagSearch(exact, Clock.systemUTC(), new StoneChatSettings(new MockEnvironment()));
         assertThat(service.sendMessage(request, "session", committed).stones()).hasSize(2);
         verify(exact, never()).complete(any(), any(), any()); verify(serialization, never()).acquire(anyString(), any()); verify(committed, never()).run();
         when(history.findCommitted(any(), any())).thenReturn(null);
@@ -85,12 +86,12 @@ class StoneChatbotServiceTest {
         when(history.findById(anyString(), any())).thenReturn(new StoneChatConversationEntity(1, conversationId, List.of()));
         var guard = mock(StoneChatConversationSerializationService.Guard.class);
         when(serialization.acquire(anyString(), any())).thenReturn(guard);
-        StoneSemanticSearchService exact = mock(StoneSemanticSearchService.class);
+        StoneRagConversationService exact = mock(StoneRagConversationService.class);
         when(exact.complete(any(), any(), any())).thenThrow(new lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException());
         StoneChatbotService service = new StoneChatbotService(history, serialization, mock(StoneChatAdmissionService.class), availability,
                 new StoneChatMessageRequestToStoneChatTurnEntityMapper(), new StoneChatTurnEntityToStoneChatMessageResponseMapper(),
                 new StoneChatConversationEntityToStoneChatHistoryResponseMapper(), new StoneChatContextSelector());
-        service.configureSemanticSearch(exact, Clock.systemUTC(), new StoneChatSettings(new MockEnvironment()));
+        service.configureRagSearch(exact, Clock.systemUTC(), new StoneChatSettings(new MockEnvironment()));
         Runnable committed = mock(Runnable.class);
         assertThatThrownBy(() -> service.sendMessage(new StoneChatMessageRequest(conversationId, UUID.randomUUID(), "basalt", null), "session", committed))
                 .isInstanceOf(lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException.class);
@@ -106,17 +107,17 @@ class StoneChatbotServiceTest {
         doAnswer(call -> { closed.set(true); return null; }).when(guard).close();
         doAnswer(call -> { if (closed.get()) throw new StoneChatUnavailableException(); return null; }).when(guard).check();
         when(serialization.acquire(anyString(), any())).thenReturn(guard);
-        var exact = mock(StoneSemanticSearchService.class); CountDownLatch entered = new CountDownLatch(1); CountDownLatch finish = new CountDownLatch(1);
+        var exact = mock(StoneRagConversationService.class); CountDownLatch entered = new CountDownLatch(1); CountDownLatch finish = new CountDownLatch(1);
         AtomicReference<Thread> worker = new AtomicReference<>();
         when(exact.complete(any(), any(), any())).thenAnswer(call -> {
             worker.set(Thread.currentThread()); entered.countDown();
             while (finish.getCount() != 0) { try { finish.await(); } catch (InterruptedException ignored) { /* Still executing after cancellation request. */ } }
-            return call.getArgument(0);
+            return new StoneRagPreparedTurnEntity(call.getArgument(0), null);
         });
         var service = new StoneChatbotService(history, serialization, mock(StoneChatAdmissionService.class), availability,
                 new StoneChatMessageRequestToStoneChatTurnEntityMapper(), new StoneChatTurnEntityToStoneChatMessageResponseMapper(),
                 new StoneChatConversationEntityToStoneChatHistoryResponseMapper(), new StoneChatContextSelector());
-        var settings = mock(StoneChatSettings.class); when(settings.deadline()).thenReturn(Duration.ofMillis(100)); service.configureSemanticSearch(exact, Clock.systemUTC(), settings);
+        var settings = mock(StoneChatSettings.class); when(settings.deadline()).thenReturn(Duration.ofMillis(100)); service.configureRagSearch(exact, Clock.systemUTC(), settings);
         Runnable committed = mock(Runnable.class);
         try {
             assertThatThrownBy(() -> service.sendMessage(new StoneChatMessageRequest(conversationId, UUID.randomUUID(), "basalt", null), "session", committed))

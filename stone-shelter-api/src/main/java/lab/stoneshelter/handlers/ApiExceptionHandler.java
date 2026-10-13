@@ -7,6 +7,8 @@ import lab.stoneshelter.exceptions.ModelCapacityExceededException;
 import lab.stoneshelter.exceptions.ModelTokenBudgetExceededException;
 import lab.stoneshelter.exceptions.ModelAdmissionDeferredException;
 import lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException;
+import lab.stoneshelter.exceptions.InvalidStoneRagOutputException;
+import lab.stoneshelter.exceptions.StoneRagAnswerLimitExceededException;
 import lab.stoneshelter.exceptions.InvalidStoneSemanticSearchOutputException;
 import lab.stoneshelter.exceptions.StoneSemanticSearchLimitExceededException;
 import lab.stoneshelter.exceptions.StoneCardReindexConflictException;
@@ -176,6 +178,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(StoneSemanticSearchLimitExceededException.class)
     public ProblemDetail semanticLimit(StoneSemanticSearchLimitExceededException exception) {
         return chatProblem(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_SEMANTIC_LIMIT_EXCEEDED", exception.getMessage());
+    }
+    @ExceptionHandler(InvalidStoneRagOutputException.class)
+    public ProblemDetail invalidRagOutput(InvalidStoneRagOutputException exception) {
+        return chatProblem(HttpStatus.BAD_GATEWAY, "CHAT_INVALID_MODEL_OUTPUT", exception.getMessage());
+    }
+    @ExceptionHandler(StoneRagAnswerLimitExceededException.class)
+    public ProblemDetail ragLimit(StoneRagAnswerLimitExceededException exception) {
+        return chatProblem(HttpStatus.SERVICE_UNAVAILABLE, "CHAT_RAG_LIMIT_EXCEEDED", exception.getMessage());
     }
     @ExceptionHandler(ModelAdmissionDeferredException.class)
     public ProblemDetail indexAdmissionDeferred(ModelAdmissionDeferredException exception) {

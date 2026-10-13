@@ -1,6 +1,8 @@
 # Feature 0026 Acceptance Criteria
 
-Status: Criteria prepared. Implementation and verification have not been executed.
+Status: Implemented; focused final-provider, controlled integration and architecture
+verification completed. Final acceptance evidence is recorded below and in ADR-0026;
+broader fixed-query/human answer qualification remains feature 0027.
 
 Requirements: [spec.md](spec.md). Detailed discussion:
 [ADR-0026](../../docs/adr/0026-semantic-search-rag-answers.md).
@@ -88,7 +90,28 @@ pinned Testcontainers and clean up their own data. Controlled providers cover
 failure/cancellation/concurrency cases; real selected-model calls are confined
 to T0026-002 and the explicitly named T0026-006 production recheck.
 
-All AC-0026-001–015: **NOT RUN**. Documentation consistency/whitespace checks
-do not establish runtime readiness, model quality or implementation acceptance.
+Initial planning evidence was NOT RUN; the execution evidence below supersedes
+that historical state. Documentation consistency alone is not runtime evidence.
 Append factual evidence only after authorized execution; broader user-reviewed
 query/answer qualification is feature 0027, not an implicit test expansion here.
+
+
+## Focused Execution Evidence — 2026-10-13
+
+| Criteria | Result and evidence |
+| --- | --- |
+| AC-0026-001–004 | PASS: final real routing for selection/knowledge/mixed; real per-stone and actual care generation; strict visibility/ID/order tests. Model attribution false positives are retained in ADR; deterministic guards enforce rejection. |
+| AC-0026-005 | PASS: StoneRagKnowledgeTest (5), compatible synthetic PostgreSQL vectors/current references, shared two-query cache/cap; integration reuses vector on the single refresh. |
+| AC-0026-006 | PASS: final complete grounding checks the unchanged uncertainty/invention/disclosure oracles. Two actual model calls validate properties; forbidden attribution returns structured false before admission. Controlled one-repair/shared-checker-cap tests pass. |
+| AC-0026-007–008 | PASS: controlled settings/cap/deadline/context/SDK tests and final required-input packing bound 8156 <=8192. Actual 8192 reservation/1024 generation; model-only outage retains unknown 8192 usage through actual exit. No usage bypass. |
+| AC-0026-009–013 | PASS: eleven isolated PostgreSQL/Redis/native-contract integration cases, including exact/mixed counts, templates, knowledge failure/state, trusted references, late partial loss/no refill, one total-loss refresh and narrow current-turn outage completion. |
+| AC-0026-014 | PASS: native generated JSON/YAML success/history shapes and 502/503 errors, one-pair replay and unacknowledged-commit recovery; no internal proof fields exposed. |
+| AC-0026-015 | PASS: preceding 0025 delivered, batch readiness recorded, final providers and two architecture checks pass. No dependency/schema/import/Kafka/frontend implementation. |
+
+Final modified grounding/strict/source-segmentation selectors and architecture:
+five tests PASS. Real grounding attempt has two reservations and 909 actual
+charged tokens. Earlier successful real generation and final route/capacity checks
+retain their evidence because their inputs did not change. All failed model-format
+attempts and charges remain in ADR-0026; these results do not claim broad query
+quality or human answer review. Existing semantic test delegate wiring is checked
+separately before the whole-feature commit.

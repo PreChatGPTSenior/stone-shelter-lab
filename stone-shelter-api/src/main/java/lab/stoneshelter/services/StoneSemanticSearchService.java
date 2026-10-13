@@ -59,15 +59,26 @@ public class StoneSemanticSearchService {
             catch (InvalidStoneSemanticSearchOutputException exception) { if (attempt == 1) throw exception; }
         }
         checkDeadline(execution.getModelDeadline());
+        return prepare(turn, history, decision, execution);
+    }
+
+    public StoneSemanticPreparedTurnEntity prepare(StoneChatTurnEntity turn, List<StoneChatTurnEntity> history,
+            StoneSemanticSearchDecision decision, StoneSemanticSearchExecutionEntity execution) {
+        return prepare(turn, history, decision, execution, false);
+    }
+
+    public StoneSemanticPreparedTurnEntity prepare(StoneChatTurnEntity turn, List<StoneChatTurnEntity> history,
+            StoneSemanticSearchDecision decision, StoneSemanticSearchExecutionEntity execution, boolean knownSelection) {
+        checkDeadline(execution.getModelDeadline());
         StoneSemanticSearchCriteria interpreted = components.mapping().criteria().toEntity(decision);
         Map<String, StoneSemanticWish> wishes = new LinkedHashMap<>();
         if (!decision.getResetSearch()) previousWishes(history).forEach(wish -> wishes.put(wish.key(), wish));
         interpreted.wishes().forEach(wish -> wishes.put(wish.key(), wish));
-        StoneExactSearchPreparationEntity preparation = components.exact().prepare(turn, history, components.mapping().exact().toDto(decision), !wishes.isEmpty());
+        StoneExactSearchPreparationEntity preparation = components.exact().prepare(turn, history, components.mapping().exact().toDto(decision), !wishes.isEmpty(), knownSelection);
         StoneSemanticSearchCriteria selection = new StoneSemanticSearchCriteria(preparation.criteria(), List.copyOf(wishes.values()));
         if (preparation.earlyTurn() != null) return new StoneSemanticPreparedTurnEntity(
                 retainState(preparation.earlyTurn(), selection), selection, null, execution);
-        if (wishes.isEmpty()) return new StoneSemanticPreparedTurnEntity(retainState(components.exact().search(turn, preparation.criteria()), selection),
+        if (wishes.isEmpty()) return new StoneSemanticPreparedTurnEntity(retainState(components.exact().search(turn, preparation.criteria(), execution), selection),
                 selection, null, execution);
         return new StoneSemanticPreparedTurnEntity(turn, selection, components.candidates().prepare(selection, execution), execution);
     }

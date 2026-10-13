@@ -59,6 +59,14 @@ public class StoneChatConversationRepository {
                                     || !range.startInclusive().isBefore(range.endExclusive())))
                         throw new IllegalArgumentException("Invalid stored exact-search metadata");
                 }
+                if (turn.getRagState() != null) {
+                    var state = turn.getRagState();
+                    if (state.mode() == null || state.completion() == null || state.actualSelection()
+                            && (state.mode() != lab.stoneshelter.enums.StoneRagMode.SELECTION || turn.getStones().isEmpty()
+                                || !turn.getTurnId().equals(state.selectionReferenceTurnId())))
+                        throw new IllegalArgumentException("Invalid stored answer-route metadata");
+                }
+
                 if (turn.getSemanticSearchState() != null) {
                     var state = turn.getSemanticSearchState();
                     if (state.getExact() == null || state.getWishes() == null || state.getMode() == null

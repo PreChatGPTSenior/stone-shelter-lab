@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import lab.stoneshelter.services.StoneSemanticSearchService;
+import lab.stoneshelter.services.StoneRagConversationService;
 import lab.stoneshelter.exceptions.ModelCapacityExceededException;
 import lab.stoneshelter.exceptions.ModelTokenBudgetExceededException;
 import lab.stoneshelter.exceptions.InvalidStoneExactSearchOutputException;
@@ -76,7 +76,7 @@ class StoneChatbotControllerTest {
             when(admission.bind(nullable(String.class), any())).thenReturn("test-session");
             when(admission.retentionSeconds()).thenReturn(86400L); return admission;
         }
-        @Bean StoneSemanticSearchService exactSearch() { return mock(StoneSemanticSearchService.class); }
+        @Bean StoneRagConversationService exactSearch() { return mock(StoneRagConversationService.class); }
         @Bean Clock clock() { return Clock.systemUTC(); }
         @Bean StoneChatSettings chatSettings() { return new StoneChatSettings(new MockEnvironment()); }
         @Bean StoneChatbotService chatbot() {

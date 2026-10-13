@@ -152,7 +152,10 @@ class StoneSemanticRetrievalTest {
     @Test
     void incompatiblePublishedProfilesFailInsteadOfLookingLikeNoMatches() {
         long id = card("profile", StoneType.BASALT, StoneSize.SMALL, AdoptionStatus.AVAILABLE, "2026-10-06T12:00:00Z", 1.0);
-        jdbcTemplate.update("UPDATE stone_card_embedding SET embedding_profile='different-profile' WHERE stone_id=?", id);
+        var bare = new StoneDocumentEmbeddingEntity(StoneDocumentEmbeddingInputEntity.MODEL, StoneDocumentEmbeddingInputEntity.PROFILE, vector(1), 1);
+        assertThatThrownBy(() -> repository.findPassages(new StoneSemanticPassageCriteria(bare, List.of(), new StoneSemanticPassageCriteria.Bounds(10, 0.5))))
+                .isInstanceOf(StoneDocumentDependencyUnavailableException.class);
+        jdbcTemplate.update("UPDATE stone_card_embedding SET embedding_profile=? WHERE stone_id=?", StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "b".repeat(64), id);
         assertThatThrownBy(() -> repository.search(retrieval(exact(), List.of()))).isInstanceOf(StoneDocumentDependencyUnavailableException.class);
     }
 
@@ -202,7 +205,7 @@ class StoneSemanticRetrievalTest {
                 Timestamp.from(Instant.parse(admissionDate)), "Current factual biography");
         ids.add(id);
         if (score != null) jdbcTemplate.update("INSERT INTO stone_card_embedding(stone_id,text,embedding_profile,embedding) VALUES(?,?,?,?::vector)",
-                id, "Stale projection must not become factual authority", StoneDocumentEmbeddingInputEntity.PROFILE, Arrays.toString(vector(score)));
+                id, "Stale projection must not become factual authority", (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)), Arrays.toString(vector(score)));
         return id;
     }
 
@@ -210,11 +213,11 @@ class StoneSemanticRetrievalTest {
         jdbcTemplate.update("""
                 INSERT INTO stone_document_index(document_key,source_version,embedding_profile,language,indexed_fragments)
                 VALUES(?,?,?,'en',3) ON CONFLICT DO NOTHING
-                """, documentKey, SOURCE_VERSION, StoneDocumentEmbeddingInputEntity.PROFILE);
+                """, documentKey, SOURCE_VERSION, (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)));
         jdbcTemplate.update("""
                 INSERT INTO stone_document_fragment(document_key,fragment_order,source_version,embedding_profile,language,stone_type,section_path,passage_text,embedding)
                 VALUES(?,?,?,?,'en',?,'test',?,?::vector)
-                """, documentKey, order, SOURCE_VERSION, StoneDocumentEmbeddingInputEntity.PROFILE, type.name(), text, Arrays.toString(vector(score)));
+                """, documentKey, order, SOURCE_VERSION, (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)), type.name(), text, Arrays.toString(vector(score)));
     }
 
     private StoneExactSearchCriteria exact() {
@@ -230,7 +233,7 @@ class StoneSemanticRetrievalTest {
     }
 
     private StoneDocumentEmbeddingEntity query() {
-        return new StoneDocumentEmbeddingEntity(StoneDocumentEmbeddingInputEntity.MODEL, StoneDocumentEmbeddingInputEntity.PROFILE, vector(1), 1);
+        return new StoneDocumentEmbeddingEntity(StoneDocumentEmbeddingInputEntity.MODEL, (StoneDocumentEmbeddingInputEntity.PROFILE + "/" + "a".repeat(64)), vector(1), 1);
     }
 
     private double[] vector(double score) {

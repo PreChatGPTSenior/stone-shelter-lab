@@ -13,6 +13,7 @@ import lab.stoneshelter.criteria.StoneExactSearchCriteria;
 import lab.stoneshelter.entities.StoneChatTurnEntity;
 import lab.stoneshelter.entities.StoneExactSearchResultEntity;
 import lab.stoneshelter.entities.StoneExactSearchPreparationEntity;
+import lab.stoneshelter.entities.StoneSemanticSearchExecutionEntity;
 import lab.stoneshelter.shared.StoneExactSearchDecision;
 import lab.stoneshelter.enums.StoneExactSearchAction;
 import lab.stoneshelter.enums.StoneExactSearchReferenceKind;
@@ -53,10 +54,16 @@ public class StoneExactSearchService {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public StoneExactSearchPreparationEntity prepare(StoneChatTurnEntity turn, List<StoneChatTurnEntity> history,
             StoneExactSearchDecision decision, boolean semanticNarrowing) {
+        return prepare(turn, history, decision, semanticNarrowing, false);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public StoneExactSearchPreparationEntity prepare(StoneChatTurnEntity turn, List<StoneChatTurnEntity> history,
+            StoneExactSearchDecision decision, boolean semanticNarrowing, boolean knownSelection) {
         StoneExactSearchCriteria prior = decision.getResetSearch() ? null : previousCriteria(history);
         StoneExactSearchCriteria effective = merge(decision, decision.getResetSearch() ? null : prior);
         String request = turn.getMessage().toLowerCase(Locale.ROOT);
-        if (decision.getAction() == StoneExactSearchAction.UNSUPPORTED || !semanticNarrowing && unsupported(request))
+        if (decision.getAction() == StoneExactSearchAction.UNSUPPORTED || !semanticNarrowing && !knownSelection && unsupported(request))
             return preparedAnswer(effective, answer(turn, decision.getResetSearch() ? null : prior,
                     "I can search by stone type, size, availability and admission date. Please choose one of these conditions."));
         if (missingYear(request)) {
@@ -94,13 +101,22 @@ public class StoneExactSearchService {
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public StoneChatTurnEntity search(StoneChatTurnEntity turn, StoneExactSearchCriteria effective) {
+        return search(turn, effective, null);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public StoneChatTurnEntity search(StoneChatTurnEntity turn, StoneExactSearchCriteria effective, StoneSemanticSearchExecutionEntity execution) {
         StoneExactSearchResultEntity result = components.repository().search(effective);
         result.setTurn(turn);
         result.setText(result.getTotal() == 0 ? "No available stones match these conditions."
                 : result.getTotal() > 5 ? "Found " + result.getTotal() + " matching available stones. Here are the first five. Which stone type would you prefer? What size would you like?"
                 : "Found " + result.getTotal() + " matching available stones.");
+        if (execution != null) execution.setExactResult(result);
         return components.mapping().result().toEntity(result);
     }
+    @Transactional(readOnly = true)
+    public long count(StoneExactSearchCriteria stoneExactSearchCriteria) { return components.repository().count(stoneExactSearchCriteria); }
+
     private StoneChatTurnEntity clarify(StoneChatTurnEntity turn, StoneExactSearchCriteria prior, String reason) {
         return answer(turn, prior, reason + " Which stone type would you like? What size or admission date do you prefer?");
     }

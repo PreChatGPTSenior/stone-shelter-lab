@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import lab.stoneshelter.exceptions.StoneChatUnavailableException;
 import lab.stoneshelter.entities.StoneChatTurnEntity;
+import lab.stoneshelter.entities.StoneRagPreparedTurnEntity;
 import lab.stoneshelter.mappers.dtos.StoneChatConversationEntityToStoneChatHistoryResponseMapper;
 import lab.stoneshelter.mappers.dtos.StoneChatTurnEntityToStoneChatMessageResponseMapper;
 import lab.stoneshelter.mappers.entities.StoneChatMessageRequestToStoneChatTurnEntityMapper;
@@ -29,9 +30,9 @@ public class StoneChatbotService {
                               StoneChatAdmissionService admission, StoneChatAvailabilityService availability) {}
     private record Mapping(StoneChatMessageRequestToStoneChatTurnEntityMapper request, StoneChatTurnEntityToStoneChatMessageResponseMapper response,
                            StoneChatConversationEntityToStoneChatHistoryResponseMapper history, StoneChatContextSelector context) {}
-    private record Execution(StoneSemanticSearchService search, Clock clock, Duration deadline) {}
+    private record Execution(StoneRagConversationService search, Clock clock, Duration deadline) {}
     private Execution execution;
-    @Autowired public void configureSemanticSearch(StoneSemanticSearchService search, Clock clock, StoneChatSettings settings) {
+    @Autowired public void configureRagSearch(StoneRagConversationService search, Clock clock, StoneChatSettings settings) {
         execution = new Execution(search, clock, settings.deadline());
     }
     private final Components components;
@@ -50,7 +51,7 @@ public class StoneChatbotService {
             StoneChatTurnEntity turn = mapping.request().toEntity(request);
             StoneChatTurnEntity replay = components.history().findCommitted(components.history().findById(sessionId, request.conversationId()), turn);
             if (replay != null) { components.availability().assertReady(); return mapping.response().toDto(replay); }
-            StoneChatTurnEntity committed;
+            StoneRagPreparedTurnEntity committed;
             Instant processingDeadline = execution.clock().instant().plus(execution.deadline());
             try (var guard = components.serialization().acquire(sessionId, request.conversationId())) {
                 components.availability().assertReady();
@@ -59,13 +60,14 @@ public class StoneChatbotService {
                 if (racedReplay != null) return mapping.response().toDto(racedReplay);
                 if (mapping.context().select(conversation.turns()) == null) throw new StoneChatUnavailableException();
                 guard.check(); components.availability().assertReady();
-                CompletableFuture<StoneChatTurnEntity> completion = new CompletableFuture<>();
+                CompletableFuture<StoneRagPreparedTurnEntity> completion = new CompletableFuture<>();
                 Thread worker = Thread.ofVirtual().name("stone-search-turn").start(() -> {
                     try {
-                        StoneChatTurnEntity completed = execution.search().complete(turn, conversation.turns(), processingDeadline);
-                        guard.check(); components.availability().assertReady();
-                        StoneChatTurnEntity saved = components.history().append(sessionId, request.conversationId(), guard.token(), completed);
-                        guard.check(); components.availability().assertReady(); completion.complete(saved);
+                        StoneRagPreparedTurnEntity completed = execution.search().complete(turn, conversation.turns(), processingDeadline);
+                        guard.check(); components.availability().assertCompletion(completed, sessionId, request.conversationId());
+                        StoneChatTurnEntity saved = components.history().append(sessionId, request.conversationId(), guard.token(), completed.turn());
+                        guard.check(); components.availability().assertCompletion(completed, sessionId, request.conversationId());
+                        completion.complete(new StoneRagPreparedTurnEntity(saved, completed.completionEvidence()));
                     } catch (RuntimeException exception) { completion.completeExceptionally(exception); }
                 });
                 try {
@@ -78,9 +80,10 @@ public class StoneChatbotService {
                     if (exception.getCause() instanceof RuntimeException runtime) throw runtime;
                     throw new StoneChatUnavailableException(exception);
                 }
-                guard.check(); components.availability().assertReady();
+                guard.check(); components.availability().assertCompletion(committed, sessionId, request.conversationId());
             }
-            components.availability().assertReady(); onCommitted.run(); return mapping.response().toDto(committed);
+            components.availability().assertCompletion(committed, sessionId, request.conversationId());
+            onCommitted.run(); return mapping.response().toDto(committed.turn());
         });
     }
     @Transactional(readOnly = true)
