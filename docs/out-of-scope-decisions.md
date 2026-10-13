@@ -15,6 +15,18 @@ Decision record: [ADR-0030, phase 2](adr/phase-2/0030-reliable-search-analytics.
 | --- | --- | --- |
 | OOS-0030-001 | Entire reliable search analytics feature in the current development phase | Defer all analytics-specific discussion/preparation, contracts, event publication, storage/migrations, consumers and verification to phase 2 as feature 0030. Current-phase streaming API 0028 and widget 0029 do not depend on analytics. Existing indexing outbox/Kafka work and feature 0027 qualification remain unchanged. |
 
+## Feature 0029: Chat Streaming Widget
+
+Accepted on 2026-10-13. Feature: [specification](../specs/0029-chat-streaming-widget/spec.md).
+Decision record: [ADR-0029](adr/0029-chat-streaming-widget.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0029-001 | API-mode transition to mock data or automatic JSON fallback | Real API mode never switches to mocks for sends, retries, history or recovery, including failures or missing/malformed data; explicitly selected development mock mode is separate. Streaming failure does not automatically resend through JSON. |
+| OOS-0029-002 | Definitive UX decision for interrupted partial-answer presentation | Use the accepted provisional behavior in this phase: retain received partial text as incomplete and offer manual authoritative history recovery without duplicates or automatic resend. Defer the final keep/clear/redesign decision to a later discussion; no date or phase assignment is assumed. Provisional behavior still requires implementation and verification. |
+| OOS-0029-003 | Separate stop-display or stop-generation UI control | Do not add a separate stop button in this phase. Existing collapse keeps the stream/conversation alive; backend cancellation remains excluded by 0028. Technical cleanup on page exit, transport failure or invalid protocol is not a user cancellation feature. |
+| OOS-0029-004 | Rich response markup and artificial typing animation | Render response text literally without HTML/Markdown formatting or artificial typing/replay delays. Show arriving fragments and valid completed content directly; existing ordered stone links remain separate UI elements. No rich-rendering or animation dependency is selected. |
+
 ## Feature 0028: Chat Streaming API
 
 Accepted on 2026-10-13. Feature: [specification](../specs/0028-chat-streaming-api/spec.md).

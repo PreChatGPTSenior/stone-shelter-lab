@@ -1,62 +1,155 @@
 # Feature 0029: Chat Streaming Widget
 
-Status: Initial draft for discussion. Not ready for implementation.
+Status: Discussion complete; all 17 questions answered. Specification, acceptance,
+plan and tasks prepared. Implementation, environment readiness, application tests
+and actual browser verification are NOT RUN.
 
 ## Goal and References
 
-Integrate the backend streaming contract into the existing React chat widget.
+Integrate the prepared 0028 stream into the existing React chat widget without
+creating a second conversation store or changing backend search behavior. Present
+checked saved response fragments in one message and add authoritative links only
+when valid completed arrives. Keep the entire explicitly selected development UI
+usable on mock data without a backend; real API mode never becomes mock mode.
 
-- Shared requirements: [LLM Search Discovery](../0015-llm-search-discovery/spec.md).
-- Shared decisions: [ADR-0007](../../docs/adr/0007-llm-search-discovery.md).
-- Acceptance criteria: [acceptance.md](acceptance.md).
-- Technical decisions: [plan.md](plan.md).
-- Task preparation: [tasks.md](tasks.md).
+- Full questions/answers/decisions: [ADR-0029](../../docs/adr/0029-chat-streaming-widget.md).
+- Acceptance criteria exclusively: [acceptance.md](acceptance.md).
+- Technical preparation: [plan.md](plan.md); tickets: [tasks.md](tasks.md).
+- Streaming contract: [0028](../0028-chat-streaming-api/spec.md).
+- History/session lifecycle: [0016](../0016-llm-search-conversation-history-and-context/spec.md).
+- Existing UI architecture: [ADR-0005](../../docs/adr/0005-ui-mock-to-code.md).
+- Pinned UI versions: [ADR-0002](../../docs/adr/0002-stack-ui-versions.md).
 
-## Initial Scope
+## Modes and API Boundary
 
-- Render answer text incrementally and expose stone links after completion.
-- Preserve conversation navigation/reload behaviour from feature 0016.
-- Handle stream errors, cancellation and reconnect/retry according to the backend contract.
-- Verify browser state against real API behaviour as well as focused UI tests.
+In API mode, each intentional send and explicit retry uses POST
+/api/v1/chat/messages/stream with the captured original request, cookies and
+existing identity/context semantics. Never switch real sends, history or recovery
+to mocks, and never automatically resend a failed stream through JSON. Keep the
+ordinary backend JSON route independent; it is not a widget recovery fallback.
 
-## Delivery Boundary to Refine
+Preserve the existing explicitly selected mock mode for the whole UI, including
+catalog/details/create/reservation/navigation and chat/history. Matching mock
+stream/history adapters provide the same interface and state outcomes without
+real backend, cookie-service, model or network synchronization dependencies.
+API/domain DTOs remain in api/dto; enums in enums; fixtures/adapters in mocks.
+Components do not import mock datasets, and real API failure never selects them.
+No new mode-switch control or unrelated catalog/mock rewrite is introduced.
 
-- Use the completed feature 0028 contract; do not invent another stream protocol in the UI.
-- Backend search/indexing changes remain in their respective features. Reliable search analytics is outside this development phase.
+Generated backend OpenAPI remains the HTTP source of truth. Client typed event
+models conform to 0028; do not create another handwritten HTTP contract or change
+backend DTOs/routes to make UI fixtures convenient.
 
-These boundaries organize discussion; they do not establish new accepted product
-exclusions. Record newly accepted out-of-scope decisions in the feature ADR and
-[central register](../../docs/out-of-scope-decisions.md) when confirmed.
+## Stream Validation and Display
 
-## Dependencies
+Validate HTTP success/content type, named event structure, expected conversationId/
+turnId, safe positive contiguous sequence, literal text and reference shapes.
+Ignore keep-alive comments. SSE/UTF-8 parsing must tolerate network chunks that
+split bytes, lines or frames; malformed named data is not a heartbeat.
 
-- [0028-chat-streaming-api](../0028-chat-streaming-api/spec.md).
-- [0016-llm-search-conversation-history-and-context](../0016-llm-search-conversation-history-and-context/spec.md).
+Accept started first, then checked nonempty text-delta fragments and a valid
+terminal completed or error. Retained replay may contain started/completed with
+no deltas. If deltas exist, their exact concatenation must equal completed.text;
+completed supplies full text and ordered safe-positive id/nonblank name links.
+A foreign identity, missing/repeated sequence, malformed payload, inconsistent
+text or EOF without a valid terminal success requires manual recovery, not guessed
+completion or repaired content. Close/release the reader at terminal delivery.
 
-Existing capabilities must pass fresh readiness checks; their documentation or
-prior verification is not evidence of current runtime readiness.
+Show ordinary waiting until the first fragment. Append fragments to one assistant
+message identified by the turn, not one bubble per event. A valid completed
+finalizes that same message with full text/references immediately. Keep literal
+plain text/whitespace/Unicode and existing separate catalog links, without HTML/
+Markdown rendering or typing/replay animation. No visible sources/internal stages.
 
-## Open Decisions
+Block send/quick prompts/manual send-retry while awaiting/receiving or synchronizing
+history. Keep draft editing available; edits never mutate captured original retry
+payload/context. Ordinary UI blocking supplements server admission, not replaces it.
 
-Former feature 0030 is now 0029; its readiness ticket is T0029-001.
-The new [0030 analytics feature](../0030-reliable-search-analytics/spec.md) is
-entirely deferred to phase 2, as recorded in
-[the phase-2 ADR](../../docs/adr/phase-2/0030-reliable-search-analytics.md).
-No analytics implementation or analytics dependency is part of this widget phase.
+## Recovery and Provisional Partial-Answer Rule
 
-- Pending/partial/error UI states and retry interaction.
-- Navigation, reload and duplicate-completion reconciliation.
-- Exact frontend file allowlist, focused selectors and browser smoke scenarios.
+Before completed, interrupted delivery retains received text in active-page state
+with an incomplete marker and manual history recovery, without links or a completion
+claim. This is explicitly provisional under OOS-0029-002. Definitive keep/clear/
+redesign policy is deferred to a later discussion; no date/phase is assumed.
+The provisional behavior still needs implementation and verification now.
 
-## Contract and Implementation Preparation
+Reconcile authoritative history by turnId/role, update existing matching messages
+instead of duplicating them and preserve the captured original request while a
+manual retry remains relevant. Never infer rollback from absent current history
+or automatically resend. Retention loss/ownership/empty history follow 0016.
 
-English-only delivery and existing pinned project versions remain the starting
-point. Before implementation, settle this feature's behaviour and contracts,
-fill acceptance.md and plan.md, and define exact writable files and focused test
-selectors in tasks.md. HTTP contracts are generated from controllers/shared DTOs;
-do not create handwritten OpenAPI. Define applicable AsyncAPI contracts before
-Kafka implementation. Use new Liquibase migrations for schema changes.
+Once valid completed arrives, the response is confirmed even if the later history/
+cookie synchronization fails. Retain full answer/links, show a separate recovery
+problem and block further sends until successful verified recovery. Do not offer
+send retry for that completed turn. A post-completion history read must match the
+just-confirmed pair; a missing/inconsistent pair is a reconciliation issue, not
+permission to erase success or fabricate rollback. Initial/manual restore retains
+0016's authoritative expiry/ownership handling and never reconstructs lost work.
 
-The first execution ticket must establish readiness for the entire requested
-batch. This draft authorizes no implementation, source provisioning, model
-calls/downloads, business imports, commits or pushes.
+Recognized rate/busy/model-capacity/stream-capacity rejections preserve the original
+payload and valid Retry-After cooldown for manual retry, without declaring a healthy
+backend globally unavailable. Actual CHAT_UNAVAILABLE, unknown control/delivery or
+malformed protocol requires manual authoritative recovery. Local model-output/
+limit errors retain their existing contract distinction; do not guess retry times
+or classify all 503 responses alike. A retry keeps one local user entry and uses
+the exact original turnId/message/context. No automatic polling/reconnect/resume.
+
+## Navigation, Reload and Cookie Handoff
+
+Navigation, Back/Forward, collapse and temporary invisibility preserve conversation,
+draft and the active stream through shared provider state. Render cleanup must not
+abort/restart the request. Separate stop-display/generation UI is excluded.
+
+Full reload restores saved history only, starts collapsed and does not persist/
+restore old draft, pending/error/partial state or request payload. Backend work may
+finish later; make manual history refresh available when idle, without automatic
+polling or rebuilding the old request. New intentional sends use new turn IDs.
+
+After completed, reconcile history when dependencies permit, using real GET only
+in API mode and the matching mock history operation in mock mode. The narrow 0028
+cookie baseline synchronizes browser expiry without extending server TTL; its
+full detailed redesign/discussion is deferred after phase-1 implementation under
+OOS-0028-004. Sync failure never regenerates a completed response or triggers mocks.
+
+## Presentation and Accessibility
+
+Follow incoming content automatically only while the user is at the conversation
+bottom. Preserve older-message reading position; an initial 80 CSS-pixel near-bottom
+tolerance is a technical preparation choice. Keep existing focus/Escape/collapse
+behavior. Announce waiting and a newly completed answer once per turn, not every
+fragment or repeated history reconciliation. Errors/statuses and final links remain
+accessible through existing keyboard/live-region semantics.
+
+API mode removes Demo assistant/Demo replies labels; explicit mock mode is clearly
+identified. Preserve the existing 2000-character limit and plain-text input rules.
+Mode identification is not evidence-source attribution.
+
+## Technical Client Bounds
+
+Initial VITE_CHAT_STREAM_TIMEOUT_MS=135000 is a positive finite integer, at most
+2147483647 milliseconds to fit the browser timer range, bounding
+one request/read attempt, not reset by started/heartbeat. It does not extend backend
+processing, authorize automatic retry or cancel server work. API history operations
+used for synchronization/recovery also receive a finite request bound. Mock mode
+has no backend dependency.
+
+Bound an unfinished encoded SSE frame and active streamed answer text initially
+to 1 MiB each; parse complete frames incrementally rather than buffering the entire
+response. These are technical client limits, not new backend search/model limits.
+Confirm compatibility with valid maximum backend responses before integrated
+execution; incompatibility is a blocker/correction proposal, not silent truncation.
+Expired reads abort/release transport and use the accepted recovery state.
+
+## Boundaries and Completion
+
+OOS-0029-001–004 are identically recorded in ADR-0029 and the
+[central register](../../docs/out-of-scope-decisions.md): API fallback to mocks/
+automatic JSON resend, definitive interrupted-answer UX, separate stop UI and
+rich markup/artificial typing. The existing analytics feature is
+[0030, entirely phase 2](../0030-reliable-search-analytics/spec.md).
+
+No library/version/schema/backend contract change or new model-quality campaign.
+API execution requires delivered 0028 and fresh prerequisites; prepared documents
+are not an available endpoint. No baseline product question remains open. Current
+authorization is documentation only; stop after preparation/verification, without
+code, application tests, browser operations, service startup, commits or pushes.
