@@ -45,3 +45,7 @@
   .chat-composer { padding: 8px 12px; }
   .chat-limit { margin-top: 4px; }
 }
+
+.chat-incomplete { display: block; margin-top: 8px; color: #85372b; }
+.chat-recovery { margin-top: 12px; font-size: 12px; }
+.chat-recovery button { border: 1px solid #cdd9c7; border-radius: 14px; background: white; padding: 7px 12px; color: var(--color-accent); cursor: pointer; }

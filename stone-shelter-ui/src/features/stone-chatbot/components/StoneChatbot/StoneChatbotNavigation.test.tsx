@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { App } from '../../../../App/App';
+import { stubChatStream } from '../../state/ChatSessionProvider/chatStreamTestSupport';
 import * as chatbotApi from '../../../../api/chatbotApi';
 import type { StoneChatMessageResponse } from '../../../../api/dto/StoneChatMessageResponse';
 
@@ -21,7 +22,7 @@ async function mountOpen() {
 }
 
 test('chat links open mock stone details and Back/Forward preserve conversation, draft and open state', async () => {
-  const send = vi.spyOn(chatbotApi, 'sendChatMessage');
+  const send = vi.spyOn(chatbotApi, 'sendChatMessageStream');
   await mountOpen();
   expect(document.querySelector('.page-layout.chat-visible')).toBeTruthy();
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Help me choose a stone' })); });
@@ -48,7 +49,7 @@ test('chat links open mock stone details and Back/Forward preserve conversation,
 
 test('a pending request settles on a hidden route without resend and returns with its result', async () => {
   let resolve!: (response: StoneChatMessageResponse) => void;
-  const send = vi.spyOn(chatbotApi, 'sendChatMessage').mockReturnValue(new Promise(accept => { resolve = accept; }));
+  const send = stubChatStream(() => new Promise(accept => { resolve = accept; }));
   window.history.replaceState(null, '', '/stone-shelter/stones/1');
   await mountOpen();
   fireEvent.change(screen.getByRole('textbox'), { target: { value: 'About Mars' } });
@@ -67,7 +68,7 @@ test('a pending request settles on a hidden route without resend and returns wit
 
 test('collapse and resize preserve a pending reply and the new draft until reopening', async () => {
   let resolve!: (response: StoneChatMessageResponse) => void;
-  const send = vi.spyOn(chatbotApi, 'sendChatMessage').mockReturnValue(new Promise(accept => { resolve = accept; }));
+  const send = stubChatStream(() => new Promise(accept => { resolve = accept; }));
   await mountOpen();
   fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Choose' } });
   fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
@@ -108,7 +109,7 @@ test('filter modal keeps chat inert and Escape closes the modal without collapsi
 });
 
 test('missing stub references retain the existing not-found route without clearing chat', async () => {
-  vi.spyOn(chatbotApi, 'sendChatMessage').mockResolvedValue({ text: 'Demo', stones: [{ id: 999, name: 'Missing demo stone' }] });
+  stubChatStream(async () => ({ text: 'Demo', stones: [{ id: 999, name: 'Missing demo stone' }] }));
   await mountOpen();
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Another topic' })); });
   await act(async () => { fireEvent.click(screen.getByRole('link', { name: 'Missing demo stone' })); });

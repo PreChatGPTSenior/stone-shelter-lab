@@ -1,8 +1,10 @@
 # Feature 0029: Chat Streaming Widget
 
-Status: Discussion complete; all 17 questions answered. Specification, acceptance,
-plan and tasks prepared. Implementation, environment readiness, application tests
-and actual browser verification are NOT RUN.
+Status: T0029-001–006 complete. Recorded evidence satisfies the acceptance scope
+amended on 2026-10-14; mock create/reservation browser submissions are no longer
+required. Fresh closure readiness and mandatory UI lint/all 235 tests/build PASS.
+See [browser-verification.md](browser-verification.md). The user has authorized
+completion and local commits of all current changes; no push is requested.
 
 ## Goal and References
 
@@ -10,7 +12,8 @@ Integrate the prepared 0028 stream into the existing React chat widget without
 creating a second conversation store or changing backend search behavior. Present
 checked saved response fragments in one message and add authoritative links only
 when valid completed arrives. Keep the entire explicitly selected development UI
-usable on mock data without a backend; real API mode never becomes mock mode.
+usable on mock data without a backend for developers' testing only. The user-facing
+API mode requires a backend and never becomes mock mode.
 
 - Full questions/answers/decisions: [ADR-0029](../../docs/adr/0029-chat-streaming-widget.md).
 - Acceptance criteria exclusively: [acceptance.md](acceptance.md).
@@ -28,13 +31,22 @@ existing identity/context semantics. Never switch real sends, history or recover
 to mocks, and never automatically resend a failed stream through JSON. Keep the
 ordinary backend JSON route independent; it is not a widget recovery fallback.
 
-Preserve the existing explicitly selected mock mode for the whole UI, including
-catalog/details/create/reservation/navigation and chat/history. Matching mock
+Preserve the existing explicitly selected mock mode for developers' development
+and testing only, including catalog/details/create/reservation/navigation and
+chat/history. Backend-free operation belongs exclusively to this mode; the
+user-facing API mode requires the backend. Matching mock
 stream/history adapters provide the same interface and state outcomes without
 real backend, cookie-service, model or network synchronization dependencies.
 API/domain DTOs remain in api/dto; enums in enums; fixtures/adapters in mocks.
 Components do not import mock datasets, and real API failure never selects them.
 No new mode-switch control or unrelated catalog/mock rewrite is introduced.
+
+Under the accepted 2026-10-14 amendment, retain existing automated coverage for
+mock creation/reservation. Actual mock browser verification focuses on the changed
+chat/history/navigation/reload lifecycle; creating Widget 0029 browser fixture and
+submitting the Luna application are excluded from mandatory browser verification.
+This changes verification scope, not the existing creation/reservation behavior.
+The observable evidence requirements remain exclusively in [acceptance.md](acceptance.md).
 
 Generated backend OpenAPI remains the HTTP source of truth. Client typed event
 models conform to 0028; do not create another handwritten HTTP contract or change
@@ -142,7 +154,7 @@ Expired reads abort/release transport and use the accepted recovery state.
 
 ## Boundaries and Completion
 
-OOS-0029-001–004 are identically recorded in ADR-0029 and the
+OOS-0029-001–005 are identically recorded in ADR-0029 and the
 [central register](../../docs/out-of-scope-decisions.md): API fallback to mocks/
 automatic JSON resend, definitive interrupted-answer UX, separate stop UI and
 rich markup/artificial typing. The existing analytics feature is

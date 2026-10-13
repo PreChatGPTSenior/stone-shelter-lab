@@ -457,3 +457,33 @@ configured total chat context) and CHAT_RAG_MAX_GENERATION_CALLS (default 4,
 integer from 1 through 4). Interpretation/checking keep the existing 512 output
 allowance. The final five seconds of the original turn deadline are reserved
 for final eligibility/template/history work; model calls never gain extra time.
+
+
+### Feature 0029 client transport bound
+
+`VITE_CHAT_STREAM_TIMEOUT_MS` defaults to `135000`; use a positive integer no
+greater than `2147483647`. It bounds one fetch/read or history request without
+resetting on heartbeat. It closes client transport and does not cancel an admitted
+backend turn. API mode never changes to mocks or automatically resends via JSON.
+The initial 1 MiB unfinished-frame/active-answer bounds fit the checked initial
+8192/512/1024 backend configuration; reassess compatibility if those limits change.
+
+
+## Real-Model Qualification Test Quota
+
+MODEL_DAILY_TOKEN_BUDGET is a positive configurable UTC-day token quota. The
+application default is 100000; feature 0027 qualification defaults to 200000,
+explicitly doubled for test runs. Supply it in the test command environment:
+
+```sh
+MODEL_DAILY_TOKEN_BUDGET=200000 ./mvnw -B '-Dtest=StoneSearchQueryQualificationTest#verifyTokenBudgetConfiguration+verifyQuotaInterruptionClassification' test
+```
+
+Run from stone-shelter-api with the approved command-scoped JAVA_HOME/service/
+owned-fixture settings from the existing qualification setup. A supplied positive
+value overrides the test default and is recorded in new execution evidence.
+The temporary owned launcher must preserve this value instead of replacing it
+with 100000. Keep actual isolated usage/reservations; changing the quota does not
+reset accounting or rewrite older attempts' settings/results. Token exhaustion
+marks verification INCOMPLETE_BUDGET_EXHAUSTED and stops collection, including
+quota-caused saved templates. Controlled quota checks perform no live inference.

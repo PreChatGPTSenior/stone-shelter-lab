@@ -17,7 +17,7 @@ Decision record: [ADR-0030, phase 2](adr/phase-2/0030-reliable-search-analytics.
 
 ## Feature 0029: Chat Streaming Widget
 
-Accepted on 2026-10-13. Feature: [specification](../specs/0029-chat-streaming-widget/spec.md).
+Accepted on 2026-10-13; OOS-0029-005 added on 2026-10-14. Feature: [specification](../specs/0029-chat-streaming-widget/spec.md).
 Decision record: [ADR-0029](adr/0029-chat-streaming-widget.md).
 
 | ID | Accepted exclusion | Scope boundary |
@@ -26,6 +26,7 @@ Decision record: [ADR-0029](adr/0029-chat-streaming-widget.md).
 | OOS-0029-002 | Definitive UX decision for interrupted partial-answer presentation | Use the accepted provisional behavior in this phase: retain received partial text as incomplete and offer manual authoritative history recovery without duplicates or automatic resend. Defer the final keep/clear/redesign decision to a later discussion; no date or phase assignment is assumed. Provisional behavior still requires implementation and verification. |
 | OOS-0029-003 | Separate stop-display or stop-generation UI control | Do not add a separate stop button in this phase. Existing collapse keeps the stream/conversation alive; backend cancellation remains excluded by 0028. Technical cleanup on page exit, transport failure or invalid protocol is not a user cancellation feature. |
 | OOS-0029-004 | Rich response markup and artificial typing animation | Render response text literally without HTML/Markdown formatting or artificial typing/replay delays. Show arriving fragments and valid completed content directly; existing ordered stone links remain separate UI elements. No rich-rendering or animation dependency is selected. |
+| OOS-0029-005 | Mandatory browser submissions for mock stone creation and reservation in feature 0029 | Accepted on 2026-10-14 for [feature 0029](../specs/0029-chat-streaming-widget/spec.md). Remove creating Widget 0029 browser fixture and submitting the Luna application from mandatory browser verification. Retain existing automated mock creation/reservation coverage and actual mock chat/history/navigation/reload browser evidence. Backend-free mock mode is exclusively for developers' development/testing; the user-facing API mode requires the backend. Existing creation/reservation functionality remains required. |
 
 ## Feature 0028: Chat Streaming API
 
@@ -48,7 +49,9 @@ Decision record: [ADR-0027](adr/0027-llm-search-query-qualification.md).
 | --- | --- | --- |
 | OOS-0027-001 | Automatic production-code corrections during qualification | A poor result triggers additional diagnosis and a concrete correction proposal. Agree the correction behavior, exact writable files and verification separately before code changes; qualification alone does not authorize production fixes or threshold adoption. |
 | OOS-0027-002 | Performance measurements, benchmarks and speed optimization | Evaluate correctness and selection/explanation quality without latency/throughput, percentile timing, CPU/memory or model-speed analysis. Existing timeout/resource-limit correctness and reporting of failures remain required. |
-| OOS-0027-003 | Manual application acceptance against the user's personal scenario set | The user will collect a separate personal set during development and manually test the application after implementation. That unsupplied set and its execution are deferred from current 0027 qualification; no submission is required now. The approved fixed 20-scenario qualification and human review of its generated answers remain in scope. |
+| OOS-0027-003 | Manual application acceptance against the user's personal scenario set | The user will collect a separate personal set during development and manually test the application after implementation. That unsupplied set and its execution are deferred from current 0027 qualification; no submission is required now. The approved fixed 20-scenario autonomous qualification remains in scope; current user review of its outputs is separately deferred under OOS-0027-005. |
+| OOS-0027-004 | Request-sized embedding reservation and tokenizer-based reservation redesign | Accepted on 2026-10-14 under D0027-012: defer the smaller per-input reserve, local/exact tokenizer and byte/special-token reservation redesign from the current 0025–0029 delivery; retain the existing 32768 reserve per embedding call. The delivered configurable 200000 test daily quota and incomplete-on-exhaustion rule remain in scope. Revisit only as separately scoped future work. |
+| OOS-0027-005 | User assessment of fixed-set generated replies during the current phase | Accepted on 2026-10-14 under D0027-013: defer the user's manual answer review to a separate later stage. Current 0027 runs independent automatic checks and agent assessment without requiring user verdicts; preserve reviewer identity, original evidence/denominators/quality targets and ungraded/incomplete cases. Autonomous assessment does not certify later human/application acceptance. |
 
 ## Feature 0026: Semantic Search and RAG Answers
 

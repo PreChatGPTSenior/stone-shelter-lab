@@ -2,10 +2,12 @@
 
 Date: 2026-10-13
 
-Status: Discussion complete; all 17 questions answered. Specification, acceptance,
-plan and tasks prepared for the accepted baseline, including complete explicit
-mock-UI operation and provisional interrupted-text presentation. No implementation,
-readiness, application tests, browser qualification, new commit or push is claimed.
+Status: All 17 original questions answered; implementation/verification history is
+recorded below. D0029-018, accepted on 2026-10-14, clarifies developer-only mock
+operation and removes mandatory mock creation/reservation browser submissions.
+Related documents reflect the revised scope. The subsequent explicit completion/
+commit request closes T0029-006 after fresh readiness and successful UI lint/all
+235 tests/build. Local commits are authorized; no push is requested.
 
 Feature: [0029: Chat Streaming Widget](../../specs/0029-chat-streaming-widget/spec.md).
 Related [acceptance](../../specs/0029-chat-streaming-widget/acceptance.md),
@@ -336,11 +338,13 @@ User answer, translated into English:
 
 > 11: The development UI must still be able to work entirely on mock data.
 
-Accepted decision D0029-011 — Preserve a complete backend-free development UI:
+Accepted decision D0029-011 — Preserve a complete backend-free development UI
+(developer-only scope clarified by D0029-018 on 2026-10-14):
 
 - Keep the explicitly selected development mock mode usable for the whole UI,
-  not merely a mocked chat answer. Existing catalog/details/navigation and chat/
-  history flows remain usable with mock data without a running backend.
+  exclusively for developers' development/testing. Existing catalog/details/
+  creation/reservation/navigation and chat/history flows remain usable with mock
+  data without a running backend. The user-facing API mode requires the backend.
 - The new chat streaming lifecycle must have a matching mock adapter/interface
   for success, history, replay and controlled failure/interruption checks.
 - Do not require a real SSE route, session-cookie service, model or post-completion
@@ -496,6 +500,9 @@ Accepted decision D0029-017:
   parser/provider/component checks, lint/build and actual browser verification.
 - Cover API and explicitly selected complete mock UI, interruption/recovery,
   replay/navigation/reload, final content and failed post-completion history sync.
+  The 2026-10-14 D0029-018 amendment removes mock creation/reservation browser
+  submissions from mandatory verification while retaining existing automated
+  coverage; acceptance.md owns the current observable evidence requirements.
 - API browser evidence requires delivered 0028 and actual healthy dependencies;
   mock tests never certify the real transport or model-quality gate.
 - Do not run a new broad model evaluation or full suite in ordinary tickets.
@@ -558,6 +565,7 @@ Accepted entries are kept identically in the
 | OOS-0029-002 | Definitive UX decision for interrupted partial-answer presentation | Use the accepted provisional behavior in this phase: retain received partial text as incomplete and offer manual authoritative history recovery without duplicates or automatic resend. Defer the final keep/clear/redesign decision to a later discussion; no date or phase assignment is assumed. Provisional behavior still requires implementation and verification. |
 | OOS-0029-003 | Separate stop-display or stop-generation UI control | Do not add a separate stop button in this phase. Existing collapse keeps the stream/conversation alive; backend cancellation remains excluded by 0028. Technical cleanup on page exit, transport failure or invalid protocol is not a user cancellation feature. |
 | OOS-0029-004 | Rich response markup and artificial typing animation | Render response text literally without HTML/Markdown formatting or artificial typing/replay delays. Show arriving fragments and valid completed content directly; existing ordered stone links remain separate UI elements. No rich-rendering or animation dependency is selected. |
+| OOS-0029-005 | Mandatory browser submissions for mock stone creation and reservation in feature 0029 | Accepted on 2026-10-14 for [feature 0029](../../specs/0029-chat-streaming-widget/spec.md). Remove creating Widget 0029 browser fixture and submitting the Luna application from mandatory browser verification. Retain existing automated mock creation/reservation coverage and actual mock chat/history/navigation/reload browser evidence. Backend-free mock mode is exclusively for developers' development/testing; the user-facing API mode requires the backend. Existing creation/reservation functionality remains required. |
 
 Inherited 0028 exclusions and deferred analytics/cookie-policy review retain
 their accepted meaning; do not use the provisional UX note to reopen that review.
@@ -662,3 +670,269 @@ repetition. No model/profile/limit/gold change occurred.
 T0025-002 is complete as a basic prototype gate. T0025-003 onward remains the
 requested production implementation sequence; final providers and feature
 acceptance are unverified. No feature commit/push has been created yet.
+
+## Independent T0029-002 Readiness and Maximum-Response Proof
+
+READY for controlled client parsing/API tests within the authorized 0025–0029
+batch: Node 24.21.0/npm 11.19.0, installed Vite 8.3.2/Vitest 5.0.3/TypeScript
+6.0.3/ESLint 10.12.0. The API-mode UI is actually HTTP 200 at 127.0.0.1:5173;
+served public module metadata reports mode=api. A sandbox-restricted localhost
+probe failed and a duplicate-start attempt found the existing listener; authorized
+network verification confirms it was not a stopped service. No second server or
+persistent configuration change. Actual backend integration/browser remains gated
+by delivered 0028 and the separately proposed source-profile correction.
+
+Read-only approved qwen2.5:3b verbose tokenizer metadata reports gpt2, 151936
+vocabulary entries, maximum decoded UTF-8 token expansion 128 bytes. Decode the
+byte-level vocabulary with conservative per-invalid-byte replacement; no inference,
+model download or tuning. Under verified context/check/generation values 8192/
+512/1024 and five displayed stones, generated encoded text/frame bound is
+1024*128+8192 = 139264 bytes. A conservative template bound includes all inherited
+mandatory state (at most 8192 bytes by the existing packing guard), new interpretation
+output and five repetitions, plus 8192 bytes for escaped names/labels/IDs/framing:
+5*(8192+512*128)+8192 = 376832 bytes. Both fit the initial 1048576-byte frame/text
+limits. This proof concerns the checked initial settings, not arbitrary future
+raised output/context configurations. Repeat compatibility review if those change.
+
+Additional necessary type path: src/api/ChatApiError.ts extracts the existing error
+class and re-exports it through chatbotApi, avoiding a parser/API circular import
+while preserving existing consumers. The user's necessary-type authorization
+covers it. API-only native streaming is implemented first; explicit mock dispatch
+is the next ticket and existing mock JSON UI stays usable until provider integration.
+No live browser/model/catalog operation or missing backend implementation here.
+
+## T0029-002 — Actual Controlled Client Outcome
+
+PASS: chatbotStream.test.ts / chatbotApi.test.ts, 35 tests; lint and build pass.
+Native credentials POST, exact original payload, no JSON/mock resend, split UTF-8/
+CRLF/bare-CR/multiline JSON/comments, typed identity/sequence/text/reference checks,
+replay, EOF/invalid UTF-8, byte bounds, known retry hints and terminal reader
+cancel/release are covered. Fetch/history attempts remain finite even when the
+controlled fetch ignores its abort signal. No real backend/model proof is claimed.
+
+Additional necessary T0029-003 enum type: src/enums/ChatStreamMockScenario.ts keeps
+private fixture scenario values in the required separate enum directory. Default
+mock events use existing stored pairs/real mock IDs; controlled interruption and
+error belong to the adapter fixture boundary, not components or API fallback.
+
+## T0029-003/004 Controlled Lifecycle Work
+
+Mock streams use the existing atomic history adapter before exposing fragments.
+Replay has no deltas; interruption retains the saved pair for manual reconciliation.
+API mode never chooses this adapter on failure. The extra named enum
+ChatStreamMockScenario follows the frontend enum convention.
+
+Provider actions require the additional ChatSessionActionType enum path, authorized
+by the user’s necessary-type scope. One reducer owns provisional versus confirmed
+messages, immutable retry payloads and authoritative history reconciliation.
+Confirmed answers survive failed synchronization without a resend option. A restored
+failed turn must match both its original user text/context and complete pair; a reused
+ID alone cannot prove successful reconciliation. A new intentional request clears
+the previous confirmation marker. Waiting and completed announcements are tracked
+per turn; fragments never change the live announcement.
+
+T0029-005 uses a shared test-only callback/history helper at
+features/stone-chatbot/state/ChatSessionProvider/chatStreamTestSupport.ts to keep
+component/navigation tests on the same confirmed-pair oracle. This necessary
+additional path is within the user's authorized type scope. Presentation uses
+explicit mock-only labels, provisional incomplete markers, confirmed-only links,
+a separate history synchronization/recovery action and an 80-pixel near-bottom
+scroll tolerance. No per-fragment announcement or typing animation is introduced.
+
+Controlled T0029-003–T0029-005 verification: 50 tests passed across the API/mock, reducer,
+provider, component and navigation selectors. Lint and TypeScript/production build
+pass. Evidence includes incomplete literal fragments, final-link isolation,
+unchanged retry payload/cooldown, saved-answer retention after sync failure,
+manual-only recovery and older-message scroll preservation. This is controlled
+DOM/keyboard evidence, not a performed screen-reader session or real backend proof.
+
+A closed attempt now invalidates its callback identity, and completed ignores any
+late fragment callback while history synchronization runs. Additional controlled
+provider tests exercise StrictMode's single restoration/intentional POST and stale
+callbacks after terminal completion. This closes a real lifecycle gap rather
+than relying only on the native parser's terminal reader cleanup. Full UI checks
+are rerun because the provider changed after its previous successful 232-test run.
+
+Full UI pre-commit verification after the final callback changes: lint passes,
+all 234 tests pass with one worker, and production build passes. The two catalog
+timeouts in the earlier concurrent verification pass independently (18 application
+page tests and six filter-label tests), without catalog edits, timeout changes
+or relaxed assertions. Single-worker sequencing changes only verification
+execution and avoids competing compilation/test work; no performance result is
+claimed. Actual API/browser verification remains separate.
+
+Browser execution preparation reuses the approved 0027 fixture and its compatible
+real vector cache in the explicitly owned isolated database. There is no business
+import, schema/model/threshold/resource change or new embedding preparation.
+Real provider usage during actual API smoke remains charged in that target's
+existing ledger; it never changes original 0027 scores. A separate uniquely named
+localhost browser origin isolates browser cookie/tab identity. Temporary local
+API/frontend processes use command-scoped settings and explicit API mode.
+The explicit mock process points its API base at an intentionally unreachable
+local fault target, proving whole-UI independence without a real-mode fallback.
+
+## Actual API Browser Outcome and Mock Approval Boundary — 2026-10-14
+
+The isolated API process uses the built full application and owned PostgreSQL
+fixture; its health is UP and generated OpenAPI exposes the real stream route.
+The initial health probe reached the port during startup before a response existed;
+a fresh post-start probe succeeds. This was startup preparation, not a source fix.
+The preceding batch API is intentionally stopped temporarily to keep the fixture
+process isolated; the original main storage/configuration will be restored with
+the updated image after verification. Both frontend processes respond HTTP 200.
+
+On stone-qualification-0029.localhost:5175, a single intentional request,
+“Show available small obsidian stones.”, produces a checked saved response with
+Obsidian 01's canonical /stone-shelter/stones/150 link. Waiting blocks sending but
+permits draft edits. Collapse/navigation to details preserve the stream and draft.
+Manual Refresh history leaves one pair, then full reload starts collapsed, restores
+that pair, clears the draft and leaves the live announcement empty. API labels
+contain no Demo/Mock or source attribution. This functional browser request is not
+an approved 0027 baseline repetition or a replacement quality score.
+
+On stone-mock-0029.localhost:5174, API base is the deliberately unavailable
+127.0.0.1:18029 test target. Mock chat completes and synchronizes locally with ordered
+Mars/Luna links, explicit Mock labels, working details and preserved navigation draft.
+The complete mock catalog initially contains 30 stones.
+
+Automatic approval review rejects clicking Submit application, stating that broad
+UI-testing authorization does not specifically authorize consequential reservation
+submission, even in mock mode. Do not bypass this through another execution path.
+Prepared only: Luna's local mock application with synthetic identity
+Widget 0029 verification / widget-0029@example.invalid, and a separate mock create
+form for Widget 0029 browser fixture, BASALT/SMALL, optional temporary-test biography.
+Both have reviewable screenshots and remain unsubmitted.
+
+The assistant asks for explicit permission for those two concrete mock submissions,
+with options allowing both, only the application, or neither yet. Actual user answer
+is PENDING; no accepted scope exclusion or successful browser submission is assumed.
+Unaffected checks continue.
+
+API reload during processing is exercised with a second original request,
+“What size is this stone?”, captured on Obsidian 01's actual details page. Reload
+displays only the previous acknowledged pair, collapsed/empty draft, without the
+old pending payload or a new POST. Manual Refresh history later obtains exactly
+one additional saved pair. The model chose a clarification asking type/size/date
+rather than answering the size question; record this actual business output and
+do not claim a new knowledge-quality success from this lifecycle test.
+
+Real shared accounting after the first API request and history/reload operations:
+31 reservations, 19160 charged tokens on actual UTC 2026-10-13, versus preserved
+qualification total 17761. Browser local date is 2026-10-14; do not move accounting
+clocks/rows to the local date. Subsequent usage is retained separately.
+
+The owned API is deliberately stopped after both turns are acknowledged. Manual
+Refresh history fails at the unavailable proxy, but both confirmed pairs and the
+Obsidian link remain; sending is blocked, only Restore history is offered and no
+Mock label/output appears. Restart the same owned API, verify health UP and click
+Restore history: the two pairs recover without a new POST or duplicate message.
+This is an actual browser dependency-outage/recovery observation, distinct from
+the controlled immediate-completed-then-sync-failure tests.
+
+The independent mock browser also verifies page size 12, A–Z ordering, page 2,
+Small filter resetting to page 1 with ten matches, and collapsed reload followed
+by locally restored chat with empty draft/no repeated live announcement.
+The two submitted-form operations remain pending explicit permission after the
+automatic-review rejection; automated mock adapter/component coverage remains
+separate and is not claimed as successful browser submission.
+
+
+## Final Source Review: Canonical UUID Identity
+
+The native parser accepts UUID identity by value, including letter case, while
+the provider compared event identifiers case-sensitively and returned an accepted
+uppercase saved conversation identifier unchanged. Spring's UUID serialization
+uses canonical lowercase; an otherwise valid restored identity could therefore
+become a false foreign-event/history rejection. Necessary changes are confined to
+existing ChatSessionProvider.tsx and ChatSessionProvider.test.tsx: canonicalize
+valid saved conversation UUIDs and compare callback UUID values case-insensitively.
+New sends still use browser-generated UUIDs, frozen payloads and independent turn
+identities; genuinely foreign IDs remain rejected. This repairs the accepted
+identity contract without changing product scope. Verify the focused provider
+regression and repeat mandatory lint/full UI tests/build after inference ends.
+
+
+The canonical UUID regression passes all 14 provider tests. After that final
+source change, mandatory lint PASS, full 235 UI tests PASS (one worker) and build
+PASS. No backend qualification inference overlaps these commands. Actual pending
+mock forms remain unsubmitted; T0029-006 is still incomplete, with no scope waiver.
+
+
+After the final provider source reload, development HMR clears the prepared form
+fields/dialog. The assistant restores the same previously reviewed synthetic
+values through visible UI fields, without submitting either action, and leaves
+both tabs marked for handoff. Updated proof screenshots:
+/private/tmp/stone-q029-mock-create-final.png and
+/private/tmp/stone-q029-mock-reservation-final.png.
+The submission question remains unanswered; automatic-review rejection is
+explained separately in chat. No browser application/create mutation is claimed.
+235 UI tests/lint/build remain PASS; no subsequent UI source change.
+
+
+## User Question About Automatic Browser Approval
+
+On 2026-10-14, the user asks what automatic check rejected the mock application
+and what they need to do, explicitly expressing confusion. The assistant explains
+that the prior rejection is a tool-action permission review before clicking Submit
+application; it is not a Stone Shelter test/backend error. In this session eligible
+requests use automatic review; the actual rejection says broad UI-test permission
+does not specifically authorize consequential application submission even in
+mock mode. Official OpenAI permission/computer-use guidance supports the general
+permission distinction; specific reason comes from the actual tool result.
+
+Reviewable proposed user authorization: allow creating Widget 0029 browser fixture
+(BASALT/SMALL) and submitting the Luna application with Widget 0029 verification /
+widget-0029@example.invalid only on local mock origin
+http://stone-mock-0029.localhost:5174, using synthetic data. This is an example the
+user may expressly approve; the present explanatory question is not permission
+to submit. Do not bypass a rejection or assume a settings change is needed.
+Both prepared-form actions remain unsubmitted pending actual authorization.
+Sources: https://learn.chatgpt.com/docs/permission-modes and
+https://developers.openai.com/api/docs/guides/tools-computer-use.
+
+## D0029-018 — Developer-Only Mock Mode and Focused Browser Scope — 2026-10-14
+
+The user clarified that only the developers' development/testing mode works
+without a backend, then explicitly accepted removing creation of Widget 0029
+browser fixture and submission of the Luna application from mandatory browser
+verification and requested corresponding requirement/specification updates.
+
+Accepted decision:
+
+- Backend-free mock operation is exclusively for developers' development/testing.
+  The user-facing API mode requires the backend and never falls back to mocks.
+- Preserve existing mock creation/reservation behavior and its automated coverage.
+  Remove their two form submissions from mandatory browser verification in 0029;
+  actual mock browser verification remains focused on the changed chat/history/
+  navigation/reload lifecycle. Acceptance criteria remain exclusively in
+  [acceptance.md](../../specs/0029-chat-streaming-widget/acceptance.md).
+- Record the accepted verification exclusion as OOS-0029-005 here and in the
+  [central register](../out-of-scope-decisions.md), linked to the specification.
+- Existing evidence satisfies the revised AC-0029-011/015 and B029-008 scope.
+  The two submissions remain unperformed; the earlier permission blocker is
+  historical and no longer blocks these criteria. This scope change does not
+  authorize submission or retroactively claim successful browser mutations.
+
+This request changes documentation only. No application code, HTTP/AsyncAPI
+contract, dependency, runtime configuration or test changes are required. No
+service startup, fresh readiness claim, application/browser execution, ticket
+closure, commit or push is performed. Historical execution/approval records above
+are preserved; their pending-submission status is superseded by this decision.
+
+## Final T0029-006 Review and Local Commit Authorization — 2026-10-14
+
+The user subsequently requested completion and committing all current changes.
+Fresh readiness for T0029-001/T0029-006 closure and mandatory frontend pre-commit
+checks is READY; exact expected/observed components are recorded in tasks.md.
+Existing services remained running, with no startup, download or persistent setup.
+
+Lint PASS, all 235 UI tests in 28 files PASS (one worker), build PASS and scoped
+git diff --check PASS. Application source was not changed during closure. Existing
+browser/native/controlled evidence satisfies the revised acceptance scope without
+the two excluded mock form submissions; T0029-006 is complete.
+
+All current changes may now be committed locally. Commit the 0029 widget/requirements
+and the existing 0027 harness/evidence separately under their exact feature-directory
+prefixes. The latest explicit all-changes commit request permits recording incomplete
+0027 work without claiming successful qualification. No unfinished 0027 task is
+executed/closed, and no push is requested/performed.

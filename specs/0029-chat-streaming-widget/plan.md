@@ -1,6 +1,10 @@
 # Feature 0029 Technical Plan
 
-Status: Prepared, all execution NOT RUN. Read [spec.md](spec.md),
+Status: Implementation and controlled checks complete; actual API/mock browser
+evidence recorded. Existing evidence satisfies the acceptance scope amended on
+2026-10-14; mock creation/reservation browser submissions are no longer required.
+T0029-006 is now closed after the subsequent explicit completion/commit request,
+fresh readiness and successful mandatory UI checks. Read [spec.md](spec.md),
 [acceptance.md](acceptance.md), [tasks.md](tasks.md) and
 [ADR-0029](../../docs/adr/0029-chat-streaming-widget.md). Acceptance criteria and
 focused scenario oracles belong exclusively in acceptance.md. These technical
@@ -15,7 +19,7 @@ sessionStorage. stonesApi selects existing mock catalog/details/create/reservati
 adapters only when the explicit application mode is mock. Preserve those boundaries
 and modes; do not create another provider/store or refactor unrelated catalog APIs.
 
-0028 documents the future backend transport, not a delivered endpoint. Actual API
+0028 is now delivered in its separate whole-feature commit. Actual API
 execution requires its delivered route, generated contract and accepted history/
 cookie amendment, plus actual reachable dependencies. Do not implement missing
 backend tickets under this frontend feature or certify readiness from documents.
@@ -95,7 +99,9 @@ control; only verified history recovery enables further sending.
 ## Complete Explicit Mock UI
 
 Keep import.meta.env.MODE === 'mock' as the existing explicit mode selection; no
-new runtime fallback switch. Reuse other mock adapters and their data/operations.
+new runtime fallback switch. This backend-free mode is exclusively for developers'
+development/testing; the user-facing API mode requires the backend. Reuse other
+mock adapters and their data/operations.
 Chat adds a mock stream adapter with the same typed events and history interface,
 using existing mock saved-pair/replay semantics and fixture IDs/names that resolve
 in mock details. Prepare controlled success/interruption/error scenarios at the
@@ -151,7 +157,10 @@ actual health/connectivity. Tests/business imports/models are not preflight chec
 Use exact task test files, lint/build and actual browser checks, with self-owned
 isolated data and no user's catalog mutation or unrequested backend fault route.
 Controlled fetch fixtures prove error cases independently of actual backend
-success/replay/navigation evidence. Missing required backend/browser fixtures
+success/replay/navigation evidence. Retain existing automated mock creation/
+reservation coverage; the approved amendment removes those two form submissions
+from mandatory browser verification. Follow acceptance.md for the revised browser
+scope. Missing required backend/browser fixtures
 block that part rather than substituting mocks as proof. Preserve real usage if
 approved API smoke invokes existing models; no broad model campaign/benchmark.
 

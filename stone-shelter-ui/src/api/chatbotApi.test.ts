@@ -90,3 +90,34 @@ test('API metadata preserves Retry-After and malformed history fails closed with
   fetch.mockResolvedValueOnce(Response.json({ conversationId: request.conversationId, messages: [{ role: 'USER' }] }));
   await expect(getChatHistory(request.conversationId)).rejects.toMatchObject({ code: 'CHAT_UNAVAILABLE' });
 });
+
+
+test('native API streaming uses exactly one credentialed POST and never JSON or mock fallback', async () => {
+  vi.stubEnv('MODE', 'api');
+  const { streamApiChatMessage } = await import('./chatbotApi');
+  const event = (name: string, sequence: number, fields = {}) => `event: ${name}\ndata: ${JSON.stringify({ conversationId: request.conversationId, turnId: request.turnId, sequence, ...fields })}\n\n`;
+  const fetch = vi.fn().mockResolvedValue(new Response(event('started', 1) + event('completed', 2, response), { headers: { 'Content-Type': 'text/event-stream;charset=UTF-8' } })); vi.stubGlobal('fetch', fetch);
+  const onEvent = vi.fn(); expect(await streamApiChatMessage(request, onEvent)).toMatchObject(response);
+  expect(fetch).toHaveBeenCalledTimes(1); expect(fetch.mock.calls[0][0]).toContain('/api/v1/chat/messages/stream'); expect(fetch.mock.calls[0][1]).toMatchObject({ method: 'POST', credentials: 'include', body: JSON.stringify(request) }); expect(onEvent).toHaveBeenCalledTimes(2);
+  fetch.mockResolvedValueOnce(Response.json({ code: 'CHAT_STREAM_CAPACITY_EXCEEDED', detail: 'Busy' }, { status: 503, headers: { 'Retry-After': '1' } }));
+  await expect(streamApiChatMessage(request, onEvent)).rejects.toMatchObject({ code: 'CHAT_STREAM_CAPACITY_EXCEEDED', status: 503, retryAfter: 1 }); expect(fetch).toHaveBeenCalledTimes(2);
+  fetch.mockResolvedValueOnce(Response.json(response)); await expect(streamApiChatMessage(request, onEvent)).rejects.toMatchObject({ status: 0, code: 'CHAT_STREAM_PROTOCOL_ERROR' }); expect(fetch).toHaveBeenCalledTimes(3);
+});
+
+test('whole-attempt stream and history timeouts are finite even when fetch ignores abort', async () => {
+  vi.stubEnv('MODE', 'api'); vi.stubEnv('VITE_CHAT_STREAM_TIMEOUT_MS', '10'); vi.useFakeTimers();
+  try {
+    const { streamApiChatMessage } = await import('./chatbotApi'); const fetch = vi.fn().mockImplementation(() => new Promise(() => {})); vi.stubGlobal('fetch', fetch);
+    const stream = streamApiChatMessage(request, () => {}); const streamCheck = expect(stream).rejects.toMatchObject({ status: 0, code: 'CHAT_STREAM_TIMEOUT' }); await vi.advanceTimersByTimeAsync(10); await streamCheck;
+    const history = getChatHistory(request.conversationId); const historyCheck = expect(history).rejects.toMatchObject({ status: 0, code: 'CHAT_STREAM_TIMEOUT' }); await vi.advanceTimersByTimeAsync(10); await historyCheck;
+    expect(fetch).toHaveBeenCalledTimes(2);
+  } finally { vi.useRealTimers(); }
+});
+
+
+test('explicit mock stream/history use no backend and real transport failure cannot select mock data', async () => {
+  const { sendChatMessageStream } = await import('./chatbotApi'); const fetch = vi.fn().mockRejectedValue(new TypeError('Offline')); vi.stubGlobal('fetch', fetch);
+  vi.stubEnv('MODE', 'mock'); const events = vi.fn(); expect(await sendChatMessageStream(request, events)).toMatchObject(response); expect(fetch).not.toHaveBeenCalled();
+  expect((await getChatHistory(request.conversationId)).messages).toHaveLength(2); expect(fetch).not.toHaveBeenCalled();
+  vi.stubEnv('MODE', 'api'); await expect(sendChatMessageStream(request, events)).rejects.toMatchObject({ code: 'CHAT_UNAVAILABLE' }); expect(fetch).toHaveBeenCalledTimes(1);
+});
