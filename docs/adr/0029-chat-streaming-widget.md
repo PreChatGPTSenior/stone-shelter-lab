@@ -563,3 +563,102 @@ Inherited 0028 exclusions and deferred analytics/cookie-policy review retain
 their accepted meaning; do not use the provisional UX note to reopen that review.
 The full discussion is recorded and feature documents are prepared. No
 application/UI code, tests, runtime operation, new commit or push is authorized.
+
+## Execution Request and Blocked Readiness — 2026-10-13
+
+The user requested execution of every task in features 0025–0029 without stopping
+at individual task/feature boundaries, and one commit for each entire completed
+feature rather than one per task. This is explicit implementation/test/feature-
+commit authorization for that batch, superseding the earlier documentation-only
+stop boundary. It does not authorize pushing, feature 0030, relaxing acceptance,
+production fixes inside 0027 qualification, or replacing actual human review.
+No new product question or exclusion was introduced by this execution request.
+
+Fresh batch preflight is BLOCKED, as recorded in
+[the feature task evidence](../../specs/0029-chat-streaming-widget/tasks.md#requested-batch-readiness--2026-10-13).
+The unavailable browser prevents required actual T0029-006 verification. Existing
+backend liveness is healthy but the current vector/index/usage-ledger schema and
+embedding endpoint configuration are absent in that running deployment. Maven's
+Java mismatch was resolved for checks by supplying the installed JDK 23.0.2
+explicitly. Installed Ollama 0.40.3 remains covered by prior approval.
+
+Preparation started the existing API-mode UI server and successfully built the
+preceding implemented backend image with tests skipped. No application deployment,
+schema migration, source import, inference or application test followed. No
+implementation ticket started, no feature is accepted and no commit was created.
+This is environment evidence, not an accepted out-of-scope decision. All selected
+readiness prerequisites must be rechecked after correction before execution.
+
+## Browser Connection and Readiness Recovery — 2026-10-13
+
+The user reported completing browser setup. Fresh inventory and an actual local
+page observation establish connected Chrome access; the earlier browser blocker
+is resolved. The agent also started the current preceding backend with approved
+command-scoped settings. Its existing Liquibase migrations applied, required
+vector/index/usage tables now exist, profile mismatch checks return zero and the
+actual history GET is healthy. No feature requirement or exclusion changed.
+
+The entire requested 0025–0029 external environment batch is READY, with exact
+components, covered IDs, preparation and command requirements recorded in
+[the current task readiness evidence](../../specs/0029-chat-streaming-widget/tasks.md#fresh-batch-readiness-after-browser-connection--2026-10-13).
+Mandatory model/transport qualification and within-batch producer deliveries are
+still gates; this readiness result does not claim their future acceptance. The
+previous blocked report remains historical evidence. User authorization remains
+continuous execution and one commit per completed feature, with no push.
+
+
+## Shared Producer Qualification Gate — 2026-10-13
+
+Chrome connection and current external environment readiness were confirmed.
+T0025-002 then failed actual prototype qualification: semantic-only shelf input
+was classified CLARIFY instead of SEARCH; evidence output invented a source ID
+not supplied by the backend, including after one correction. Detailed original
+outputs, successful checks and a pending exact correction proposal are retained
+in [ADR-0025](0025-semantic-stone-candidate-search.md#t0025-002--actual-prototype-qualification-failure).
+
+Dependent implementation remains unexecuted under the mandatory qualification
+gate. No feature is complete and no feature commit/push was created. This is
+execution evidence, not a new product exclusion or approval of a correction.
+
+
+## Authorized Necessary Type Changes — 2026-10-13
+
+The user explicitly approved the pending T0025-002 shared-prompt correction and
+broadened source-type scope for the selected batch, translated: "Yes, do it; if
+a task requires changes within features 25 through 29, all types may be modified."
+Necessary related production/test type changes for the accepted 0025–0029 behavior
+are therefore authorized even if a prepared ticket's original list omitted them.
+Record exact additional paths, reasons and focused checks before each such change;
+this approval supersedes the original type-file isolation blocker, not acceptance
+or unrelated scope. No dependency/version change, feature 0030, engineering-log
+access, push, gold relaxation, or fabricated human review is authorized.
+
+For the already reviewed T0025-002 correction, additional writable types are:
+stone-shelter-api/src/main/java/lab/stoneshelter/entities/StoneModelInvocationEntity.java
+and stone-shelter-api/src/main/java/lab/stoneshelter/repositories/OllamaChatRepository.java.
+Make the exact-only example optional with its original default preserved. Update
+the authorized semantic prototype/fixture to use its own format and supplied-ID
+constraints. Focused verification adds the three existing controlled exact-search
+qualification methods from the reviewed proposal; they perform no live inference.
+Recheck changed interpretation/evidence/capacity tests, retaining the earlier
+failed evidence and not repeating unchanged successful embedding qualification.
+
+Continuous execution and one commit per entire completed feature remain requested.
+The original task lists remain the implementation guide; broad type permission
+is not permission to invent behavior or bypass prerequisite qualification.
+
+
+## Basic Producer Qualification Recovered — 2026-10-13
+
+The accepted necessary-type correction preserved default exact-search prompts,
+removed their injection from new formats, made wish absence explicit through
+nullable slots and classified each evidence source in its own authority scope.
+Actual requalification now covers every small fixed interpretation/evidence
+case, compatible vectors and complete fresh-input capacity. Three existing
+controlled exact transport regressions passed. All earlier failures and usage
+remain recorded in ADR-0025/tasks; they were not erased or replaced by lucky
+repetition. No model/profile/limit/gold change occurred.
+
+T0025-002 is complete as a basic prototype gate. T0025-003 onward remains the
+requested production implementation sequence; final providers and feature
+acceptance are unverified. No feature commit/push has been created yet.

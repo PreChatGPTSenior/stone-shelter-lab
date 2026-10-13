@@ -738,3 +738,172 @@ above; all execution tickets remain unchecked. Current environment readiness,
 model qualification and implementation acceptance are unverified. This discussion
 authorizes documentation only, not application edits, inference, provisioning,
 business imports, tests, commits or pushes.
+
+## Execution Request and Blocked Readiness — 2026-10-13
+
+The user requested execution of every task in features 0025–0029 without stopping
+at individual task/feature boundaries, and one commit for each entire completed
+feature rather than one per task. This is explicit implementation/test/feature-
+commit authorization for that batch, superseding the earlier documentation-only
+stop boundary. It does not authorize pushing, feature 0030, relaxing acceptance,
+production fixes inside 0027 qualification, or replacing actual human review.
+No new product question or exclusion was introduced by this execution request.
+
+Fresh batch preflight is BLOCKED, as recorded in
+[the feature task evidence](../../specs/0026-semantic-search-rag-answers/tasks.md#requested-batch-readiness--2026-10-13).
+The unavailable browser prevents required actual T0029-006 verification. Existing
+backend liveness is healthy but the current vector/index/usage-ledger schema and
+embedding endpoint configuration are absent in that running deployment. Maven's
+Java mismatch was resolved for checks by supplying the installed JDK 23.0.2
+explicitly. Installed Ollama 0.40.3 remains covered by prior approval.
+
+Preparation started the existing API-mode UI server and successfully built the
+preceding implemented backend image with tests skipped. No application deployment,
+schema migration, source import, inference or application test followed. No
+implementation ticket started, no feature is accepted and no commit was created.
+This is environment evidence, not an accepted out-of-scope decision. All selected
+readiness prerequisites must be rechecked after correction before execution.
+
+## Browser Connection and Readiness Recovery — 2026-10-13
+
+The user reported completing browser setup. Fresh inventory and an actual local
+page observation establish connected Chrome access; the earlier browser blocker
+is resolved. The agent also started the current preceding backend with approved
+command-scoped settings. Its existing Liquibase migrations applied, required
+vector/index/usage tables now exist, profile mismatch checks return zero and the
+actual history GET is healthy. No feature requirement or exclusion changed.
+
+The entire requested 0025–0029 external environment batch is READY, with exact
+components, covered IDs, preparation and command requirements recorded in
+[the current task readiness evidence](../../specs/0026-semantic-search-rag-answers/tasks.md#fresh-batch-readiness-after-browser-connection--2026-10-13).
+Mandatory model/transport qualification and within-batch producer deliveries are
+still gates; this readiness result does not claim their future acceptance. The
+previous blocked report remains historical evidence. User authorization remains
+continuous execution and one commit per completed feature, with no push.
+
+
+## Shared Producer Qualification Gate — 2026-10-13
+
+Chrome connection and current external environment readiness were confirmed.
+T0025-002 then failed actual prototype qualification: semantic-only shelf input
+was classified CLARIFY instead of SEARCH; evidence output invented a source ID
+not supplied by the backend, including after one correction. Detailed original
+outputs, successful checks and a pending exact correction proposal are retained
+in [ADR-0025](0025-semantic-stone-candidate-search.md#t0025-002--actual-prototype-qualification-failure).
+
+Dependent implementation remains unexecuted under the mandatory qualification
+gate. No feature is complete and no feature commit/push was created. This is
+execution evidence, not a new product exclusion or approval of a correction.
+
+
+## Authorized Necessary Type Changes — 2026-10-13
+
+The user explicitly approved the pending T0025-002 shared-prompt correction and
+broadened source-type scope for the selected batch, translated: "Yes, do it; if
+a task requires changes within features 25 through 29, all types may be modified."
+Necessary related production/test type changes for the accepted 0025–0029 behavior
+are therefore authorized even if a prepared ticket's original list omitted them.
+Record exact additional paths, reasons and focused checks before each such change;
+this approval supersedes the original type-file isolation blocker, not acceptance
+or unrelated scope. No dependency/version change, feature 0030, engineering-log
+access, push, gold relaxation, or fabricated human review is authorized.
+
+For the already reviewed T0025-002 correction, additional writable types are:
+stone-shelter-api/src/main/java/lab/stoneshelter/entities/StoneModelInvocationEntity.java
+and stone-shelter-api/src/main/java/lab/stoneshelter/repositories/OllamaChatRepository.java.
+Make the exact-only example optional with its original default preserved. Update
+the authorized semantic prototype/fixture to use its own format and supplied-ID
+constraints. Focused verification adds the three existing controlled exact-search
+qualification methods from the reviewed proposal; they perform no live inference.
+Recheck changed interpretation/evidence/capacity tests, retaining the earlier
+failed evidence and not repeating unchanged successful embedding qualification.
+
+Continuous execution and one commit per entire completed feature remain requested.
+The original task lists remain the implementation guide; broad type permission
+is not permission to invent behavior or bypass prerequisite qualification.
+
+
+## Basic Producer Qualification Recovered — 2026-10-13
+
+The accepted necessary-type correction preserved default exact-search prompts,
+removed their injection from new formats, made wish absence explicit through
+nullable slots and classified each evidence source in its own authority scope.
+Actual requalification now covers every small fixed interpretation/evidence
+case, compatible vectors and complete fresh-input capacity. Three existing
+controlled exact transport regressions passed. All earlier failures and usage
+remain recorded in ADR-0025/tasks; they were not erased or replaced by lucky
+repetition. No model/profile/limit/gold change occurred.
+
+T0025-002 is complete as a basic prototype gate. T0025-003 onward remains the
+requested production implementation sequence; final providers and feature
+acceptance are unverified. No feature commit/push has been created yet.
+
+## Delivered Producer and T0026-002 Entry
+
+Feature 0025 completed and committed as ee6d532 with focused final real-model,
+retrieval/evidence/Redis/native-HTTP/architecture acceptance. Required semantic
+preparation, private execution counters/caches, evidence and current-card mapping
+types are delivered; source signatures and focused results are available rather
+than inferred from prepared documentation.
+
+Rechecked external prerequisites for the continuous T0025-001–T0029-006 batch:
+backend health UP, Redis PONG, actual backend-reachable Ollama 0.40.3. Previously
+verified unchanged pinned models/JAVA_HOME/Docker/database/ledger/browser/UI
+remain the batch context; the selected basic qualification uses explicit approved
+JDK 23.0.2 and host endpoints. No service was newly started, source imported or
+model downloaded in this recheck. Result READY for T0026-002. Browser/stack
+qualification of the final 0029 UI remains pending, not claimed by preflight.
+
+Proceed only with the small test-only routing/generation/grounding/context
+prototype under existing CUSTOMER admission, 8192 context, 1024 generation,
+512 routing/checking, 50-second calls and original 120-second bounds. No
+dependent 0026 application implementation before this format gate passes.
+
+## T0026-002 — First Prototype Outcome and Correction
+
+Four tests: grounding and capacity pass; generation fails after one permitted
+correction by filling knowledge text during selection and omitting explanations;
+nested routing times out at the unchanged 50-second call bound. Six reservations
+charge 9810 tokens, including the unknown routing reservation (not refunded).
+The timeout is a timeout, not evidence of context overflow. No dependent 0026
+application implementation or completed feature commit is claimed.
+
+Necessary test-only format correction flattens route fields onto the already
+qualified exact/wish interpretation grammar, replacing action with route mode
+and adding explanatory topic; knowledge type scope is interpreted only for the
+knowledge operation and never changes inherited selection state. Do not nest
+an entire decision in an optional selection union. Generation grammar explicitly
+requires knowledge=null for selection and empty stones for knowledge, with the
+complete source-free explanation instructions for every valid partial candidate.
+Keep independent route/ID/order/partial/source-visibility expectations, selected
+model, 8192/1024/512, single repair and 50/120-second bounds. Recheck only changed
+routing/generation and their capacity proof; retain unchanged grounding evidence.
+
+Prototype correction 1: mode-constrained generation now keeps knowledge=null,
+but emits only candidate names instead of per-stone explanations. Flattened
+routing again times out at 50 seconds. Capacity 8025 passes; three reservations
+charge 8913 tokens including the unknown routing reservation. Grounding remains
+unchanged and passed; no dependent implementation starts.
+
+Targeted schema diagnosis: flattening appended mode after the full criteria
+properties, so the constrained decoder encounters arrays before the route. Put
+mode first and include one compact complete routing example, retaining all
+accepted meanings. Rename the ambiguous per-stone model text field to explanation
+and explicitly require a sentence instead of a name; this is an internal format
+choice, with unchanged per-ID/order/partial/source-free assertions and resources.
+Recheck only changed routing/generation/capacity.
+
+Prototype correction 2: route-first schema removes the timeout and correctly
+routes shelf selection and basalt knowledge; mixed care still acquires an
+unasked use wish. Generation now returns sentences but copies its generic
+example without identifying shelf use. Capacity 8037 passes; six reservations,
+2128 actual tokens. No dependent implementation starts.
+
+Next correction uses a complete mixed-request example with absent selection
+use/color, and explicitly requires explanations to mention matched shelf use.
+Align the prototype's lexical assertion with the actual requirement: requested
+color identifies the sole active color wish just as red does; the spec requires
+truthful identification, not a literal red token. Accept red/color plus the
+unchanged uncertainty marker, while adding required shelf coverage. This does
+not accept missing wish explanations, invented matches or changed fixed-case
+meaning. Keep all route/ID/order/grounding/visibility oracles and approved limits.
