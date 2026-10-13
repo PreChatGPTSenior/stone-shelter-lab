@@ -6,6 +6,15 @@ ADR. Keep the two entries consistent and link them to the feature specification.
 Do not record proposals, unanswered questions or assumed exclusions as decisions.
 This register does not authorize implementation or changes to feature scope.
 
+## Feature 0026: Semantic Search and RAG Answers
+
+Accepted on 2026-10-13. Feature: [specification](../specs/0026-semantic-search-rag-answers/spec.md).
+Decision record: [ADR-0026](adr/0026-semantic-search-rag-answers.md).
+
+| ID | Accepted exclusion | Scope boundary |
+| --- | --- | --- |
+| OOS-0026-001 | User-visible information-source attribution | Do not show source citations, document/section names, provenance IDs/links/scores or prose identifying the information source. Retain provenance internally; selected-stone catalog links remain part of the answer. |
+
 ## Feature 0025: Semantic Stone Candidate Search
 
 Accepted on 2026-10-13. Feature: [specification](../specs/0025-semantic-stone-candidate-search/spec.md).
