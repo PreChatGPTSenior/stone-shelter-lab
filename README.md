@@ -12,9 +12,11 @@ And, occasionally, to enjoy the results with popcorn. 🍿
 ### 🚦 STATUS
 
 ✅ Phase 1: Vibe Coding, Unsupervised
+
 CODE FREEZE: 2026-10-14
 
 🔄 Phase 2: Quality Gates & Guardrails
+
 STATUS: PREPARATION IN PROGRESS
 
 SCOPE: Engineering Rules · Templates · Agent Skills · Agentic Workflows · Code & Style Standards · Code Review Guidelines
