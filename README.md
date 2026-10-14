@@ -8,6 +8,15 @@ The goal is to find out **how much engineering supervision AI-generated code act
 
 And, occasionally, to enjoy the results with popcorn. 🍿
 
+---### 🚦 STATUS
+
+✅ Phase 1: Vibe Coding, Unsupervised
+CODE FREEZE: 2026-10-14
+
+🔄 Phase 2: Quality Gates & Guardrails
+STATUS: PREPARATION IN PROGRESS
+SCOPE: Engineering Rules · Templates · Agent Skills · Agentic Workflows · Code & Style Standards · Code Review Guidelines
+
 ---
 
 ### 📦 Deliverables
@@ -30,7 +39,7 @@ And yes, the original code will be preserved. Future archaeologists deserve acce
 |                        | Phase 1 🍿              | Phase 2 🔧              | Phase 3 🤖               |
 |------------------------|-------------------------|-------------------------|--------------------------|
 | **Approach**           | Vibe Coding             | Controlled Refactoring  | Multi-Agent Development  |
-| **Starting Point**     | Initial implementation  | Phase 1 codebase        | Specifications only      |
+| **Starting Point**     | Initial implementation  | Specifications only     | Specifications only      |
 | **Architecture Rules** | Suggestions and prayers | Enforced where possible | Enforced from day one    |
 | **Quality Gates**      | None                    | Automated               | Automated                |
 | **Code Review**        | Human observation       | AI-assisted review      | Independent AI reviewers |
@@ -41,7 +50,7 @@ And yes, the original code will be preserved. Future archaeologists deserve acce
 ---
 ## 🎢 Phase 1: Vibe Coding, Unsupervised
 
-**Status:** 🟢 In Progress
+**Status:** ✅ [CODE FREEZE 14.10.2026]
 
 **The experiment:** Let an AI coding agent implement the application with minimal human intervention.
 
@@ -70,7 +79,7 @@ There is, admittedly, one minor flaw in the experimental design: I actually know
 
 ---
 
-## 🔧 Phase 2: Quality Gates & Controlled Refactoring
+## 🔧 Phase 2: Quality Gates & Controll
 
 **Status:** ⚪ Planned
 
