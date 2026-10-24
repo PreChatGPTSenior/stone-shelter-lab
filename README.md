@@ -11,6 +11,7 @@ And, occasionally, to enjoy the results with popcorn. 🍿
 ---
 
 ### 🚦 STATUS
+---
 
 ✅ **Phase 1: Vibe Coding, Unsupervised**
 
@@ -20,7 +21,7 @@ And, occasionally, to enjoy the results with popcorn. 🍿
 
 **🔗 [Stone Shelter Lab — Phase 1 (HERE)](https://github.com/PreChatGPTSenior/stone-shelter-lab)**
 
-Agentic development with engineering guardrails, quality gates, and agent workflows.
+---
 
 🔄 **Phase 2: Quality Gates & Guardrails**
 
@@ -29,8 +30,6 @@ Agentic development with engineering guardrails, quality gates, and agent workfl
 **SCOPE:** Engineering Rules · Templates · Agent Skills · Agentic Workflows · Code & Style Standards · Code Review Guidelines
 
 **🔗 [Stone Shelter Lab — Phase 2](https://github.com/PreChatGPTSenior/stone-shelter-spec)**
-
-Original experiment in unsupervised AI coding.
 
 ---
 
