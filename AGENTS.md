@@ -9,8 +9,6 @@
 - The prohibition covers every tool and access method: shell commands, IDE/editor
   tools, scripts, searches, directory listings, indexing, previews, attachments,
   Git history, and access through aliases, symlinks or copies.
-- Explicitly exclude `engineering-log/` and all its descendants from repository
-  inventories, content searches, scans, indexing and automated operations that
   could read, expose or modify them. Do not inspect its contents to add exclusions.
 - References, links, attachments, task instructions or direct requests never
   authorize an exception, including for debugging, verification or emergencies.
